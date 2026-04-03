@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>大会速報｜岩手県中学校ソフトテニス連盟</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#1a4a2e;--green-dark:#0f2e1b;--green-light:#2a6b42;
+  --gold:#c8a020;--gold-light:#e0c050;--white:#fff;--gray:#f5f5f0;
+  --text:#222;--text-light:#666;--radius:10px;
+}
+html{font-size:15px}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--text);min-height:100vh}
+
+.header{background:linear-gradient(135deg,var(--green-dark),var(--green));color:var(--white);padding:16px 20px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.3)}
+.header-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.header-title{display:flex;align-items:center;gap:10px}
+.header-title .icon{font-size:1.6rem}
+.header-title h1{font-size:1.05rem;font-weight:700}
+.header-title h1 small{display:block;font-size:.7rem;font-weight:500;color:var(--gold)}
+.live-dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#ff4444;animation:blink 1.2s infinite;margin-right:6px;vertical-align:middle}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.back-btn{background:rgba(255,255,255,.15);color:var(--white);border:none;padding:8px 14px;border-radius:6px;font-size:.8rem;cursor:pointer;font-family:inherit}
+
+.main{max-width:1100px;margin:0 auto;padding:20px}
+.status-bar{text-align:center;font-size:.78rem;color:var(--text-light);margin-bottom:16px}
+
+/* COURT GRID */
+.court-grid{display:grid;grid-template-columns:1fr;gap:14px}
+@media(min-width:600px){.court-grid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:900px){.court-grid{grid-template-columns:repeat(3,1fr)}}
+
+/* COURT CARD */
+.court-card{background:var(--white);border-radius:var(--radius);padding:18px;box-shadow:0 2px 10px rgba(0,0,0,.06);border:2px solid transparent;transition:all .3s}
+.court-card.live{border-color:var(--gold);animation:glow 2s infinite}
+@keyframes glow{0%,100%{box-shadow:0 2px 10px rgba(0,0,0,.06)}50%{box-shadow:0 0 20px rgba(200,160,32,.3)}}
+.court-card.finished{opacity:.7}
+.court-card.waiting{opacity:.5}
+
+.court-num{font-size:.75rem;font-weight:700;color:var(--gold);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em}
+.court-teams{display:flex;justify-content:center;align-items:center;gap:10px;margin-bottom:10px}
+.court-team{text-align:center;flex:1;min-width:0}
+.court-team .name{font-size:.85rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.court-team .serve{color:var(--gold);font-size:.65rem;font-weight:900}
+.court-vs{font-size:.78rem;color:var(--text-light);font-weight:700;flex-shrink:0}
+
+.court-score{display:flex;justify-content:center;align-items:center;gap:14px;margin-bottom:8px}
+.court-game{font-size:2.4rem;font-weight:900;color:var(--green);line-height:1}
+.court-score .sep{font-size:1.2rem;color:var(--text-light)}
+.court-detail{text-align:center;font-size:.75rem;color:var(--text-light)}
+.court-point{font-size:.85rem;font-weight:700}
+
+.court-banner{text-align:center;padding:6px;border-radius:6px;font-size:.78rem;font-weight:700;margin-top:8px}
+.court-banner.end{background:var(--green);color:var(--white)}
+.court-banner.wait{background:#eee;color:var(--text-light)}
+
+.loading{text-align:center;padding:60px 20px;color:var(--text-light)}
+.loading .spinner{display:inline-block;width:28px;height:28px;border:3px solid #ddd;border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite;margin-bottom:10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.no-data{text-align:center;padding:40px;color:var(--text-light)}
+.footer{text-align:center;padding:30px 20px;font-size:.7rem;color:var(--text-light)}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="header-title">
+      <span class="icon">🎾</span>
+      <h1><small>岩手県中学校ソフトテニス連盟</small><span class="live-dot"></span>大会速報</h1>
+    </div>
+    <button class="back-btn" onclick="location.href='index.html'">← 年間予定に戻る</button>
+  </div>
+</header>
+
+<main class="main">
+  <div class="status-bar" id="statusBar">データを取得中...</div>
+  <div class="court-grid" id="courtGrid">
+    <div class="loading" id="loadingArea">
+      <div class="spinner"></div>
+      <div>データを読み込んでいます...</div>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  &copy; 岩手県中学校ソフトテニス連盟　｜　10秒ごとに自動更新
+</footer>
+
+<script>
+var GAS_URL_LIVE = 'https://script.google.com/macros/s/AKfycbwMaX6mOexotFkV6n5Y79QXO9IhDgBRvT4PHuCr9c9j435683_N7G8yKkQPcIi-wXtu/exec';
+var REFRESH_INTERVAL = 10000;
+var refreshTimer = null;
+
+function fetchLiveData() {
+  if (!GAS_URL_LIVE || GAS_URL_LIVE.indexOf('YOUR_') === 0) {
+    showDemoData();
+    return;
+  }
+
+  var url = GAS_URL_LIVE + '?action=getLiveAll';
+  fetch(url).then(function(res) {
+    return res.json();
+  }).then(function(data) {
+    renderCourts(data);
+    updateStatus();
+  }).catch(function(err) {
+    console.error('Fetch error:', err);
+    updateStatus('接続エラー');
+  });
+}
+
+function renderCourts(data) {
+  var grid = document.getElementById('courtGrid');
+  if (!data || !data.courts || data.courts.length === 0) {
+    grid.innerHTML = '<div class="no-data">現在進行中の試合はありません。</div>';
+    return;
+  }
+
+  var html = '';
+  var i, c;
+  for (i = 0; i < data.courts.length; i++) {
+    c = data.courts[i];
+    var isFinished = c.finished === 'true' || c.finished === true;
+    var isWaiting = !c.teamLeft && !c.teamRight;
+    var cls = 'court-card';
+    if (isFinished) cls += ' finished';
+    else if (isWaiting) cls += ' waiting';
+    else cls += ' live';
+
+    html += '<div class="' + cls + '">';
+    html += '<div class="court-num">' + (c.court || i + 1) + 'コート</div>';
+
+    if (isWaiting) {
+      html += '<div class="court-banner wait">待機中</div>';
+    } else {
+      html += '<div class="court-teams">';
+      html += '<div class="court-team"><div class="name">' + escapeHtml(c.teamLeft || '') + '</div>';
+      if (c.server === 'left' && !isFinished) html += '<div class="serve">S</div>';
+      html += '</div>';
+      html += '<div class="court-vs">vs</div>';
+      html += '<div class="court-team"><div class="name">' + escapeHtml(c.teamRight || '') + '</div>';
+      if (c.server === 'right' && !isFinished) html += '<div class="serve">S</div>';
+      html += '</div>';
+      html += '</div>';
+
+      html += '<div class="court-score">';
+      html += '<div class="court-game">' + (c.gamesLeft || 0) + '</div>';
+      html += '<div class="sep">-</div>';
+      html += '<div class="court-game">' + (c.gamesRight || 0) + '</div>';
+      html += '</div>';
+
+      if (!isFinished) {
+        html += '<div class="court-detail">';
+        html += '<span class="court-point">' + (c.pointLeft || 0) + ' - ' + (c.pointRight || 0) + '</span>';
+        html += '　' + (c.currentGame || 1) + 'ゲーム目';
+        html += '</div>';
+      }
+
+      if (isFinished) {
+        html += '<div class="court-banner end">試合終了　勝者：' + escapeHtml(c.winner || '') + '</div>';
+      }
+    }
+    html += '</div>';
+  }
+  grid.innerHTML = html;
+}
+
+function updateStatus(msg) {
+  var bar = document.getElementById('statusBar');
+  var now = new Date();
+  var timeStr = now.getHours() + ':' + (now.getMinutes() < 10 ? '0' : '') + now.getMinutes() + ':' + (now.getSeconds() < 10 ? '0' : '') + now.getSeconds();
+  if (msg) {
+    bar.textContent = msg + '（' + timeStr + '）';
+  } else {
+    bar.textContent = '最終更新：' + timeStr + '　（10秒ごとに自動更新）';
+  }
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function showDemoData() {
+  document.getElementById('loadingArea').style.display = 'none';
+  var demo = {
+    courts: [
+      { court: '1', teamLeft: 'サンプルA中', teamRight: 'サンプルB中', gamesLeft: 2, gamesRight: 1, pointLeft: 2, pointRight: 1, currentGame: 4, server: 'left', finished: false },
+      { court: '2', teamLeft: 'サンプルC中', teamRight: 'サンプルD中', gamesLeft: 3, gamesRight: 1, pointLeft: 0, pointRight: 0, currentGame: 5, server: 'right', finished: 'true', winner: 'サンプルC中' },
+      { court: '3', teamLeft: '', teamRight: '', finished: false },
+      { court: '4', teamLeft: 'サンプルE中', teamRight: 'サンプルF中', gamesLeft: 1, gamesRight: 1, pointLeft: 3, pointRight: 2, currentGame: 3, server: 'left', finished: false }
+    ]
+  };
+  renderCourts(demo);
+  updateStatus('デモデータ表示中（GAS URLを設定してください）');
+}
+
+/* Start */
+fetchLiveData();
+refreshTimer = setInterval(fetchLiveData, REFRESH_INTERVAL);
+</script>
+</body>
+</html>

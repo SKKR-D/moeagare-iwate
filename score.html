@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>中学連　審判システム</title>
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#1a4a2e;--green-dark:#0f2e1b;--green-light:#2a6b42;
+  --gold:#c8a020;--gold-light:#e0c050;--white:#fff;--gray:#f5f5f0;
+  --text:#222;--text-light:#666;--radius:10px;
+  --red:#b33030;
+}
+html{font-size:15px;-webkit-tap-highlight-color:transparent}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--text);min-height:100vh;overflow-x:hidden}
+button{font-family:inherit;cursor:pointer}
+input,select{font-family:inherit}
+
+/* HEADER */
+.header{background:linear-gradient(135deg,var(--green-dark),var(--green));color:var(--white);padding:12px 16px;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,.3);position:relative;z-index:10}
+.header h1{font-size:.95rem;font-weight:700;letter-spacing:.04em}
+.header h1 span{color:var(--gold)}
+
+/* STEPS */
+.step{display:none;padding:16px}
+.step.active{display:block}
+
+/* STEP 1: SETUP */
+.setup-card{background:var(--white);border-radius:var(--radius);padding:20px;margin-bottom:14px;box-shadow:0 1px 6px rgba(0,0,0,.06)}
+.setup-card h2{font-size:.85rem;font-weight:700;color:var(--green);margin-bottom:12px}
+.form-row{margin-bottom:12px}
+.form-row label{display:block;font-size:.78rem;font-weight:700;color:var(--text-light);margin-bottom:4px}
+.form-row input,.form-row select{width:100%;padding:10px 12px;border:2px solid #ddd;border-radius:8px;font-size:.9rem;outline:none;transition:border-color .2s}
+.form-row input:focus,.form-row select:focus{border-color:var(--green)}
+.team-setup{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:end}
+.team-setup .vs{font-size:1rem;font-weight:900;color:var(--text-light);text-align:center;padding-bottom:10px}
+.player-fields{margin-top:8px}
+.player-fields .player-row{display:flex;gap:8px;margin-bottom:6px;align-items:center}
+.player-fields .player-row span{font-size:.72rem;color:var(--text-light);width:20px;flex-shrink:0}
+.player-fields .player-row input{flex:1}
+
+.btn{display:inline-block;padding:12px 24px;border-radius:8px;font-size:.9rem;font-weight:700;border:none;cursor:pointer;text-align:center;transition:all .2s}
+.btn-green{background:var(--green);color:var(--white)}
+.btn-green:active{background:var(--green-light)}
+.btn-gold{background:var(--gold);color:var(--white)}
+.btn-red{background:var(--red);color:var(--white)}
+.btn-outline{background:var(--white);color:var(--green);border:2px solid var(--green)}
+.btn-block{display:block;width:100%}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:16px}
+
+/* STEP 2: SCORING */
+.scoreboard{background:var(--green);border-radius:var(--radius);padding:16px;margin-bottom:14px;color:var(--white);box-shadow:0 4px 20px rgba(0,0,0,.2)}
+.match-info{text-align:center;font-size:.72rem;color:var(--gold);margin-bottom:10px;letter-spacing:.04em}
+.game-count-row{display:flex;justify-content:center;align-items:center;gap:16px;margin-bottom:14px}
+.team-block{text-align:center;flex:1}
+.team-block .name{font-size:.82rem;font-weight:700;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.team-block .game-count{font-size:2.8rem;font-weight:900;line-height:1}
+.game-count-row .separator{font-size:1.4rem;font-weight:700;color:var(--gold)}
+
+.point-area{background:rgba(0,0,0,.2);border-radius:8px;padding:14px;margin-bottom:12px}
+.point-row{display:flex;justify-content:center;align-items:center;gap:20px}
+.point-display{font-size:2rem;font-weight:900;text-align:center;min-width:60px}
+.point-label{text-align:center;font-size:.7rem;color:rgba(255,255,255,.6);margin-bottom:4px}
+.serve-mark{display:inline-block;background:var(--gold);color:var(--green-dark);font-size:.65rem;font-weight:900;padding:2px 6px;border-radius:4px;margin-left:4px;vertical-align:middle}
+
+.game-detail{text-align:center;font-size:.78rem;color:rgba(255,255,255,.7);margin-bottom:6px}
+
+/* Score buttons */
+.score-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.score-btn{padding:28px 10px;border-radius:var(--radius);border:none;font-size:1rem;font-weight:700;cursor:pointer;transition:all .15s;position:relative}
+.score-btn:active{transform:scale(.96)}
+.score-btn.left{background:var(--green);color:var(--white);border:3px solid var(--green-light)}
+.score-btn.right{background:var(--green);color:var(--white);border:3px solid var(--green-light)}
+.score-btn .sub{display:block;font-size:.7rem;font-weight:500;margin-top:4px;opacity:.7}
+
+/* Action buttons */
+.action-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.action-btn{padding:10px 16px;border-radius:8px;font-size:.78rem;font-weight:700;border:2px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:var(--white);cursor:pointer;transition:all .15s}
+.action-btn:active{background:rgba(255,255,255,.2)}
+.action-btn.fault{border-color:var(--gold);color:var(--gold)}
+.action-btn.undo{border-color:#aaa}
+.action-btn.abort{border-color:var(--red);color:#ff8888}
+
+/* Game history */
+.history-card{background:var(--white);border-radius:var(--radius);padding:16px;box-shadow:0 1px 6px rgba(0,0,0,.06)}
+.history-card h3{font-size:.82rem;font-weight:700;color:var(--green);margin-bottom:10px}
+.history-table{width:100%;border-collapse:collapse;font-size:.78rem}
+.history-table th,.history-table td{padding:6px 8px;text-align:center;border-bottom:1px solid #eee}
+.history-table th{font-weight:700;color:var(--text-light);background:#fafaf6}
+.history-table .winner{font-weight:700;color:var(--green)}
+
+/* STEP 3: RESULT */
+.result-card{background:var(--white);border-radius:var(--radius);padding:24px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.1);margin-bottom:16px}
+.result-card h2{font-size:1.1rem;font-weight:900;color:var(--green);margin-bottom:6px}
+.result-card .winner-name{font-size:1.4rem;font-weight:900;color:var(--gold);margin-bottom:10px}
+.result-card .final-score{font-size:1.8rem;font-weight:900;margin-bottom:16px}
+.result-table{width:100%;border-collapse:collapse;font-size:.82rem;margin-bottom:20px}
+.result-table th,.result-table td{padding:8px;text-align:center;border:1px solid #ddd}
+.result-table th{background:var(--green);color:var(--white);font-weight:700}
+
+/* ALERT */
+.alert-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:200;justify-content:center;align-items:center}
+.alert-overlay.show{display:flex}
+.alert-box{background:var(--white);border-radius:12px;padding:24px;text-align:center;max-width:300px;width:90%;box-shadow:0 10px 40px rgba(0,0,0,.3);animation:popIn .25s ease}
+@keyframes popIn{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+.alert-box h3{font-size:1rem;font-weight:900;margin-bottom:8px;color:var(--green)}
+.alert-box p{font-size:.85rem;color:var(--text-light);margin-bottom:16px}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <h1>🎾 <span>中学連</span>　審判システム</h1>
+</header>
+
+<!-- STEP 1: Match Setup -->
+<div class="step active" id="step1">
+  <div class="setup-card">
+    <h2>大会情報</h2>
+    <div class="form-row">
+      <label>大会名</label>
+      <input type="text" id="tournamentName" placeholder="例：岩手県中学校選手権大会">
+    </div>
+    <div class="form-row">
+      <label>コート番号</label>
+      <select id="courtNumber">
+        <option value="">選択してください</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label>回戦</label>
+      <input type="text" id="roundName" placeholder="例：1回戦、準決勝">
+    </div>
+  </div>
+
+  <div class="setup-card">
+    <h2>対戦チーム</h2>
+    <div class="team-setup">
+      <div class="form-row">
+        <label>左チーム</label>
+        <input type="text" id="teamLeft" placeholder="チーム名">
+      </div>
+      <div class="vs">VS</div>
+      <div class="form-row">
+        <label>右チーム</label>
+        <input type="text" id="teamRight" placeholder="チーム名">
+      </div>
+    </div>
+  </div>
+
+  <div class="setup-card">
+    <h2>選手名</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div>
+        <div style="font-size:.78rem;font-weight:700;color:var(--green);margin-bottom:6px" id="labelLeft">左チーム</div>
+        <div class="player-fields">
+          <div class="player-row"><span>前衛</span><input type="text" id="leftP1" placeholder="選手名"></div>
+          <div class="player-row"><span>後衛</span><input type="text" id="leftP2" placeholder="選手名"></div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:.78rem;font-weight:700;color:var(--green);margin-bottom:6px" id="labelRight">右チーム</div>
+        <div class="player-fields">
+          <div class="player-row"><span>前衛</span><input type="text" id="rightP1" placeholder="選手名"></div>
+          <div class="player-row"><span>後衛</span><input type="text" id="rightP2" placeholder="選手名"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="setup-card">
+    <h2>試合設定</h2>
+    <div class="form-row">
+      <label>ゲーム数</label>
+      <select id="gameCount">
+        <option value="3">3ゲームマッチ</option>
+        <option value="5" selected>5ゲームマッチ</option>
+        <option value="7">7ゲームマッチ</option>
+        <option value="9">9ゲームマッチ</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label>最初のサーブ</label>
+      <select id="firstServe">
+        <option value="left">左チーム</option>
+        <option value="right">右チーム</option>
+      </select>
+    </div>
+  </div>
+
+  <button class="btn btn-green btn-block" onclick="startMatch()">試合開始</button>
+</div>
+
+<!-- STEP 2: Scoring -->
+<div class="step" id="step2">
+  <div class="scoreboard">
+    <div class="match-info" id="matchInfo"></div>
+    <div class="game-count-row">
+      <div class="team-block">
+        <div class="name" id="scrLeftName"></div>
+        <div class="game-count" id="scrLeftGames">0</div>
+      </div>
+      <div class="separator">-</div>
+      <div class="team-block">
+        <div class="name" id="scrRightName"></div>
+        <div class="game-count" id="scrRightGames">0</div>
+      </div>
+    </div>
+    <div class="game-detail" id="gameDetail"></div>
+    <div class="point-area">
+      <div class="point-label" id="pointLabel">ポイント</div>
+      <div class="point-row">
+        <div class="point-display" id="scrLeftPoint">0</div>
+        <div style="color:var(--gold);font-weight:700">-</div>
+        <div class="point-display" id="scrRightPoint">0</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="score-buttons">
+    <button class="score-btn left" id="btnLeft" onclick="scorePoint('left')">
+      <span id="btnLeftName">左チーム</span>
+      <span class="sub">得点</span>
+    </button>
+    <button class="score-btn right" id="btnRight" onclick="scorePoint('right')">
+      <span id="btnRightName">右チーム</span>
+      <span class="sub">得点</span>
+    </button>
+  </div>
+
+  <div class="action-row">
+    <button class="action-btn fault" onclick="handleFault()">FAULT</button>
+    <button class="action-btn undo" onclick="undoLast()">↩ 戻す</button>
+    <button class="action-btn abort" onclick="confirmAbort()">打ち切り</button>
+  </div>
+
+  <div class="history-card" style="margin-top:14px">
+    <h3>ゲーム経過</h3>
+    <table class="history-table" id="historyTable">
+      <thead><tr><th>G</th><th id="histLeftName">左</th><th id="histRightName">右</th></tr></thead>
+      <tbody id="historyBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- STEP 3: Result -->
+<div class="step" id="step3">
+  <div class="result-card">
+    <h2>試合終了</h2>
+    <div class="winner-name" id="winnerName"></div>
+    <div class="final-score" id="finalScore"></div>
+    <div id="resultTableArea"></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-gold" onclick="sendToSheet()">スプレッドシートに記録</button>
+    <button class="btn btn-green" onclick="newMatch()">新しい試合を入力</button>
+  </div>
+</div>
+
+<!-- Alert overlay -->
+<div class="alert-overlay" id="alertOverlay">
+  <div class="alert-box">
+    <h3 id="alertTitle"></h3>
+    <p id="alertMsg"></p>
+    <button class="btn btn-green" onclick="closeAlert()">OK</button>
+  </div>
+</div>
+
+<script>
+/* ========== CONFIG ========== */
+var GAS_URL_INTEGRATED = 'https://script.google.com/macros/s/AKfycbwMaX6mOexotFkV6n5Y79QXO9IhDgBRvT4PHuCr9c9j435683_N7G8yKkQPcIi-wXtu/exec';
+var GAS_URL_LIVE = 'https://script.google.com/macros/s/AKfycbwMaX6mOexotFkV6n5Y79QXO9IhDgBRvT4PHuCr9c9j435683_N7G8yKkQPcIi-wXtu/exec';
+
+/* ========== STATE ========== */
+var match = {
+  tournament: '',
+  court: '',
+  round: '',
+  teamLeft: '',
+  teamRight: '',
+  playersLeft: [],
+  playersRight: [],
+  maxGames: 5,
+  gamesLeft: 0,
+  gamesRight: 0,
+  pointLeft: 0,
+  pointRight: 0,
+  server: 'left',
+  currentGame: 1,
+  isFinal: false,
+  faultCount: 0,
+  history: [],
+  gameScores: [],
+  finished: false
+};
+
+var undoStack = [];
+
+/* ========== INIT ========== */
+function initCourtSelect() {
+  var sel = document.getElementById('courtNumber');
+  var i, opt;
+  for (i = 1; i <= 20; i++) {
+    opt = document.createElement('option');
+    opt.value = String(i);
+    opt.textContent = i + 'コート';
+    sel.appendChild(opt);
+  }
+}
+
+function initTeamLabels() {
+  var leftInput = document.getElementById('teamLeft');
+  var rightInput = document.getElementById('teamRight');
+  leftInput.addEventListener('input', function() {
+    document.getElementById('labelLeft').textContent = this.value || '左チーム';
+  });
+  rightInput.addEventListener('input', function() {
+    document.getElementById('labelRight').textContent = this.value || '右チーム';
+  });
+}
+
+initCourtSelect();
+initTeamLabels();
+
+/* ========== STEPS ========== */
+function showStep(n) {
+  var steps = document.querySelectorAll('.step');
+  var i;
+  for (i = 0; i < steps.length; i++) {
+    steps[i].classList.remove('active');
+  }
+  document.getElementById('step' + n).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+/* ========== START MATCH ========== */
+function startMatch() {
+  var tl = document.getElementById('teamLeft').value.trim();
+  var tr = document.getElementById('teamRight').value.trim();
+  if (!tl || !tr) {
+    showAlert('入力エラー', '両チームのチーム名を入力してください。');
+    return;
+  }
+
+  match.tournament = document.getElementById('tournamentName').value.trim();
+  match.court = document.getElementById('courtNumber').value;
+  match.round = document.getElementById('roundName').value.trim();
+  match.teamLeft = tl;
+  match.teamRight = tr;
+  match.playersLeft = [
+    document.getElementById('leftP1').value.trim(),
+    document.getElementById('leftP2').value.trim()
+  ];
+  match.playersRight = [
+    document.getElementById('rightP1').value.trim(),
+    document.getElementById('rightP2').value.trim()
+  ];
+  match.maxGames = parseInt(document.getElementById('gameCount').value);
+  match.server = document.getElementById('firstServe').value;
+  match.gamesLeft = 0;
+  match.gamesRight = 0;
+  match.pointLeft = 0;
+  match.pointRight = 0;
+  match.currentGame = 1;
+  match.isFinal = false;
+  match.faultCount = 0;
+  match.history = [];
+  match.gameScores = [];
+  match.finished = false;
+  undoStack = [];
+
+  updateScoreboard();
+  showStep(2);
+  sendLiveUpdate();
+}
+
+/* ========== POINT DISPLAY ========== */
+function getPointDisplay(pts, side) {
+  if (match.isFinal) {
+    if (pts <= 6) return String(pts);
+    if (pts === 7) {
+      // deuce at 6-6 in final
+      var otherPts = (side === 'left') ? match.pointRight : match.pointLeft;
+      if (otherPts === 7) return 'D';
+      return '7';
+    }
+    // advantage / deuce in final
+    var myPts = pts;
+    var oppPts = (side === 'left') ? match.pointRight : match.pointLeft;
+    if (myPts > 6 && oppPts > 6) {
+      if (myPts === oppPts) return 'D';
+      if (myPts > oppPts) return 'AD';
+      return 'D';
+    }
+    return String(pts);
+  }
+  var display = ['0', '1', '2', '3'];
+  if (pts < 4) return display[pts];
+  var otherPts2 = (side === 'left') ? match.pointRight : match.pointLeft;
+  if (pts >= 3 && otherPts2 >= 3) {
+    if (pts === otherPts2) return 'D';
+    if (pts > otherPts2) return 'AD';
+    return 'D';
+  }
+  return String(pts);
+}
+
+/* ========== UPDATE SCOREBOARD ========== */
+function updateScoreboard() {
+  var info = '';
+  if (match.tournament) info += match.tournament + '　';
+  if (match.court) info += match.court + 'コート　';
+  if (match.round) info += match.round;
+  document.getElementById('matchInfo').textContent = info;
+
+  var leftName = match.teamLeft;
+  var rightName = match.teamRight;
+  document.getElementById('scrLeftName').innerHTML = leftName + (match.server === 'left' ? ' <span class="serve-mark">S</span>' : '');
+  document.getElementById('scrRightName').innerHTML = rightName + (match.server === 'right' ? ' <span class="serve-mark">S</span>' : '');
+  document.getElementById('scrLeftGames').textContent = match.gamesLeft;
+  document.getElementById('scrRightGames').textContent = match.gamesRight;
+
+  var gameLabel = match.currentGame + 'ゲーム目';
+  if (match.isFinal) gameLabel = 'ファイナルゲーム';
+  document.getElementById('gameDetail').textContent = gameLabel;
+
+  document.getElementById('scrLeftPoint').textContent = getPointDisplay(match.pointLeft, 'left');
+  document.getElementById('scrRightPoint').textContent = getPointDisplay(match.pointRight, 'right');
+
+  document.getElementById('btnLeftName').textContent = leftName;
+  document.getElementById('btnRightName').textContent = rightName;
+  document.getElementById('histLeftName').textContent = leftName;
+  document.getElementById('histRightName').textContent = rightName;
+
+  updateHistory();
+}
+
+function updateHistory() {
+  var body = document.getElementById('historyBody');
+  var html = '';
+  var i, gs;
+  for (i = 0; i < match.gameScores.length; i++) {
+    gs = match.gameScores[i];
+    var leftCls = gs.winner === 'left' ? ' class="winner"' : '';
+    var rightCls = gs.winner === 'right' ? ' class="winner"' : '';
+    html += '<tr><td>' + (i + 1) + '</td><td' + leftCls + '>' + gs.leftPts + '</td><td' + rightCls + '>' + gs.rightPts + '</td></tr>';
+  }
+  body.innerHTML = html;
+}
+
+/* ========== SCORE POINT ========== */
+function scorePoint(side) {
+  if (match.finished) return;
+
+  // Save state for undo
+  undoStack.push(JSON.parse(JSON.stringify(match)));
+  if (undoStack.length > 50) undoStack.shift();
+
+  match.faultCount = 0;
+
+  if (side === 'left') {
+    match.pointLeft++;
+  } else {
+    match.pointRight++;
+  }
+
+  checkGameEnd();
+  updateScoreboard();
+  sendLiveUpdate();
+}
+
+/* ========== CHECK GAME END ========== */
+function checkGameEnd() {
+  var won = null;
+  var winGames = Math.ceil(match.maxGames / 2);
+
+  if (match.isFinal) {
+    // Final game: first to 7, deuce at 6-6
+    if (match.pointLeft >= 7 || match.pointRight >= 7) {
+      if (match.pointLeft >= 7 && match.pointRight < match.pointLeft - 0 && match.pointLeft !== match.pointRight) {
+        if (match.pointLeft > match.pointRight && (match.pointLeft >= 7 && (match.pointRight < 6 || match.pointLeft >= match.pointRight + 2))) {
+          won = 'left';
+        }
+      }
+      if (match.pointRight >= 7 && match.pointLeft < match.pointRight && (match.pointRight >= 7 && (match.pointLeft < 6 || match.pointRight >= match.pointLeft + 2))) {
+        won = 'right';
+      }
+    }
+  } else {
+    // Normal game: first to 4
+    if (match.pointLeft >= 4 || match.pointRight >= 4) {
+      if (match.pointLeft >= 4 && match.pointRight < 3) {
+        won = 'left';
+      } else if (match.pointRight >= 4 && match.pointLeft < 3) {
+        won = 'right';
+      } else if (match.pointLeft >= 3 && match.pointRight >= 3) {
+        // Deuce: need 2 ahead (but in soft tennis, deuce point decides)
+        // In soft tennis: at 3-3, next point wins (no advantage in normal game)
+        if (match.pointLeft > match.pointRight) won = 'left';
+        if (match.pointRight > match.pointLeft) won = 'right';
+      }
+    }
+  }
+
+  if (won) {
+    match.gameScores.push({
+      leftPts: match.pointLeft,
+      rightPts: match.pointRight,
+      winner: won
+    });
+
+    if (won === 'left') match.gamesLeft++;
+    else match.gamesRight++;
+
+    // Check match end
+    if (match.gamesLeft >= winGames || match.gamesRight >= winGames) {
+      match.finished = true;
+      setTimeout(function() { showResult(); }, 500);
+      return;
+    }
+
+    // Check if next game is final
+    if (match.gamesLeft === winGames - 1 && match.gamesRight === winGames - 1) {
+      match.isFinal = true;
+    }
+
+    // Change service
+    if (match.server === 'left') {
+      match.server = 'right';
+    } else {
+      match.server = 'left';
+    }
+
+    match.pointLeft = 0;
+    match.pointRight = 0;
+    match.currentGame++;
+    match.faultCount = 0;
+
+    // Alert for change
+    var totalGames = match.gamesLeft + match.gamesRight;
+    if (totalGames % 2 === 1) {
+      showAlert('チェンジサイド', 'サイドを交替してください。');
+    } else {
+      showAlert('チェンジサービス', 'サービスが交替しました。');
+    }
+
+    if (match.isFinal) {
+      showAlert('ファイナルゲーム', 'ファイナルゲームに入ります。');
+    }
+  }
+}
+
+/* ========== FAULT ========== */
+function handleFault() {
+  if (match.finished) return;
+
+  match.faultCount++;
+  if (match.faultCount >= 2) {
+    // Double fault -> point to receiver
+    match.faultCount = 0;
+    var receiver = (match.server === 'left') ? 'right' : 'left';
+
+    undoStack.push(JSON.parse(JSON.stringify(match)));
+    if (undoStack.length > 50) undoStack.shift();
+
+    if (receiver === 'left') {
+      match.pointLeft++;
+    } else {
+      match.pointRight++;
+    }
+    showAlert('ダブルフォルト', 'ダブルフォルト（DF）');
+    checkGameEnd();
+    updateScoreboard();
+    sendLiveUpdate();
+  } else {
+    showAlert('フォルト', '1st フォルト');
+  }
+}
+
+/* ========== UNDO ========== */
+function undoLast() {
+  if (undoStack.length === 0) {
+    showAlert('戻せません', '履歴がありません。');
+    return;
+  }
+  var prev = undoStack.pop();
+  // Restore match state
+  match.gamesLeft = prev.gamesLeft;
+  match.gamesRight = prev.gamesRight;
+  match.pointLeft = prev.pointLeft;
+  match.pointRight = prev.pointRight;
+  match.server = prev.server;
+  match.currentGame = prev.currentGame;
+  match.isFinal = prev.isFinal;
+  match.faultCount = prev.faultCount;
+  match.gameScores = prev.gameScores;
+  match.finished = prev.finished;
+  updateScoreboard();
+  sendLiveUpdate();
+}
+
+/* ========== ABORT ========== */
+function confirmAbort() {
+  if (confirm('試合を打ち切りますか？')) {
+    match.finished = true;
+    // Determine winner by games
+    if (match.gamesLeft > match.gamesRight) {
+      showResultAbort('left');
+    } else if (match.gamesRight > match.gamesLeft) {
+      showResultAbort('right');
+    } else {
+      showResultAbort('draw');
+    }
+  }
+}
+
+function showResultAbort(winner) {
+  var winnerText = '引き分け（打ち切り）';
+  if (winner === 'left') winnerText = match.teamLeft + '（打ち切り勝ち）';
+  if (winner === 'right') winnerText = match.teamRight + '（打ち切り勝ち）';
+
+  document.getElementById('winnerName').textContent = winnerText;
+  document.getElementById('finalScore').textContent = match.gamesLeft + ' - ' + match.gamesRight;
+  document.getElementById('resultTableArea').innerHTML = buildResultTable();
+  showStep(3);
+}
+
+/* ========== RESULT ========== */
+function showResult() {
+  var winner = (match.gamesLeft > match.gamesRight) ? match.teamLeft : match.teamRight;
+  document.getElementById('winnerName').textContent = winner + ' の勝利';
+  document.getElementById('finalScore').textContent = match.gamesLeft + ' - ' + match.gamesRight;
+  document.getElementById('resultTableArea').innerHTML = buildResultTable();
+  showStep(3);
+}
+
+function buildResultTable() {
+  var html = '<table class="result-table"><thead><tr><th>G</th>';
+  html += '<th>' + match.teamLeft + '</th>';
+  html += '<th>' + match.teamRight + '</th></tr></thead><tbody>';
+  var i, gs;
+  for (i = 0; i < match.gameScores.length; i++) {
+    gs = match.gameScores[i];
+    html += '<tr><td>' + (i + 1) + '</td>';
+    html += '<td' + (gs.winner === 'left' ? ' style="font-weight:900;color:var(--green)"' : '') + '>' + gs.leftPts + '</td>';
+    html += '<td' + (gs.winner === 'right' ? ' style="font-weight:900;color:var(--green)"' : '') + '>' + gs.rightPts + '</td></tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+/* ========== SEND TO SHEET ========== */
+function sendToSheet() {
+  var data = {
+    tournament: match.tournament,
+    court: match.court,
+    round: match.round,
+    teamLeft: match.teamLeft,
+    teamRight: match.teamRight,
+    playersLeft: match.playersLeft.join('・'),
+    playersRight: match.playersRight.join('・'),
+    gamesLeft: match.gamesLeft,
+    gamesRight: match.gamesRight,
+    gameScores: JSON.stringify(match.gameScores),
+    winner: (match.gamesLeft > match.gamesRight) ? match.teamLeft : match.teamRight,
+    timestamp: new Date().toISOString()
+  };
+
+  var params = [];
+  var key;
+  for (key in data) {
+    if (data.hasOwnProperty(key)) {
+      params.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));
+    }
+  }
+
+  fetch(GAS_URL_INTEGRATED + '?' + params.join('&'), { method: 'GET', mode: 'no-cors' }).then(function() {
+    showAlert('送信完了', 'スプレッドシートに記録しました。');
+  }).catch(function(err) {
+    // Save to localStorage as backup
+    try {
+      var saved = JSON.parse(localStorage.getItem('pendingResults') || '[]');
+      saved.push(data);
+      localStorage.setItem('pendingResults', JSON.stringify(saved));
+    } catch(e) {}
+    showAlert('オフライン保存', 'ネットワークに接続できませんでした。\nローカルに保存しました。');
+  });
+}
+
+/* ========== LIVE UPDATE ========== */
+function sendLiveUpdate() {
+  if (!GAS_URL_LIVE || GAS_URL_LIVE.indexOf('YOUR_') === 0) return;
+
+  var data = {
+    action: 'updateLive',
+    court: match.court || '1',
+    teamLeft: match.teamLeft,
+    teamRight: match.teamRight,
+    gamesLeft: match.gamesLeft,
+    gamesRight: match.gamesRight,
+    pointLeft: match.pointLeft,
+    pointRight: match.pointRight,
+    currentGame: match.currentGame,
+    server: match.server,
+    finished: match.finished ? 'true' : 'false',
+    winner: match.finished ? ((match.gamesLeft > match.gamesRight) ? match.teamLeft : match.teamRight) : ''
+  };
+
+  var params = [];
+  var key;
+  for (key in data) {
+    if (data.hasOwnProperty(key)) {
+      params.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));
+    }
+  }
+
+  fetch(GAS_URL_LIVE + '?' + params.join('&'), { method: 'GET', mode: 'no-cors' }).catch(function() {});
+}
+
+/* ========== NEW MATCH ========== */
+function newMatch() {
+  showStep(1);
+}
+
+/* ========== ALERT ========== */
+function showAlert(title, msg) {
+  document.getElementById('alertTitle').textContent = title;
+  document.getElementById('alertMsg').textContent = msg;
+  document.getElementById('alertOverlay').classList.add('show');
+}
+
+function closeAlert() {
+  document.getElementById('alertOverlay').classList.remove('show');
+}
+
+/* ========== SERVICE WORKER ========== */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(function() {});
+}
+</script>
+</body>
+</html>

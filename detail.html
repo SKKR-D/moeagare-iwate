@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>大会要項｜岩手県中学校ソフトテニス連盟</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#1a4a2e;--green-dark:#0f2e1b;--green-light:#2a6b42;
+  --gold:#c8a020;--gold-light:#e0c050;--white:#fff;--gray:#f5f5f0;
+  --text:#222;--text-light:#666;--radius:10px;
+  --cat-tournament:#b33030;--cat-meeting:#6a3a8a;
+  --cat-seminar:#2555a0;--cat-training:#227a4a;--cat-other:#666;
+}
+html{font-size:15px}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--text)}
+a{color:inherit;text-decoration:none}
+
+.header{background:linear-gradient(135deg,var(--green-dark),var(--green));color:var(--white);padding:16px 20px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.3)}
+.header-inner{max-width:800px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.header-title{display:flex;align-items:center;gap:10px}
+.header-title .icon{font-size:1.6rem}
+.header-title h1{font-size:1rem;font-weight:700}
+.header-title h1 small{display:block;font-size:.7rem;font-weight:500;color:var(--gold)}
+.back-btn{background:rgba(255,255,255,.15);color:var(--white);border:none;padding:8px 14px;border-radius:6px;font-size:.8rem;cursor:pointer;font-family:inherit}
+.back-btn:hover{background:rgba(255,255,255,.25)}
+
+.main{max-width:800px;margin:0 auto;padding:20px}
+
+/* HERO CARD */
+.hero-card{background:var(--green);color:var(--white);border-radius:var(--radius);padding:28px 24px;margin-bottom:20px;position:relative;overflow:hidden}
+.hero-card::after{content:'🎾';position:absolute;right:-10px;bottom:-10px;font-size:5rem;opacity:.1}
+.hero-card .badge{display:inline-block;padding:3px 12px;border-radius:20px;font-size:.7rem;font-weight:700;color:var(--white);margin-bottom:10px}
+.hero-card h2{font-size:1.3rem;font-weight:900;margin-bottom:8px}
+.hero-card .date{font-size:.9rem;color:var(--gold)}
+
+/* INFO TABLE */
+.info-section{background:var(--white);border-radius:var(--radius);padding:20px;margin-bottom:16px;box-shadow:0 1px 6px rgba(0,0,0,.06)}
+.info-section h3{font-size:.85rem;font-weight:700;color:var(--green);margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--green)}
+.info-table{width:100%;border-collapse:collapse}
+.info-table tr{border-bottom:1px solid #eee}
+.info-table tr:last-child{border-bottom:none}
+.info-table th{width:120px;padding:10px 12px;font-size:.8rem;font-weight:700;text-align:left;vertical-align:top;color:var(--text-light);background:#fafaf6}
+.info-table td{padding:10px 12px;font-size:.85rem;line-height:1.6}
+@media(max-width:500px){
+  .info-table th,.info-table td{display:block;width:100%;padding:6px 12px}
+  .info-table th{padding-bottom:0;background:none;font-size:.72rem}
+}
+
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.btn{display:inline-block;padding:10px 20px;border-radius:8px;font-size:.85rem;font-weight:700;border:none;cursor:pointer;text-align:center;transition:opacity .2s;font-family:inherit}
+.btn-green{background:var(--green);color:var(--white)}
+.btn-gold{background:var(--gold);color:var(--white)}
+.btn-outline{background:var(--white);color:var(--green);border:2px solid var(--green)}
+
+.footer{text-align:center;padding:30px 20px;font-size:.7rem;color:var(--text-light)}
+.loading{text-align:center;padding:60px 20px;color:var(--text-light)}
+.loading .spinner{display:inline-block;width:28px;height:28px;border:3px solid #ddd;border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite;margin-bottom:10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.no-data{text-align:center;padding:60px 20px;color:var(--text-light);font-size:.9rem}
+
+/* PRINT STYLES */
+@media print {
+  .header,.back-btn,.btn-row,.footer{display:none !important}
+  body{background:#fff;font-size:11pt}
+  .main{padding:0;max-width:100%}
+  .hero-card{display:none}
+  .info-section{box-shadow:none;border:none;padding:0;margin-bottom:0}
+  .info-section h3{display:none}
+
+  .print-only{display:block !important}
+  .print-header{margin-bottom:20pt}
+  .print-header .left{text-align:left;font-size:10pt;margin-bottom:4pt}
+  .print-header .right{text-align:right;font-size:10pt;margin-bottom:10pt}
+  .print-header .center{text-align:center;font-size:16pt;font-weight:bold;margin-bottom:6pt}
+  .print-header .sub{text-align:center;font-size:11pt;margin-bottom:16pt}
+
+  .print-table{width:100%;border-collapse:collapse;margin-bottom:12pt;page-break-inside:avoid}
+  .print-table th,.print-table td{border:1px solid #333;padding:6pt 8pt;font-size:10pt;text-align:left;vertical-align:top}
+  .print-table th{width:100pt;background:#eee;font-weight:bold}
+  .print-table tr{page-break-inside:avoid}
+
+  .print-footer{position:fixed;bottom:0;left:0;right:0;text-align:center;font-size:8pt;color:#666;border-top:1px solid #999;padding-top:4pt}
+}
+.print-only{display:none}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="header-title">
+      <span class="icon">🎾</span>
+      <h1><small>岩手県中学校ソフトテニス連盟</small>大会要項</h1>
+    </div>
+    <button class="back-btn" onclick="location.href='index.html'">← 年間予定に戻る</button>
+  </div>
+</header>
+
+<main class="main">
+  <div class="loading" id="loadingArea">
+    <div class="spinner"></div>
+    <div>データを読み込んでいます...</div>
+  </div>
+  <div id="contentArea" style="display:none"></div>
+</main>
+
+<footer class="footer">
+  &copy; 岩手県中学校ソフトテニス連盟
+</footer>
+
+<script>
+var CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ-lGDkzU9W1EPhITCpMPchihRd6EKjcAxZB4RWKKeuH03xzSIzM86OjvpksZEawwVn-uLuaasCJ6QP/pub?gid=0&single=true&output=csv';
+var PROXIES = [
+  'https://corsproxy.io/?',
+  'https://api.allorigins.win/raw?url='
+];
+var FETCH_TIMEOUT = 8000;
+
+var DCOL = {
+  ORGANIZER: 0, CO_ORGANIZER: 1, SUPPORT: 2, MANAGER: 3,
+  START_DATE: 4, END_DATE: 5, NAME: 6, VENUE: 7,
+  OPEN: 8, COURT_OPEN: 9, RECEPTION: 10, MEETING: 11,
+  CEREMONY: 12, GAME_START: 13, GAME_END: 14,
+  QUALIFICATION: 15, CATEGORY: 16, FORMAT: 17, AWARDS: 18,
+  APPLICATION: 19, FORM_URL: 20, NOTES: 21, STATUS: 22
+};
+
+var DOW = ['日','月','火','水','木','金','土'];
+
+function parseCSVFull(text) {
+  var rows = [];
+  var row = [];
+  var cell = '';
+  var inQuotes = false;
+  var i, ch;
+  for (i = 0; i < text.length; i++) {
+    ch = text[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (i + 1 < text.length && text[i + 1] === '"') {
+          cell += '"'; i++;
+        } else { inQuotes = false; }
+      } else { cell += ch; }
+    } else {
+      if (ch === '"') { inQuotes = true; }
+      else if (ch === ',') { row.push(cell.trim()); cell = ''; }
+      else if (ch === '\n' || ch === '\r') {
+        row.push(cell.trim()); cell = '';
+        if (ch === '\r' && i + 1 < text.length && text[i + 1] === '\n') i++;
+        if (row.length > 1 || (row.length === 1 && row[0] !== '')) rows.push(row);
+        row = [];
+      } else { cell += ch; }
+    }
+  }
+  if (cell !== '' || row.length > 0) { row.push(cell.trim()); rows.push(row); }
+  return rows;
+}
+
+function fetchWithTimeout(url, timeout) {
+  return new Promise(function(resolve, reject) {
+    var controller = new AbortController();
+    var timer = setTimeout(function() { controller.abort(); reject(new Error('Timeout')); }, timeout);
+    fetch(url, { signal: controller.signal }).then(function(res) { clearTimeout(timer); resolve(res); }).catch(function(err) { clearTimeout(timer); reject(err); });
+  });
+}
+
+function fetchData() {
+  var attempt = function(index) {
+    if (index >= PROXIES.length) return Promise.reject(new Error('All proxies failed'));
+    var url = PROXIES[index] + encodeURIComponent(CSV_URL);
+    return fetchWithTimeout(url, FETCH_TIMEOUT).then(function(res) {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.text();
+    }).catch(function() { return attempt(index + 1); });
+  };
+  return attempt(0);
+}
+
+function parseDate(str) {
+  if (!str) return null;
+  var p = str.replace(/\//g, '-').split('-');
+  if (p.length < 3) return null;
+  return new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]));
+}
+
+function formatDateFull(d) {
+  return d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日(' + DOW[d.getDay()] + ')';
+}
+
+function getCategory(row) {
+  var txt = (row[DCOL.NAME] || '') + (row[DCOL.CATEGORY] || '');
+  if (txt.indexOf('大会') >= 0) return { label: '大会', color: '#b33030' };
+  if (txt.indexOf('会議') >= 0) return { label: '会議', color: '#6a3a8a' };
+  if (txt.indexOf('講習') >= 0) return { label: '講習会', color: '#2555a0' };
+  if (txt.indexOf('強化') >= 0 || txt.indexOf('練習') >= 0) return { label: '強化練習会', color: '#227a4a' };
+  return { label: 'その他', color: '#666' };
+}
+
+function getTargetDate() {
+  var params = new URLSearchParams(window.location.search);
+  var d = params.get('date');
+  if (!d) return null;
+  var p = d.split('-');
+  return new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]));
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function renderDetail(row) {
+  var startDate = parseDate(row[DCOL.START_DATE]);
+  var endDate = row[DCOL.END_DATE] ? parseDate(row[DCOL.END_DATE]) : null;
+  var cat = getCategory(row);
+
+  var dateStr = formatDateFull(startDate);
+  if (endDate) {
+    dateStr += ' 〜 ' + formatDateFull(endDate);
+  }
+
+  var html = '';
+
+  /* Print-only header */
+  var today = new Date();
+  var printDate = today.getFullYear() + '年' + (today.getMonth() + 1) + '月' + today.getDate() + '日';
+
+  html += '<div class="print-only">';
+  html += '<div class="print-header">';
+  html += '<div class="left">加盟チーム代表各位</div>';
+  html += '<div class="right">岩手県中学校ソフトテニス連盟</div>';
+  html += '<div class="center">大会要項</div>';
+  html += '<div class="sub">' + escapeHtml(row[DCOL.NAME]) + '　' + dateStr + '</div>';
+  html += '</div>';
+
+  /* Print table */
+  var printItems = [
+    ['1', '主催', row[DCOL.ORGANIZER]],
+    ['2', '共催', row[DCOL.CO_ORGANIZER]],
+    ['3', '後援', row[DCOL.SUPPORT]],
+    ['4', '主管', row[DCOL.MANAGER]],
+    ['5', '期日', dateStr],
+    ['6', '会場', row[DCOL.VENUE]],
+    ['7', '開場', row[DCOL.OPEN]],
+    ['8', 'コート解放', row[DCOL.COURT_OPEN]],
+    ['9', '受付', row[DCOL.RECEPTION]],
+    ['10', '監督会議', row[DCOL.MEETING]],
+    ['11', '開会式', row[DCOL.CEREMONY]],
+    ['12', '競技開始', row[DCOL.GAME_START]],
+    ['13', '競技終了予定', row[DCOL.GAME_END]],
+    ['14', '参加資格', row[DCOL.QUALIFICATION]],
+    ['15', '種別', row[DCOL.CATEGORY]],
+    ['16', '試合方法', row[DCOL.FORMAT]],
+    ['17', '表彰', row[DCOL.AWARDS]],
+    ['18', '参加申込', row[DCOL.APPLICATION]],
+    ['19', 'その他', row[DCOL.NOTES]]
+  ];
+
+  html += '<table class="print-table">';
+  var pi;
+  for (pi = 0; pi < printItems.length; pi++) {
+    if (printItems[pi][2]) {
+      html += '<tr><th>' + printItems[pi][0] + '. ' + printItems[pi][1] + '</th><td>' + escapeHtml(printItems[pi][2]) + '</td></tr>';
+    }
+  }
+  html += '</table>';
+  html += '<div class="print-footer">岩手県中学校ソフトテニス連盟　配布資料　印刷日：' + printDate + '</div>';
+  html += '</div>';
+
+  /* Screen hero */
+  html += '<div class="hero-card">';
+  html += '<span class="badge" style="background:' + cat.color + '">' + cat.label + '</span>';
+  html += '<h2>' + escapeHtml(row[DCOL.NAME]) + '</h2>';
+  html += '<div class="date">' + dateStr + '</div>';
+  html += '</div>';
+
+  /* Organization info */
+  var orgRows = '';
+  if (row[DCOL.ORGANIZER]) orgRows += '<tr><th>主催</th><td>' + escapeHtml(row[DCOL.ORGANIZER]) + '</td></tr>';
+  if (row[DCOL.CO_ORGANIZER]) orgRows += '<tr><th>共催</th><td>' + escapeHtml(row[DCOL.CO_ORGANIZER]) + '</td></tr>';
+  if (row[DCOL.SUPPORT]) orgRows += '<tr><th>後援</th><td>' + escapeHtml(row[DCOL.SUPPORT]) + '</td></tr>';
+  if (row[DCOL.MANAGER]) orgRows += '<tr><th>主管</th><td>' + escapeHtml(row[DCOL.MANAGER]) + '</td></tr>';
+  if (orgRows) {
+    html += '<div class="info-section"><h3>主催・運営</h3><table class="info-table">' + orgRows + '</table></div>';
+  }
+
+  /* Schedule info */
+  var schedRows = '';
+  schedRows += '<tr><th>会場</th><td>' + escapeHtml(row[DCOL.VENUE] || '未定') + '</td></tr>';
+  if (row[DCOL.OPEN]) schedRows += '<tr><th>開場</th><td>' + escapeHtml(row[DCOL.OPEN]) + '</td></tr>';
+  if (row[DCOL.COURT_OPEN]) schedRows += '<tr><th>コート解放</th><td>' + escapeHtml(row[DCOL.COURT_OPEN]) + '</td></tr>';
+  if (row[DCOL.RECEPTION]) schedRows += '<tr><th>受付</th><td>' + escapeHtml(row[DCOL.RECEPTION]) + '</td></tr>';
+  if (row[DCOL.MEETING]) schedRows += '<tr><th>監督会議</th><td>' + escapeHtml(row[DCOL.MEETING]) + '</td></tr>';
+  if (row[DCOL.CEREMONY]) schedRows += '<tr><th>開会式</th><td>' + escapeHtml(row[DCOL.CEREMONY]) + '</td></tr>';
+  if (row[DCOL.GAME_START]) schedRows += '<tr><th>競技開始</th><td>' + escapeHtml(row[DCOL.GAME_START]) + '</td></tr>';
+  if (row[DCOL.GAME_END]) schedRows += '<tr><th>競技終了予定</th><td>' + escapeHtml(row[DCOL.GAME_END]) + '</td></tr>';
+  html += '<div class="info-section"><h3>日程・会場</h3><table class="info-table">' + schedRows + '</table></div>';
+
+  /* Competition info */
+  var compRows = '';
+  if (row[DCOL.QUALIFICATION]) compRows += '<tr><th>参加資格</th><td>' + escapeHtml(row[DCOL.QUALIFICATION]) + '</td></tr>';
+  if (row[DCOL.CATEGORY]) compRows += '<tr><th>種別</th><td>' + escapeHtml(row[DCOL.CATEGORY]) + '</td></tr>';
+  if (row[DCOL.FORMAT]) compRows += '<tr><th>試合方法</th><td>' + escapeHtml(row[DCOL.FORMAT]) + '</td></tr>';
+  if (row[DCOL.AWARDS]) compRows += '<tr><th>表彰</th><td>' + escapeHtml(row[DCOL.AWARDS]) + '</td></tr>';
+  if (compRows) {
+    html += '<div class="info-section"><h3>競技</h3><table class="info-table">' + compRows + '</table></div>';
+  }
+
+  /* Application info */
+  var appRows = '';
+  if (row[DCOL.APPLICATION]) appRows += '<tr><th>参加申込</th><td>' + escapeHtml(row[DCOL.APPLICATION]) + '</td></tr>';
+  if (row[DCOL.NOTES]) appRows += '<tr><th>その他</th><td>' + escapeHtml(row[DCOL.NOTES]) + '</td></tr>';
+  if (appRows) {
+    html += '<div class="info-section"><h3>申込・その他</h3><table class="info-table">' + appRows + '</table></div>';
+  }
+
+  /* Buttons */
+  html += '<div class="btn-row">';
+  if (row[DCOL.FORM_URL]) {
+    html += '<a class="btn btn-gold" href="' + row[DCOL.FORM_URL] + '" target="_blank" rel="noopener">申込フォームへ</a>';
+  }
+  html += '<a class="btn btn-outline" href="rules.html">競技規則・諸規定を見る</a>';
+  html += '<button class="btn btn-green" onclick="window.print()">🖨️ 大会要項をPDFで出力する</button>';
+  html += '</div>';
+
+  return html;
+}
+
+function init() {
+  var targetDate = getTargetDate();
+  if (!targetDate) {
+    document.getElementById('loadingArea').innerHTML = '<div class="no-data">日付が指定されていません。<br><a href="index.html" style="color:var(--green);text-decoration:underline">年間予定に戻る</a></div>';
+    return;
+  }
+
+  fetchData().then(function(text) {
+    var rows = parseCSVFull(text);
+    var found = null;
+    var i, row, sd;
+    for (i = 1; i < rows.length; i++) {
+      row = rows[i];
+      sd = parseDate(row[DCOL.START_DATE]);
+      if (sd && sd.getFullYear() === targetDate.getFullYear() && sd.getMonth() === targetDate.getMonth() && sd.getDate() === targetDate.getDate()) {
+        found = row;
+        break;
+      }
+    }
+
+    document.getElementById('loadingArea').style.display = 'none';
+    var content = document.getElementById('contentArea');
+    content.style.display = 'block';
+
+    if (!found) {
+      content.innerHTML = '<div class="no-data">該当する大会が見つかりません。<br><a href="index.html" style="color:var(--green);text-decoration:underline">年間予定に戻る</a></div>';
+      return;
+    }
+
+    content.innerHTML = renderDetail(found);
+    document.title = found[DCOL.NAME] + '｜岩手県中学校ソフトテニス連盟';
+  }).catch(function(err) {
+    document.getElementById('loadingArea').innerHTML = '<div class="no-data">データの読み込みに失敗しました。</div>';
+    console.error(err);
+  });
+}
+
+init();
+</script>
+</body>
+</html>
