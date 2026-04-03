@@ -126,7 +126,7 @@ var DCOL = {
   OPEN: 9, COURT_OPEN: 10, RECEPTION: 11, MEETING: 12,
   CEREMONY: 13, GAME_START: 14, GAME_END: 15,
   QUALIFICATION: 16, CATEGORY: 17, FORMAT: 18, AWARDS: 19,
-  APPLICATION: 20, FORM_URL: 21, NOTES: 22, STATUS: 23
+  APPLICATION: 20, FEE: 21, FORM_URL: 22, NOTES: 23, STATUS: 24
 };
 
 var DOW = ['日','月','火','水','木','金','土'];
@@ -258,7 +258,8 @@ function renderDetail(row) {
     ['17', '試合方法', row[DCOL.FORMAT]],
     ['18', '表彰', row[DCOL.AWARDS]],
     ['19', '参加申込', row[DCOL.APPLICATION]],
-    ['20', 'その他', row[DCOL.NOTES]]
+    ['20', '参加料', row[DCOL.FEE]],
+    ['21', 'その他', row[DCOL.NOTES]]
   ];
 
   html += '<table class="print-table">';
@@ -315,6 +316,7 @@ function renderDetail(row) {
   /* Application info */
   var appRows = '';
   if (row[DCOL.APPLICATION]) appRows += '<tr><th>参加申込</th><td>' + escapeHtml(row[DCOL.APPLICATION]) + '</td></tr>';
+  if (row[DCOL.FEE]) appRows += '<tr><th>参加料</th><td>' + escapeHtml(row[DCOL.FEE]) + '</td></tr>';
   if (row[DCOL.NOTES]) appRows += '<tr><th>その他</th><td>' + escapeHtml(row[DCOL.NOTES]) + '</td></tr>';
   if (appRows) {
     html += '<div class="info-section"><h3>申込・その他</h3><table class="info-table">' + appRows + '</table></div>';
