@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>大会要項｜岩手県中学校ソフトテニス連盟</title>
+<title>大会要項｜岩手県中学生ソフトテニス連盟</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -93,7 +93,7 @@ a{color:inherit;text-decoration:none}
   <div class="header-inner">
     <div class="header-title">
       <span class="icon">🎾</span>
-      <h1><small>岩手県中学校ソフトテニス連盟</small>大会要項</h1>
+      <h1><small>岩手県中学生ソフトテニス連盟</small>大会要項</h1>
     </div>
     <button class="back-btn" onclick="location.href='index.html'">← 年間予定に戻る</button>
   </div>
@@ -108,7 +108,7 @@ a{color:inherit;text-decoration:none}
 </main>
 
 <footer class="footer">
-  &copy; 岩手県中学校ソフトテニス連盟
+  &copy; 岩手県中学生ソフトテニス連盟
 </footer>
 
 <script>
@@ -231,7 +231,7 @@ function renderDetail(row) {
   html += '<div class="print-only">';
   html += '<div class="print-header">';
   html += '<div class="left">加盟チーム代表各位</div>';
-  html += '<div class="right">岩手県中学校ソフトテニス連盟</div>';
+  html += '<div class="right">岩手県中学生ソフトテニス連盟</div>';
   html += '<div class="center">大会要項</div>';
   html += '<div class="sub">' + escapeHtml(row[DCOL.NAME]) + '　' + dateStr + '</div>';
   html += '</div>';
@@ -267,7 +267,7 @@ function renderDetail(row) {
     }
   }
   html += '</table>';
-  html += '<div class="print-footer">岩手県中学校ソフトテニス連盟　配布資料　印刷日：' + printDate + '</div>';
+  html += '<div class="print-footer">岩手県中学生ソフトテニス連盟　配布資料　印刷日：' + printDate + '</div>';
   html += '</div>';
 
   /* Screen hero */
@@ -359,7 +359,7 @@ function init() {
     }
 
     content.innerHTML = renderDetail(found);
-    document.title = found[DCOL.NAME] + '｜岩手県中学校ソフトテニス連盟';
+    document.title = found[DCOL.NAME] + '｜岩手県中学生ソフトテニス連盟';
   }).catch(function(err) {
     document.getElementById('loadingArea').innerHTML = '<div class="no-data">データの読み込みに失敗しました。</div>';
     console.error(err);
