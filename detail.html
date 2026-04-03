@@ -122,10 +122,11 @@ var FETCH_TIMEOUT = 8000;
 var DCOL = {
   START_DATE: 0, END_DATE: 1, NAME: 2,
   ORGANIZER: 3, CO_ORGANIZER: 4, SUPPORT: 5, MANAGER: 6,
-  VENUE: 7, OPEN: 8, COURT_OPEN: 9, RECEPTION: 10, MEETING: 11,
-  CEREMONY: 12, GAME_START: 13, GAME_END: 14,
-  QUALIFICATION: 15, CATEGORY: 16, FORMAT: 17, AWARDS: 18,
-  APPLICATION: 19, FORM_URL: 20, NOTES: 21, STATUS: 22
+  VENUE: 7, VENUE_MAP: 8,
+  OPEN: 9, COURT_OPEN: 10, RECEPTION: 11, MEETING: 12,
+  CEREMONY: 13, GAME_START: 14, GAME_END: 15,
+  QUALIFICATION: 16, CATEGORY: 17, FORMAT: 18, AWARDS: 19,
+  APPLICATION: 20, FORM_URL: 21, NOTES: 22, STATUS: 23
 };
 
 var DOW = ['日','月','火','水','木','金','土'];
@@ -244,19 +245,20 @@ function renderDetail(row) {
     ['4', '主管', row[DCOL.MANAGER]],
     ['5', '期日', dateStr],
     ['6', '会場', row[DCOL.VENUE]],
-    ['7', '開場', row[DCOL.OPEN]],
-    ['8', 'コート解放', row[DCOL.COURT_OPEN]],
-    ['9', '受付', row[DCOL.RECEPTION]],
-    ['10', '監督会議', row[DCOL.MEETING]],
-    ['11', '開会式', row[DCOL.CEREMONY]],
-    ['12', '競技開始', row[DCOL.GAME_START]],
-    ['13', '競技終了予定', row[DCOL.GAME_END]],
-    ['14', '参加資格', row[DCOL.QUALIFICATION]],
-    ['15', '種別', row[DCOL.CATEGORY]],
-    ['16', '試合方法', row[DCOL.FORMAT]],
-    ['17', '表彰', row[DCOL.AWARDS]],
-    ['18', '参加申込', row[DCOL.APPLICATION]],
-    ['19', 'その他', row[DCOL.NOTES]]
+    ['7', '会場地図', row[DCOL.VENUE_MAP]],
+    ['8', '開場', row[DCOL.OPEN]],
+    ['9', 'コート解放', row[DCOL.COURT_OPEN]],
+    ['10', '受付', row[DCOL.RECEPTION]],
+    ['11', '監督会議', row[DCOL.MEETING]],
+    ['12', '開会式', row[DCOL.CEREMONY]],
+    ['13', '競技開始', row[DCOL.GAME_START]],
+    ['14', '競技終了予定', row[DCOL.GAME_END]],
+    ['15', '参加資格', row[DCOL.QUALIFICATION]],
+    ['16', '種別', row[DCOL.CATEGORY]],
+    ['17', '試合方法', row[DCOL.FORMAT]],
+    ['18', '表彰', row[DCOL.AWARDS]],
+    ['19', '参加申込', row[DCOL.APPLICATION]],
+    ['20', 'その他', row[DCOL.NOTES]]
   ];
 
   html += '<table class="print-table">';
@@ -290,6 +292,7 @@ function renderDetail(row) {
   /* Schedule info */
   var schedRows = '';
   schedRows += '<tr><th>会場</th><td>' + escapeHtml(row[DCOL.VENUE] || '未定') + '</td></tr>';
+  if (row[DCOL.VENUE_MAP]) schedRows += '<tr><th>会場地図</th><td><a href="' + escapeHtml(row[DCOL.VENUE_MAP]) + '" target="_blank" rel="noopener" style="color:var(--green);text-decoration:underline">地図を開く ↗</a></td></tr>';
   if (row[DCOL.OPEN]) schedRows += '<tr><th>開場</th><td>' + escapeHtml(row[DCOL.OPEN]) + '</td></tr>';
   if (row[DCOL.COURT_OPEN]) schedRows += '<tr><th>コート解放</th><td>' + escapeHtml(row[DCOL.COURT_OPEN]) + '</td></tr>';
   if (row[DCOL.RECEPTION]) schedRows += '<tr><th>受付</th><td>' + escapeHtml(row[DCOL.RECEPTION]) + '</td></tr>';
