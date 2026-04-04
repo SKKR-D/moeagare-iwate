@@ -238,7 +238,7 @@ function buildPlayers(count) {
   for (i = 0; i < count; i++) {
     html += '<h3 style="margin-top:' + (i > 0 ? '20px' : '0') + '">' + TEAM_LABELS[i] + 'チーム（各チーム最大8名）</h3>';
     html += '<table class="player-table"><thead><tr>';
-    html += '<th>No.</th><th>氏名</th><th>ふりがな</th><th>学年</th><th>日連登録番号</th><th>審判資格</th>';
+    html += '<th>No.</th><th>氏名</th><th>ふりがな</th><th>生年月日</th><th>学年</th><th>日連登録番号</th><th>審判資格</th>';
     html += '</tr></thead><tbody>';
 
     for (j = 0; j < 8; j++) {
@@ -254,6 +254,7 @@ function buildPlayers(count) {
       html += '</td>';
       html += '<td><input type="text" id="name_' + pid + '"' + reqAttr + ' placeholder="氏名"></td>';
       html += '<td><input type="text" id="kana_' + pid + '"' + reqAttr + ' placeholder="ふりがな"></td>';
+      html += '<td><input type="date" id="birth_' + pid + '"' + reqAttr + '></td>';
       html += '<td><select id="grade_' + pid + '"' + reqAttr + '><option value="">--</option>';
       for (g = 0; g < GRADES.length; g++) html += '<option>' + GRADES[g] + '</option>';
       html += '</select></td>';
@@ -353,13 +354,14 @@ function submitForm() {
       vcb = document.getElementById('vacant_' + pid);
       var isVacant = (vcb && vcb.checked);
       if (isVacant) {
-        players.push({ no: j + 1, name: '', kana: '', grade: '', jstc: '', judge: '', vacant: true });
+        players.push({ no: j + 1, name: '', kana: '', grade: '', birth: '', jstc: '', judge: '', vacant: true });
       } else {
         players.push({
           no: j + 1,
           name: document.getElementById('name_' + pid).value,
           kana: document.getElementById('kana_' + pid).value,
           grade: document.getElementById('grade_' + pid).value,
+          birth: document.getElementById('birth_' + pid).value,
           jstc: 'JSTC' + document.getElementById('jstc_' + pid).value,
           judge: document.getElementById('judge_' + pid).value,
           vacant: false
