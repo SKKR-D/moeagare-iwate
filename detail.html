@@ -125,7 +125,10 @@ var DCOL = {
   OPEN: 9, COURT_OPEN: 10, RECEPTION: 11, MEETING: 12,
   CEREMONY: 13, GAME_START: 14, GAME_END: 15,
   QUALIFICATION: 16, CATEGORY: 17, FORMAT: 18, AWARDS: 19,
-  APPLICATION: 20, FEE: 21, FORM_URL: 22, NOTES: 23, STATUS: 24
+  APPLICATION: 20, FEE: 21, FORM_URL: 22,
+  INDIV_FEE: 23, INDIV_OPEN_FEE: 24, INDIV_MAX_PAIRS: 25,
+  TEAM_FEE: 26, TEAM_MAX_TEAMS: 27,
+  NOTES: 28, STATUS: 29
 };
 
 var DOW = ['日','月','火','水','木','金','土'];
@@ -326,10 +329,33 @@ function renderDetail(row) {
   }
 
   /* Buttons */
+  var detailDateParam = startDate.getFullYear() + '-' + (startDate.getMonth() + 1) + '-' + startDate.getDate();
+  var tournamentEnc = encodeURIComponent(row[DCOL.NAME] || '');
+
   html += '<div class="btn-row">';
-  if (row[DCOL.FORM_URL]) {
+
+  /* 個人戦申込ボタン */
+  if (row[DCOL.INDIV_FEE]) {
+    var indivParams = 'tournament=' + tournamentEnc + '&date=' + detailDateParam;
+    indivParams += '&fee=' + row[DCOL.INDIV_FEE];
+    if (row[DCOL.INDIV_OPEN_FEE]) indivParams += '&openFee=' + row[DCOL.INDIV_OPEN_FEE];
+    if (row[DCOL.INDIV_MAX_PAIRS]) indivParams += '&maxPairs=' + row[DCOL.INDIV_MAX_PAIRS];
+    html += '<a class="btn btn-gold" href="entry-individual.html?' + indivParams + '">個人戦 申込はこちら</a>';
+  }
+
+  /* 団体戦申込ボタン */
+  if (row[DCOL.TEAM_FEE]) {
+    var teamParams = 'tournament=' + tournamentEnc + '&date=' + detailDateParam;
+    teamParams += '&fee=' + row[DCOL.TEAM_FEE];
+    if (row[DCOL.TEAM_MAX_TEAMS]) teamParams += '&maxTeams=' + row[DCOL.TEAM_MAX_TEAMS];
+    html += '<a class="btn btn-gold" href="entry-team.html?' + teamParams + '">団体戦 申込はこちら</a>';
+  }
+
+  /* 外部フォームURL（内部申込がない場合のフォールバック） */
+  if (row[DCOL.FORM_URL] && !row[DCOL.INDIV_FEE] && !row[DCOL.TEAM_FEE]) {
     html += '<a class="btn btn-gold" href="' + row[DCOL.FORM_URL] + '" target="_blank" rel="noopener">申込フォームへ</a>';
   }
+
   html += '<a class="btn btn-outline" href="rules.html">競技規則・諸規定を見る</a>';
   html += '<button class="btn btn-green" onclick="window.print()">🖨️ 大会要項をPDFで出力する</button>';
   html += '</div>';
