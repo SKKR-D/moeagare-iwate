@@ -241,11 +241,11 @@ function buildPlayers(count) {
   var i, j, pid, label;
 
   html += '<table class="player-table"><thead><tr>';
-  html += '<th>ペア</th><th>選手</th><th>氏名</th><th>ふりがな</th><th>学年</th><th>日連登録番号</th><th>審判資格</th>';
+  html += '<th>ペア</th><th>選手</th><th>氏名</th><th>ふりがな</th><th>生年月日</th><th>学年</th><th>日連登録番号</th><th>審判資格</th>';
   html += '</tr></thead><tbody>';
 
   for (i = 0; i < count; i++) {
-    html += '<tr class="pair-header"><td colspan="7">ペア ' + (i + 1);
+    html += '<tr class="pair-header"><td colspan="8">ペア ' + (i + 1);
     html += '<label class="open-check"><input type="checkbox" id="open_' + i + '" onchange="toggleOpen(' + i + ')">1名で参加（オープン）</label>';
     html += '</td></tr>';
 
@@ -262,6 +262,7 @@ function buildPlayers(count) {
       html += '<td>' + label + '</td>';
       html += '<td><input type="text" id="name_' + pid + '" required placeholder="氏名"></td>';
       html += '<td><input type="text" id="kana_' + pid + '" required placeholder="ふりがな"></td>';
+      html += '<td><input type="date" id="birth_' + pid + '" required></td>';
       html += '<td><select id="grade_' + pid + '" required><option value="">--</option>';
       var g;
       for (g = 0; g < GRADES.length; g++) html += '<option>' + GRADES[g] + '</option>';
@@ -293,6 +294,7 @@ function toggleOpen(pairIdx) {
     document.getElementById('kana_' + pid).setAttribute('required', '');
     document.getElementById('grade_' + pid).setAttribute('required', '');
     document.getElementById('jstc_' + pid).setAttribute('required', '');
+    document.getElementById('birth_' + pid).setAttribute('required', '');
   }
   calcFee();
 }
@@ -354,12 +356,13 @@ function submitForm() {
     for (j = 0; j < 2; j++) {
       pid = 'p' + i + '_' + j;
       if (j === 1 && isOpen) {
-        players.push({ name: '', kana: '', grade: '', jstc: '', judge: '', absent: true });
+        players.push({ name: '', kana: '', grade: '', birth: '', jstc: '', judge: '', absent: true });
       } else {
         players.push({
           name: document.getElementById('name_' + pid).value,
           kana: document.getElementById('kana_' + pid).value,
           grade: document.getElementById('grade_' + pid).value,
+          birth: document.getElementById('birth_' + pid).value,
           jstc: 'JSTC' + document.getElementById('jstc_' + pid).value,
           judge: document.getElementById('judge_' + pid).value,
           absent: false
