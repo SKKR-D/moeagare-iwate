@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>岩手県中学生ソフトテニス連盟｜年間予定</title>
+<title>年間予定｜岩手県中学生ソフトテニス連盟</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --green:#1a4a2e;--green-dark:#0f2e1b;--green-light:#2a6b42;
-  --gold:#c8a020;--gold-light:#e0c050;--white:#fff;--gray:#f5f5f0;
-  --text:#222;--text-light:#666;--radius:10px;
+  --gold:#c8a020;--gold-light:#e0c050;--white:#fff;--gray:#f7f7f3;
+  --text:#222;--text-light:#666;--radius:12px;
   --cat-tournament:#b33030;--cat-meeting:#6a3a8a;
   --cat-seminar:#2555a0;--cat-training:#227a4a;--cat-other:#666;
 }
@@ -19,134 +19,83 @@ html{font-size:15px}
 body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--text);min-height:100vh}
 a{color:inherit;text-decoration:none}
 
-/* HEADER */
-.header{background:linear-gradient(135deg,var(--green-dark),var(--green));color:var(--white);padding:16px 20px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.3)}
-.header-inner{max-width:900px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
-.header-title{display:flex;align-items:center;gap:10px}
-.header-title .icon{font-size:1.6rem}
-.header-title h1{font-size:1.05rem;font-weight:700;line-height:1.3;letter-spacing:.02em}
-.header-title h1 small{display:block;font-size:.7rem;font-weight:500;color:var(--gold);letter-spacing:.08em}
-.month-select{background:var(--green-light);color:var(--white);border:1px solid rgba(255,255,255,.25);border-radius:6px;padding:6px 10px;font-size:.85rem;font-family:inherit;cursor:pointer;outline:none}
-.month-select:focus{border-color:var(--gold)}
+/* ========== HEADER ========== */
+.header{background:linear-gradient(135deg,var(--green-dark) 0%,var(--green) 60%,var(--green-light) 100%);color:var(--white);padding:28px 20px 24px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.25);position:relative;overflow:hidden}
+.header::before{content:'';position:absolute;top:-40px;right:-40px;width:180px;height:180px;background:rgba(255,255,255,.04);border-radius:50%}
+.header::after{content:'🎾';position:absolute;right:20px;bottom:10px;font-size:3rem;opacity:.12}
+.header-inner{max-width:800px;margin:0 auto;position:relative;z-index:1}
+.header-org{font-size:.85rem;font-weight:500;color:var(--gold);letter-spacing:.1em;margin-bottom:6px}
+.header-title{font-size:1.5rem;font-weight:900;letter-spacing:.04em;line-height:1.4}
+@media(min-width:600px){.header-title{font-size:1.8rem}}
 
-/* HERO STATS */
-.hero{background:var(--green);color:var(--white);padding:18px 20px 22px}
-.hero-inner{max-width:900px;margin:0 auto}
-.hero-month{font-size:1.1rem;font-weight:700;margin-bottom:10px;color:var(--gold)}
-.stats{display:flex;gap:14px;flex-wrap:wrap}
-.stat{background:rgba(255,255,255,.1);border-radius:8px;padding:8px 14px;font-size:.8rem;display:flex;align-items:center;gap:6px}
-.stat .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+/* ========== MAIN ========== */
+.main{max-width:800px;margin:0 auto;padding:20px 16px 40px}
 
-/* ALERT BANNER */
-.alert-banner{background:#fff3cd;border-bottom:2px solid var(--gold);padding:10px 20px}
-.alert-inner{max-width:900px;margin:0 auto;font-size:.82rem;color:#664d03}
-.alert-item{padding:3px 0}
+/* ========== SECTION DIVIDER ========== */
+.section-divider{font-size:.88rem;font-weight:900;color:var(--green);margin:28px 0 12px;padding:8px 14px;background:var(--white);border-radius:8px;border-left:4px solid var(--green);box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.section-divider.past{color:var(--text-light);border-left-color:#aaa}
 
-/* MAIN */
-.main{max-width:900px;margin:0 auto;padding:16px}
+/* ========== EVENT CARD ========== */
+.event-card{background:var(--white);border-radius:var(--radius);margin-bottom:12px;box-shadow:0 1px 8px rgba(0,0,0,.05);display:flex;overflow:hidden;transition:box-shadow .2s,transform .15s}
+.event-card:hover{box-shadow:0 4px 20px rgba(0,0,0,.1);transform:translateY(-1px)}
 
-/* CALENDAR (mobile) */
-.calendar{display:none}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
-.cal-header{text-align:center;font-size:.7rem;font-weight:700;padding:6px 0;color:var(--text-light)}
-.cal-header:nth-child(1){color:var(--cat-tournament)}
-.cal-header:nth-child(7){color:var(--cat-seminar)}
-.cal-cell{background:var(--white);border-radius:6px;min-height:54px;padding:4px;cursor:pointer;transition:box-shadow .2s;position:relative}
-.cal-cell:hover{box-shadow:0 0 0 2px var(--gold)}
-.cal-cell.today{box-shadow:inset 0 0 0 2px var(--green)}
-.cal-cell.other-month{opacity:.35}
-.cal-day{font-size:.72rem;font-weight:700;text-align:right;margin-bottom:2px}
-.cal-badges{display:flex;flex-wrap:wrap;gap:2px}
-.cal-badge{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.cal-cell.selected{background:var(--green);color:var(--white)}
+.card-accent{width:6px;flex-shrink:0}
 
-/* DETAIL PANEL (calendar) */
-.detail-panel{display:none;background:var(--white);border-radius:var(--radius);box-shadow:0 4px 20px rgba(0,0,0,.12);margin:12px 0;padding:16px;position:relative;animation:slideDown .25s ease}
-@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
-.detail-panel.open{display:block}
-.panel-close{position:absolute;top:10px;right:12px;background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--text-light);line-height:1}
+.card-body{flex:1;padding:16px 18px;min-width:0}
 
-/* LIST (PC) */
-.list-view{display:block}
-.list-card{background:var(--white);border-radius:var(--radius);padding:16px 18px;margin-bottom:10px;box-shadow:0 1px 6px rgba(0,0,0,.06);display:flex;gap:14px;align-items:flex-start;transition:box-shadow .2s}
-.list-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.1)}
-.list-date{min-width:68px;text-align:center;flex-shrink:0}
-.list-date .month{font-size:.7rem;color:var(--text-light);font-weight:500}
-.list-date .day{font-size:1.6rem;font-weight:900;line-height:1.1;color:var(--green)}
-.list-date .dow{font-size:.7rem;color:var(--text-light)}
-.list-date .range{font-size:.65rem;color:var(--text-light);margin-top:2px}
-.list-body{flex:1;min-width:0}
-.list-body h3{font-size:.95rem;font-weight:700;margin-bottom:4px}
-.list-body .meta{font-size:.78rem;color:var(--text-light);margin-bottom:6px}
-.badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:.68rem;font-weight:700;color:var(--white)}
-.btn-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
-.btn{display:inline-block;padding:7px 16px;border-radius:6px;font-size:.78rem;font-weight:700;border:none;cursor:pointer;transition:opacity .2s}
+.card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.card-date{font-size:.82rem;font-weight:700;color:var(--green)}
+.card-date .dow{font-weight:500}
+.card-date .range{color:var(--text-light);font-weight:500}
+
+.badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:.65rem;font-weight:700;color:var(--white);vertical-align:middle}
+
+.card-name{font-size:1rem;font-weight:900;line-height:1.4;margin-bottom:6px}
+
+.card-meta{font-size:.78rem;color:var(--text-light);line-height:1.6}
+.card-meta span{margin-right:12px}
+
+.card-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.btn{display:inline-block;padding:8px 16px;border-radius:7px;font-size:.78rem;font-weight:700;border:none;cursor:pointer;text-align:center;transition:opacity .2s;font-family:inherit;line-height:1.3}
 .btn-green{background:var(--green);color:var(--white)}
-.btn-gold{background:var(--gold);color:var(--white)}
+.btn-green:hover{background:var(--green-light)}
 
-/* EVENT CARD inside panel */
-.evt-card{margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #eee}
-.evt-card:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
-.evt-card h4{font-size:.9rem;font-weight:700;margin-bottom:4px}
-.evt-card .info{font-size:.78rem;color:var(--text-light);line-height:1.7}
+/* ========== PAST EVENT ========== */
+.event-card.past{opacity:.5;pointer-events:auto}
+.event-card.past:hover{opacity:.65;transform:none}
+.event-card.past .card-name{color:var(--text-light)}
+.ended-badge{display:inline-block;background:#ddd;color:#888;font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:4px;margin-left:8px;vertical-align:middle}
 
-/* FOOTER */
-.footer{text-align:center;padding:30px 20px;font-size:.7rem;color:var(--text-light)}
+/* ========== ALERT BANNER ========== */
+.alert-banner{background:#fff8e1;border:2px solid var(--gold);border-radius:var(--radius);padding:12px 16px;margin-bottom:20px}
+.alert-item{font-size:.82rem;color:#7a5d00;font-weight:700;padding:2px 0}
 
-/* LOADING */
+/* ========== LOADING ========== */
 .loading{text-align:center;padding:60px 20px;color:var(--text-light)}
 .loading .spinner{display:inline-block;width:28px;height:28px;border:3px solid #ddd;border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite;margin-bottom:10px}
 @keyframes spin{to{transform:rotate(360deg)}}
+.no-data{text-align:center;padding:40px;color:var(--text-light);font-size:.88rem}
 
-/* RESPONSIVE */
-@media(max-width:768px){
-  .calendar{display:block}
-  .list-view{display:none}
-  .header-title h1{font-size:.92rem}
-}
-@media(min-width:769px){
-  .calendar{display:none}
-  .list-view{display:block}
-}
-
-/* NO DATA */
-.no-data{text-align:center;padding:40px 20px;color:var(--text-light);font-size:.88rem}
+/* ========== FOOTER ========== */
+.footer{text-align:center;padding:30px 20px;font-size:.7rem;color:var(--text-light)}
 </style>
 </head>
 <body>
 
 <header class="header">
   <div class="header-inner">
-    <div class="header-title">
-      <span class="icon">🎾</span>
-      <h1><small>岩手県中学生ソフトテニス連盟</small>年間予定</h1>
-    </div>
-    <select class="month-select" id="monthSelect"></select>
+    <div class="header-org">岩手県中学生ソフトテニス連盟</div>
+    <h1 class="header-title" id="headerTitle">年間予定</h1>
   </div>
 </header>
 
-<div class="hero" id="heroArea">
-  <div class="hero-inner">
-    <div class="hero-month" id="heroMonth"></div>
-    <div class="stats" id="heroStats"></div>
-  </div>
-</div>
-
-<div class="alert-banner" id="alertBanner" style="display:none">
-  <div class="alert-inner" id="alertInner"></div>
-</div>
-
 <main class="main">
+  <div id="alertArea"></div>
   <div class="loading" id="loadingArea">
     <div class="spinner"></div>
     <div>データを読み込んでいます...</div>
   </div>
-  <div class="calendar" id="calendarArea"></div>
-  <div class="detail-panel" id="detailPanel">
-    <button class="panel-close" id="panelClose">&times;</button>
-    <div id="panelContent"></div>
-  </div>
-  <div class="list-view" id="listArea"></div>
+  <div id="cardArea"></div>
 </main>
 
 <footer class="footer">
@@ -173,55 +122,25 @@ var COL = {
   APPLICATION: 20, FEE: 21, NOTES: 22, STATUS: 23
 };
 
-/* ========== GLOBALS ========== */
-var allEvents = [];
-var currentYear = new Date().getFullYear();
-var currentMonth = new Date().getMonth();
-var selectedDate = null;
+/* ========== MONTH COLORS (pastel) ========== */
+var MONTH_COLORS = {
+  1:  { bg: '#f0e6ff', accent: '#9b72cf' },
+  2:  { bg: '#e6f7ef', accent: '#5bb88a' },
+  3:  { bg: '#ffeee6', accent: '#e08860' },
+  4:  { bg: '#ffe6f0', accent: '#d4739a' },
+  5:  { bg: '#e6ffe6', accent: '#5aad5a' },
+  6:  { bg: '#e6f0ff', accent: '#6a8fd4' },
+  7:  { bg: '#e6faff', accent: '#4aafcf' },
+  8:  { bg: '#fff9e6', accent: '#c8a830' },
+  9:  { bg: '#fff0e6', accent: '#cf8a4a' },
+  10: { bg: '#f5e6e6', accent: '#b06060' },
+  11: { bg: '#eee8e0', accent: '#8a7560' },
+  12: { bg: '#e8ecf0', accent: '#708090' }
+};
+
+var DOW = ['日','月','火','水','木','金','土'];
 
 /* ========== CSV PARSER ========== */
-function parseCSV(text) {
-  var lines = [];
-  var current = '';
-  var inQuotes = false;
-  var i, ch;
-  for (i = 0; i < text.length; i++) {
-    ch = text[i];
-    if (inQuotes) {
-      if (ch === '"') {
-        if (i + 1 < text.length && text[i + 1] === '"') {
-          current += '"';
-          i++;
-        } else {
-          inQuotes = false;
-        }
-      } else {
-        current += ch;
-      }
-    } else {
-      if (ch === '"') {
-        inQuotes = true;
-      } else if (ch === ',') {
-        lines.push(current);
-        current = '';
-      } else if (ch === '\n' || ch === '\r') {
-        lines.push(current);
-        current = '';
-        if (ch === '\r' && i + 1 < text.length && text[i + 1] === '\n') {
-          i++;
-        }
-        if (lines.length > 0) {
-          // yield row
-        }
-      } else {
-        current += ch;
-      }
-    }
-  }
-  // better approach: line-based
-  return null;
-}
-
 function parseCSVFull(text) {
   var rows = [];
   var row = [];
@@ -232,40 +151,21 @@ function parseCSVFull(text) {
     ch = text[i];
     if (inQuotes) {
       if (ch === '"') {
-        if (i + 1 < text.length && text[i + 1] === '"') {
-          cell += '"';
-          i++;
-        } else {
-          inQuotes = false;
-        }
-      } else {
-        cell += ch;
-      }
+        if (i + 1 < text.length && text[i + 1] === '"') { cell += '"'; i++; }
+        else { inQuotes = false; }
+      } else { cell += ch; }
     } else {
-      if (ch === '"') {
-        inQuotes = true;
-      } else if (ch === ',') {
-        row.push(cell.trim());
-        cell = '';
-      } else if (ch === '\n' || ch === '\r') {
-        row.push(cell.trim());
-        cell = '';
-        if (ch === '\r' && i + 1 < text.length && text[i + 1] === '\n') {
-          i++;
-        }
-        if (row.length > 1 || (row.length === 1 && row[0] !== '')) {
-          rows.push(row);
-        }
+      if (ch === '"') { inQuotes = true; }
+      else if (ch === ',') { row.push(cell.trim()); cell = ''; }
+      else if (ch === '\n' || ch === '\r') {
+        row.push(cell.trim()); cell = '';
+        if (ch === '\r' && i + 1 < text.length && text[i + 1] === '\n') i++;
+        if (row.length > 1 || (row.length === 1 && row[0] !== '')) rows.push(row);
         row = [];
-      } else {
-        cell += ch;
-      }
+      } else { cell += ch; }
     }
   }
-  if (cell !== '' || row.length > 0) {
-    row.push(cell.trim());
-    rows.push(row);
-  }
+  if (cell !== '' || row.length > 0) { row.push(cell.trim()); rows.push(row); }
   return rows;
 }
 
@@ -273,54 +173,24 @@ function parseCSVFull(text) {
 function fetchWithTimeout(url, timeout) {
   return new Promise(function(resolve, reject) {
     var controller = new AbortController();
-    var timer = setTimeout(function() {
-      controller.abort();
-      reject(new Error('Timeout'));
-    }, timeout);
-    fetch(url, { signal: controller.signal }).then(function(res) {
-      clearTimeout(timer);
-      resolve(res);
-    }).catch(function(err) {
-      clearTimeout(timer);
-      reject(err);
-    });
+    var timer = setTimeout(function() { controller.abort(); reject(new Error('Timeout')); }, timeout);
+    fetch(url, { signal: controller.signal }).then(function(res) { clearTimeout(timer); resolve(res); }).catch(function(err) { clearTimeout(timer); reject(err); });
   });
 }
 
 function fetchData() {
   var attempt = function(index) {
-    if (index >= PROXIES.length) {
-      return Promise.reject(new Error('All proxies failed'));
-    }
+    if (index >= PROXIES.length) return Promise.reject(new Error('All proxies failed'));
     var url = PROXIES[index] + encodeURIComponent(CSV_URL);
     return fetchWithTimeout(url, FETCH_TIMEOUT).then(function(res) {
       if (!res.ok) throw new Error('HTTP ' + res.status);
       return res.text();
-    }).catch(function() {
-      return attempt(index + 1);
-    });
+    }).catch(function() { return attempt(index + 1); });
   };
   return attempt(0);
 }
 
-/* ========== CATEGORY ========== */
-function getCategory(cat) {
-  if (!cat) return { label: 'その他', color: 'var(--cat-other)' };
-  if (cat.indexOf('大会') >= 0) return { label: '大会', color: 'var(--cat-tournament)' };
-  if (cat.indexOf('会議') >= 0) return { label: '会議', color: 'var(--cat-meeting)' };
-  if (cat.indexOf('講習') >= 0) return { label: '講習会', color: 'var(--cat-seminar)' };
-  if (cat.indexOf('強化') >= 0 || cat.indexOf('練習') >= 0) return { label: '強化練習会', color: 'var(--cat-training)' };
-  return { label: 'その他', color: 'var(--cat-other)' };
-}
-
-function getCategoryFromRow(row) {
-  var name = (row[COL.NAME] || '') + (row[COL.CATEGORY] || '');
-  return getCategory(name);
-}
-
-/* ========== DATE HELPERS ========== */
-var DOW = ['日','月','火','水','木','金','土'];
-
+/* ========== HELPERS ========== */
 function parseDate(str) {
   if (!str) return null;
   var parts = str.replace(/\//g, '-').split('-');
@@ -332,18 +202,22 @@ function formatDate(d) {
   return (d.getMonth() + 1) + '/' + d.getDate() + '(' + DOW[d.getDay()] + ')';
 }
 
-function formatDateFull(d) {
-  return d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日(' + DOW[d.getDay()] + ')';
+function getCategory(row) {
+  var txt = (row[COL.NAME] || '') + (row[COL.CATEGORY] || '');
+  if (txt.indexOf('大会') >= 0) return { label: '大会', color: 'var(--cat-tournament)' };
+  if (txt.indexOf('会議') >= 0) return { label: '会議', color: 'var(--cat-meeting)' };
+  if (txt.indexOf('講習') >= 0) return { label: '講習会', color: 'var(--cat-seminar)' };
+  if (txt.indexOf('強化') >= 0 || txt.indexOf('練習') >= 0) return { label: '強化練習会', color: 'var(--cat-training)' };
+  return { label: 'その他', color: 'var(--cat-other)' };
+}
+
+function getReiwa(year, month) {
+  var fy = (month >= 4) ? year : year - 1;
+  return '令和' + (fy - 2018) + '年度';
 }
 
 function daysBetween(a, b) {
-  var msA = new Date(a.getFullYear(), a.getMonth(), a.getDate()).getTime();
-  var msB = new Date(b.getFullYear(), b.getMonth(), b.getDate()).getTime();
-  return Math.round((msB - msA) / 86400000);
-}
-
-function isSameDay(a, b) {
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  return Math.round((b.getTime() - a.getTime()) / 86400000);
 }
 
 /* ========== PROCESS DATA ========== */
@@ -364,291 +238,151 @@ function processData(text) {
       endDate: endDate,
       name: row[COL.NAME],
       venue: row[COL.VENUE] || '',
-      category: getCategoryFromRow(row)
+      category: getCategory(row)
     });
   }
-  events.sort(function(a, b) {
-    return a.startDate.getTime() - b.startDate.getTime();
-  });
+  events.sort(function(a, b) { return a.startDate.getTime() - b.startDate.getTime(); });
   return events;
 }
 
-/* ========== MONTH SELECTOR ========== */
-function buildMonthSelect() {
-  var sel = document.getElementById('monthSelect');
-  sel.innerHTML = '';
-  var i, opt, y, m;
-  for (i = 0; i < 12; i++) {
-    m = (new Date().getMonth() + i) % 12;
-    y = new Date().getFullYear() + Math.floor((new Date().getMonth() + i) / 12);
-    opt = document.createElement('option');
-    opt.value = y + '-' + m;
-    opt.textContent = y + '年' + (m + 1) + '月';
-    if (y === currentYear && m === currentMonth) opt.selected = true;
-    sel.appendChild(opt);
-  }
-  sel.addEventListener('change', function() {
-    var parts = sel.value.split('-');
-    currentYear = parseInt(parts[0]);
-    currentMonth = parseInt(parts[1]);
-    render();
-  });
-}
-
-/* ========== HERO STATS ========== */
-function renderHero() {
-  var hero = document.getElementById('heroMonth');
-  hero.textContent = currentYear + '年' + (currentMonth + 1) + '月のスケジュール';
-  var stats = { tournament: 0, meeting: 0, seminar: 0, training: 0, other: 0 };
-  var i, evt;
-  for (i = 0; i < allEvents.length; i++) {
-    evt = allEvents[i];
-    if (evt.startDate.getFullYear() === currentYear && evt.startDate.getMonth() === currentMonth) {
-      if (evt.category.label === '大会') stats.tournament++;
-      else if (evt.category.label === '会議') stats.meeting++;
-      else if (evt.category.label === '講習会') stats.seminar++;
-      else if (evt.category.label === '強化練習会') stats.training++;
-      else stats.other++;
-    }
-  }
-  var container = document.getElementById('heroStats');
-  var html = '';
-  if (stats.tournament > 0) html += '<div class="stat"><span class="dot" style="background:var(--cat-tournament)"></span>大会 ' + stats.tournament + '件</div>';
-  if (stats.meeting > 0) html += '<div class="stat"><span class="dot" style="background:var(--cat-meeting)"></span>会議 ' + stats.meeting + '件</div>';
-  if (stats.seminar > 0) html += '<div class="stat"><span class="dot" style="background:var(--cat-seminar)"></span>講習会 ' + stats.seminar + '件</div>';
-  if (stats.training > 0) html += '<div class="stat"><span class="dot" style="background:var(--cat-training)"></span>強化練習会 ' + stats.training + '件</div>';
-  if (stats.other > 0) html += '<div class="stat"><span class="dot" style="background:var(--cat-other)"></span>その他 ' + stats.other + '件</div>';
-  if (html === '') html = '<div class="stat">予定なし</div>';
-  container.innerHTML = html;
+/* ========== SET HEADER ========== */
+function setHeader() {
+  var now = new Date();
+  var reiwa = getReiwa(now.getFullYear(), now.getMonth() + 1);
+  document.getElementById('headerTitle').textContent = reiwa + '　年間予定';
+  document.title = reiwa + ' 年間予定｜岩手県中学生ソフトテニス連盟';
 }
 
 /* ========== ALERT BANNER ========== */
-function renderAlerts() {
-  var banner = document.getElementById('alertBanner');
-  var inner = document.getElementById('alertInner');
+function renderAlerts(events) {
+  var area = document.getElementById('alertArea');
   var today = new Date();
+  today = new Date(today.getFullYear(), today.getMonth(), today.getDate());
   var alerts = [];
   var i, evt, diff;
-  for (i = 0; i < allEvents.length; i++) {
-    evt = allEvents[i];
+  for (i = 0; i < events.length; i++) {
+    evt = events[i];
     diff = daysBetween(today, evt.startDate);
     if (diff >= 0 && diff <= 7) {
       if (diff === 0) {
-        alerts.push('⚠️ ' + evt.name + 'は本日開催');
+        alerts.push('⚠️ ' + evt.name + ' は本日開催');
       } else {
-        alerts.push('⚠️ ' + evt.name + 'まであと' + diff + '日');
+        alerts.push('⚠️ ' + evt.name + ' まであと' + diff + '日');
       }
     }
   }
-  if (alerts.length === 0) {
-    banner.style.display = 'none';
-    return;
-  }
-  banner.style.display = '';
-  var html = '';
+  if (alerts.length === 0) { area.innerHTML = ''; return; }
+  var html = '<div class="alert-banner">';
   for (i = 0; i < alerts.length; i++) {
     html += '<div class="alert-item">' + alerts[i] + '</div>';
   }
-  inner.innerHTML = html;
-}
-
-/* ========== CALENDAR ========== */
-function renderCalendar() {
-  var container = document.getElementById('calendarArea');
-  var firstDay = new Date(currentYear, currentMonth, 1);
-  var startDow = firstDay.getDay();
-  var daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-  var today = new Date();
-
-  var html = '<div class="cal-grid">';
-  var headers = ['日','月','火','水','木','金','土'];
-  var i;
-  for (i = 0; i < 7; i++) {
-    html += '<div class="cal-header">' + headers[i] + '</div>';
-  }
-
-  // previous month padding
-  var prevDays = new Date(currentYear, currentMonth, 0).getDate();
-  for (i = 0; i < startDow; i++) {
-    html += '<div class="cal-cell other-month"><div class="cal-day">' + (prevDays - startDow + 1 + i) + '</div></div>';
-  }
-
-  // current month days
-  var d, eventsOnDay, j, evt, evtStart, evtEnd;
-  for (d = 1; d <= daysInMonth; d++) {
-    var thisDate = new Date(currentYear, currentMonth, d);
-    var isToday = isSameDay(thisDate, today);
-    var cls = 'cal-cell' + (isToday ? ' today' : '');
-
-    eventsOnDay = [];
-    for (j = 0; j < allEvents.length; j++) {
-      evt = allEvents[j];
-      evtStart = evt.startDate;
-      evtEnd = evt.endDate || evt.startDate;
-      if (thisDate >= new Date(evtStart.getFullYear(), evtStart.getMonth(), evtStart.getDate()) &&
-          thisDate <= new Date(evtEnd.getFullYear(), evtEnd.getMonth(), evtEnd.getDate())) {
-        eventsOnDay.push(evt);
-      }
-    }
-
-    html += '<div class="' + cls + '" data-date="' + currentYear + '-' + (currentMonth + 1) + '-' + d + '">';
-    html += '<div class="cal-day">' + d + '</div>';
-    if (eventsOnDay.length > 0) {
-      html += '<div class="cal-badges">';
-      for (j = 0; j < eventsOnDay.length; j++) {
-        html += '<div class="cal-badge" style="background:' + eventsOnDay[j].category.color + '" title="' + eventsOnDay[j].name + '"></div>';
-      }
-      html += '</div>';
-    }
-    html += '</div>';
-  }
-
-  // next month padding
-  var totalCells = startDow + daysInMonth;
-  var remaining = (7 - (totalCells % 7)) % 7;
-  for (i = 1; i <= remaining; i++) {
-    html += '<div class="cal-cell other-month"><div class="cal-day">' + i + '</div></div>';
-  }
   html += '</div>';
-  container.innerHTML = html;
-
-  // bind clicks
-  var cells = container.querySelectorAll('.cal-cell:not(.other-month)');
-  for (i = 0; i < cells.length; i++) {
-    cells[i].addEventListener('click', function() {
-      var dateStr = this.getAttribute('data-date');
-      openPanel(dateStr);
-    });
-  }
+  area.innerHTML = html;
 }
 
-/* ========== DETAIL PANEL ========== */
-function openPanel(dateStr) {
-  var panel = document.getElementById('detailPanel');
-  var content = document.getElementById('panelContent');
-  var parts = dateStr.split('-');
-  var y = parseInt(parts[0]);
-  var m = parseInt(parts[1]) - 1;
-  var d = parseInt(parts[2]);
-  var targetDate = new Date(y, m, d);
+/* ========== RENDER CARD ========== */
+function renderCard(evt, isPast) {
+  var m = evt.startDate.getMonth() + 1;
+  var mc = MONTH_COLORS[m] || { bg: '#f0f0f0', accent: '#999' };
+  var cls = 'event-card' + (isPast ? ' past' : '');
+  var cat = evt.category;
 
-  var events = [];
-  var i, evt, evtStart, evtEnd;
-  for (i = 0; i < allEvents.length; i++) {
-    evt = allEvents[i];
-    evtStart = evt.startDate;
+  var dateStr = formatDate(evt.startDate);
+  if (evt.endDate) {
+    dateStr += '<span class="range"> 〜 ' + formatDate(evt.endDate) + '</span>';
+  }
+
+  var html = '';
+  html += '<div class="' + cls + '" style="background:' + (isPast ? '#f5f5f5' : mc.bg) + '">';
+  html += '<div class="card-accent" style="background:' + (isPast ? '#ccc' : mc.accent) + '"></div>';
+  html += '<div class="card-body">';
+
+  html += '<div class="card-top">';
+  html += '<div class="card-date">' + dateStr + '</div>';
+  html += '<span class="badge" style="background:' + (isPast ? '#aaa' : cat.color) + '">' + cat.label + '</span>';
+  if (isPast) html += '<span class="ended-badge">イベント終了</span>';
+  html += '</div>';
+
+  html += '<div class="card-name">' + escapeHtml(evt.name) + '</div>';
+
+  html += '<div class="card-meta">';
+  if (evt.venue) html += '<span>📍 ' + escapeHtml(evt.venue) + '</span>';
+  if (evt.row[COL.GAME_START]) html += '<span>🕐 ' + escapeHtml(evt.row[COL.GAME_START]) + '〜</span>';
+  if (evt.row[COL.CATEGORY]) html += '<span>' + escapeHtml(evt.row[COL.CATEGORY]) + '</span>';
+  html += '</div>';
+
+  if (!isPast) {
+    var catLabel = cat.label;
+    if (catLabel === '大会' || catLabel === '講習会' || catLabel === '強化練習会') {
+      var detailDate = evt.startDate.getFullYear() + '-' + (evt.startDate.getMonth() + 1) + '-' + evt.startDate.getDate();
+      html += '<div class="card-actions">';
+      html += '<a class="btn btn-green" href="detail.html?date=' + detailDate + '">大会要項を見る →</a>';
+      html += '</div>';
+    }
+  }
+
+  html += '</div></div>';
+  return html;
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/* ========== RENDER ALL ========== */
+function render(events) {
+  var area = document.getElementById('cardArea');
+  var today = new Date();
+  today = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+  var upcoming = [];
+  var past = [];
+  var i, evt, evtEnd;
+
+  for (i = 0; i < events.length; i++) {
+    evt = events[i];
     evtEnd = evt.endDate || evt.startDate;
-    if (targetDate >= new Date(evtStart.getFullYear(), evtStart.getMonth(), evtStart.getDate()) &&
-        targetDate <= new Date(evtEnd.getFullYear(), evtEnd.getMonth(), evtEnd.getDate())) {
-      events.push(evt);
+    var endOfDay = new Date(evtEnd.getFullYear(), evtEnd.getMonth(), evtEnd.getDate());
+    if (endOfDay < today) {
+      past.push(evt);
+    } else {
+      upcoming.push(evt);
     }
   }
 
-  if (events.length === 0) {
-    content.innerHTML = '<div class="no-data">' + formatDateFull(targetDate) + '<br>予定はありません</div>';
-  } else {
-    var html = '<div style="font-size:.8rem;color:var(--text-light);margin-bottom:12px">' + formatDateFull(targetDate) + '</div>';
-    for (i = 0; i < events.length; i++) {
-      evt = events[i];
-      html += '<div class="evt-card">';
-      html += '<h4>' + evt.name + ' <span class="badge" style="background:' + evt.category.color + '">' + evt.category.label + '</span></h4>';
-      html += '<div class="info">';
-      if (evt.venue) html += '会場：' + evt.venue + '<br>';
-      if (evt.row[COL.GAME_START]) html += '競技開始：' + evt.row[COL.GAME_START] + '<br>';
-      if (evt.row[COL.CATEGORY]) html += '種別：' + evt.row[COL.CATEGORY] + '<br>';
-      html += '</div>';
-      html += '<div class="btn-row">';
-      var catLabel = evt.category.label;
-      if (catLabel === '大会' || catLabel === '講習会' || catLabel === '強化練習会') {
-        var detailDate = evt.startDate.getFullYear() + '-' + (evt.startDate.getMonth() + 1) + '-' + evt.startDate.getDate();
-        html += '<a class="btn btn-green" href="detail.html?date=' + detailDate + '">大会要項を見る</a>';
-      }
-      html += '</div>';
-      html += '</div>';
-    }
-    content.innerHTML = html;
-  }
-
-  panel.classList.add('open');
-  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
-
-function closePanel() {
-  document.getElementById('detailPanel').classList.remove('open');
-}
-
-/* ========== LIST VIEW ========== */
-function renderList() {
-  var container = document.getElementById('listArea');
-  var filtered = [];
-  var i, evt;
-  for (i = 0; i < allEvents.length; i++) {
-    evt = allEvents[i];
-    if (evt.startDate.getFullYear() === currentYear && evt.startDate.getMonth() === currentMonth) {
-      filtered.push(evt);
-    }
-    // also include events that span into this month
-    if (evt.endDate) {
-      if (evt.endDate.getFullYear() === currentYear && evt.endDate.getMonth() === currentMonth && evt.startDate.getMonth() !== currentMonth) {
-        filtered.push(evt);
-      }
-    }
-  }
-
-  if (filtered.length === 0) {
-    container.innerHTML = '<div class="no-data">今月の予定はありません</div>';
+  if (upcoming.length === 0 && past.length === 0) {
+    area.innerHTML = '<div class="no-data">予定が登録されていません</div>';
     return;
   }
 
   var html = '';
-  for (i = 0; i < filtered.length; i++) {
-    evt = filtered[i];
-    html += '<div class="list-card">';
-    html += '<div class="list-date">';
-    html += '<div class="month">' + (evt.startDate.getMonth() + 1) + '月</div>';
-    html += '<div class="day">' + evt.startDate.getDate() + '</div>';
-    html += '<div class="dow">' + DOW[evt.startDate.getDay()] + '曜日</div>';
-    if (evt.endDate) {
-      html += '<div class="range">〜' + formatDate(evt.endDate) + '</div>';
-    }
-    html += '</div>';
-    html += '<div class="list-body">';
-    html += '<h3>' + evt.name + '</h3>';
-    html += '<div class="meta">';
-    html += '<span class="badge" style="background:' + evt.category.color + '">' + evt.category.label + '</span>';
-    if (evt.venue) html += '　' + evt.venue;
-    html += '</div>';
-    html += '<div class="btn-row">';
-    var catLabel = evt.category.label;
-    if (catLabel === '大会' || catLabel === '講習会' || catLabel === '強化練習会') {
-      var detailDate = evt.startDate.getFullYear() + '-' + (evt.startDate.getMonth() + 1) + '-' + evt.startDate.getDate();
-      html += '<a class="btn btn-green" href="detail.html?date=' + detailDate + '">大会要項を見る</a>';
-    }
-    html += '</div>';
-    html += '</div>';
-    html += '</div>';
-  }
-  container.innerHTML = html;
-}
 
-/* ========== RENDER ========== */
-function render() {
-  renderHero();
-  renderAlerts();
-  renderCalendar();
-  renderList();
-  closePanel();
+  if (upcoming.length > 0) {
+    html += '<div class="section-divider">今後の予定（' + upcoming.length + '件）</div>';
+    for (i = 0; i < upcoming.length; i++) {
+      html += renderCard(upcoming[i], false);
+    }
+  }
+
+  if (past.length > 0) {
+    html += '<div class="section-divider past">終了したイベント（' + past.length + '件）</div>';
+    for (i = past.length - 1; i >= 0; i--) {
+      html += renderCard(past[i], true);
+    }
+  }
+
+  area.innerHTML = html;
 }
 
 /* ========== INIT ========== */
 function init() {
-  buildMonthSelect();
-  document.getElementById('panelClose').addEventListener('click', closePanel);
-
+  setHeader();
   fetchData().then(function(text) {
     document.getElementById('loadingArea').style.display = 'none';
-    allEvents = processData(text);
-    render();
+    var events = processData(text);
+    renderAlerts(events);
+    render(events);
   }).catch(function(err) {
     document.getElementById('loadingArea').innerHTML = '<div class="no-data">データの読み込みに失敗しました。<br>時間をおいて再度アクセスしてください。</div>';
     console.error(err);
