@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>団体戦 参加申込｜岩手県中学生ソフトテニス連盟</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#28a745;--green-dark:#1e7e34;--green-light:#e6f4ea;
+  --gold:#c8a020;--white:#fff;--gray:#f5f5f0;
+  --text:#222;--text-light:#666;--radius:10px;
+  --red:#b33030;
+}
+html{font-size:15px}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--text);min-height:100vh}
+
+.header{background:linear-gradient(135deg,var(--green-dark),var(--green));color:var(--white);padding:16px 20px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.3)}
+.header-inner{max-width:800px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.header-title{display:flex;align-items:center;gap:10px}
+.header-title .icon{font-size:1.6rem}
+.header-title h1{font-size:1rem;font-weight:700}
+.header-title h1 small{display:block;font-size:.7rem;font-weight:500;opacity:.8}
+.header-title h1 #headerTournament{display:block;font-size:.82rem;font-weight:900;color:#c8a020;letter-spacing:.02em}
+.back-btn{background:rgba(255,255,255,.15);color:var(--white);border:none;padding:8px 14px;border-radius:6px;font-size:.8rem;cursor:pointer;font-family:inherit}
+
+.main{max-width:800px;margin:0 auto;padding:20px}
+
+.card{background:var(--white);border-radius:var(--radius);padding:20px;margin-bottom:16px;box-shadow:0 1px 6px rgba(0,0,0,.06)}
+.card h2{font-size:.9rem;font-weight:900;color:var(--green-dark);margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid var(--green)}
+.card h3{font-size:.82rem;font-weight:700;color:var(--text);margin:16px 0 8px;padding:6px 10px;background:var(--green-light);border-radius:6px}
+
+.form-row{margin-bottom:12px}
+.form-row label{display:block;font-size:.78rem;font-weight:700;color:var(--text-light);margin-bottom:4px}
+.form-row label .req{color:var(--red);font-size:.7rem;margin-left:4px}
+.form-row input,.form-row select{width:100%;padding:10px 12px;border:2px solid #ddd;border-radius:8px;font-size:.88rem;font-family:inherit;outline:none;transition:border-color .2s}
+.form-row input:focus,.form-row select:focus{border-color:var(--green)}
+.hint{font-size:.7rem;color:var(--text-light);margin-top:2px}
+
+.radio-group{display:flex;gap:16px;margin-top:4px}
+.radio-group label{display:flex;align-items:center;gap:6px;font-size:.88rem;font-weight:500;cursor:pointer}
+.radio-group input{width:auto}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:500px){.grid-2{grid-template-columns:1fr}}
+
+.note-box{background:#fff8e1;border:2px solid var(--gold);border-radius:8px;padding:10px 14px;font-size:.8rem;font-weight:700;color:#7a5d00;margin-bottom:12px}
+
+/* PLAYER TABLE */
+.player-section{overflow-x:auto}
+.player-table{width:100%;border-collapse:collapse;font-size:.8rem;margin-top:8px}
+.player-table th,.player-table td{padding:6px 8px;border:1px solid #ddd;text-align:left;vertical-align:middle}
+.player-table th{background:var(--green);color:var(--white);font-weight:700;font-size:.72rem;white-space:nowrap}
+.player-table input,.player-table select{width:100%;padding:6px;border:1px solid #ddd;border-radius:4px;font-size:.8rem;font-family:inherit}
+.player-table .team-header{background:var(--green-light);font-weight:700;font-size:.82rem;color:var(--green-dark)}
+.player-table tr.disabled td{background:#f0f0f0}
+.player-table tr.disabled input,.player-table tr.disabled select{background:#e8e8e8;color:#aaa;pointer-events:none}
+.vacancy-check{display:flex;align-items:center;gap:6px;font-size:.75rem}
+.vacancy-check input{width:auto}
+
+/* FEE */
+.fee-box{background:var(--green-light);border-radius:var(--radius);padding:16px;text-align:center;margin:16px 0}
+.fee-box .amount{font-size:1.6rem;font-weight:900;color:var(--green-dark)}
+.fee-box .detail{font-size:.78rem;color:var(--text-light);margin-top:4px}
+
+.btn{display:inline-block;padding:14px 28px;border-radius:8px;font-size:.92rem;font-weight:700;border:none;cursor:pointer;text-align:center;font-family:inherit;transition:all .2s;line-height:1.4}
+.btn-green{background:var(--green);color:var(--white)}
+.btn-green:hover{background:var(--green-dark)}
+.btn-green:disabled{background:#aaa;cursor:not-allowed}
+.btn-block{display:block;width:100%}
+
+.status-msg{text-align:center;padding:16px;border-radius:8px;font-size:.88rem;font-weight:700;margin-top:16px;display:none}
+.status-msg.success{display:block;background:#d4edda;color:#155724}
+.status-msg.success .nav-btns{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.status-msg.success .nav-btns .btn{font-size:.82rem;padding:10px 20px}
+.btn-outline-green{background:var(--white);color:var(--green-dark);border:2px solid var(--green)}
+.status-msg.error{display:block;background:#f8d7da;color:#721c24}
+.status-msg.sending{display:block;background:var(--green-light);color:var(--green-dark)}
+
+.footer{text-align:center;padding:30px 20px;font-size:.7rem;color:var(--text-light)}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="header-title">
+      <span class="icon">🎾</span>
+      <h1><small>岩手県中学生ソフトテニス連盟</small><span id="headerTournament"></span>団体戦 参加申込</h1>
+    </div>
+    <button class="back-btn" onclick="location.href='index.html'">← 戻る</button>
+  </div>
+</header>
+
+<main class="main">
+  <form id="entryForm" onsubmit="return false;">
+
+    <div class="card">
+      <h2>基本情報</h2>
+      <div class="form-row">
+        <label>チーム名（学校名またはクラブ名）<span class="req">※必須</span></label>
+        <input type="text" id="teamName" required placeholder="例：○○中学校、○○クラブ">
+      </div>
+      <div class="form-row">
+        <label>男女<span class="req">※必須</span></label>
+        <div class="radio-group">
+          <label><input type="radio" name="gender" value="男子" required>男子</label>
+          <label><input type="radio" name="gender" value="女子">女子</label>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>中体連地区<span class="req">※必須</span></label>
+        <select id="district" required>
+          <option value="">選択してください</option>
+          <option>久慈</option><option>二戸</option><option>岩手</option>
+          <option>盛岡</option><option>紫波</option><option>花巻</option>
+          <option>和賀</option><option>胆江</option><option>一関</option>
+          <option>気仙</option><option>遠野</option><option>釜石・大槌</option>
+          <option>宮古</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>引率・申込責任者</h2>
+      <h3>引率責任者</h3>
+      <div class="grid-2">
+        <div class="form-row">
+          <label>氏名<span class="req">※必須</span></label>
+          <input type="text" id="leaderName" required>
+        </div>
+        <div class="form-row">
+          <label>役職<span class="req">※必須</span></label>
+          <select id="leaderTitle" required>
+            <option value="">選択してください</option>
+            <option>教職員</option><option>部活動指導員</option><option>外部コーチ</option>
+            <option>地域クラブ指導者</option><option>保護者</option>
+          </select>
+        </div>
+      </div>
+      <h3>申込責任者</h3>
+      <div class="grid-2">
+        <div class="form-row">
+          <label>氏名<span class="req">※必須</span></label>
+          <input type="text" id="applicantName" required>
+        </div>
+        <div class="form-row">
+          <label>役職<span class="req">※必須</span></label>
+          <select id="applicantTitle" required>
+            <option value="">選択してください</option>
+            <option>教職員</option><option>部活動指導員</option><option>外部コーチ</option>
+            <option>地域クラブ指導者</option><option>保護者</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="form-row">
+          <label>携帯番号<span class="req">※必須</span></label>
+          <input type="tel" id="applicantPhone" required pattern="^0[0-9]{9,10}$" placeholder="09012345678">
+          <div class="hint">ハイフンなし半角数字</div>
+        </div>
+        <div class="form-row">
+          <label>メールアドレス<span class="req">※必須</span></label>
+          <input type="email" id="applicantEmail" required placeholder="example@mail.com">
+          <div class="hint">申込書の控え（PDF）をこのアドレスに送信します</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>エントリーチーム数・参加料</h2>
+      <div class="form-row">
+        <label>エントリーチーム数<span class="req">※必須</span></label>
+        <select id="teamCount" onchange="buildForm()">
+        </select>
+      </div>
+      <div class="fee-box">
+        <div class="amount" id="feeDisplay">---</div>
+        <div class="detail" id="feeDetail">読み込み中...</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>監督情報</h2>
+      <div class="note-box">※ チーム数分の登録が必須です（複数チームで同じ人を入力しても構いません）</div>
+      <div id="coachArea"></div>
+    </div>
+
+    <div class="card">
+      <h2>選手情報</h2>
+      <div class="player-section" id="playerArea"></div>
+    </div>
+
+    <button type="button" class="btn btn-green btn-block" id="submitBtn" onclick="submitForm()">団体戦の申込データを送信し、PDFの控えを受信する</button>
+    <div class="status-msg" id="statusMsg"></div>
+
+  </form>
+</main>
+
+<footer class="footer">&copy; 岩手県中学生ソフトテニス連盟</footer>
+
+<script>
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbwMaX6mOexotFkV6n5Y79QXO9IhDgBRvT4PHuCr9c9j435683_N7G8yKkQPcIi-wXtu/exec';
+
+var TEAM_LABELS = ['A', 'B', 'C', 'D'];
+var GRADES = ['1年', '2年', '3年'];
+var JUDGE_LEVELS = ['なし', 'jr.'];
+var COACH_TITLES = ['教職員', '部活動指導員', '外部コーチ', '地域クラブ指導者'];
+
+function buildForm() {
+  var count = parseInt(document.getElementById('teamCount').value);
+  buildCoaches(count);
+  buildPlayers(count);
+  calcFee(count);
+}
+
+function buildCoaches(count) {
+  var area = document.getElementById('coachArea');
+  var html = '';
+  var i, t;
+  for (i = 0; i < count; i++) {
+    html += '<h3>' + TEAM_LABELS[i] + 'チーム監督<span class="req">※必須</span></h3>';
+    html += '<div class="grid-2">';
+    html += '<div class="form-row"><label>氏名</label><input type="text" id="coach_name_' + i + '" required></div>';
+    html += '<div class="form-row"><label>役職</label><select id="coach_title_' + i + '" required><option value="">選択</option>';
+    for (t = 0; t < COACH_TITLES.length; t++) html += '<option>' + COACH_TITLES[t] + '</option>';
+    html += '</select></div></div>';
+  }
+  area.innerHTML = html;
+}
+
+function buildPlayers(count) {
+  var area = document.getElementById('playerArea');
+  var html = '';
+  var i, j, pid, g, jl;
+
+  for (i = 0; i < count; i++) {
+    html += '<h3 style="margin-top:' + (i > 0 ? '20px' : '0') + '">' + TEAM_LABELS[i] + 'チーム（各チーム最大8名）</h3>';
+    html += '<table class="player-table"><thead><tr>';
+    html += '<th>No.</th><th>氏名</th><th>ふりがな</th><th>学年</th><th>日連登録番号</th><th>審判資格</th>';
+    html += '</tr></thead><tbody>';
+
+    for (j = 0; j < 8; j++) {
+      pid = 't' + i + '_' + j;
+      var isRequired = (j < 4);
+      var reqAttr = isRequired ? ' required' : '';
+
+      html += '<tr id="row_' + pid + '">';
+      html += '<td style="text-align:center;font-weight:700">' + (j + 1);
+      if (j >= 4) {
+        html += '<br><label class="vacancy-check"><input type="checkbox" id="vacant_' + pid + '" onchange="toggleVacant(\'' + pid + '\')">欠員</label>';
+      }
+      html += '</td>';
+      html += '<td><input type="text" id="name_' + pid + '"' + reqAttr + ' placeholder="氏名"></td>';
+      html += '<td><input type="text" id="kana_' + pid + '"' + reqAttr + ' placeholder="ふりがな"></td>';
+      html += '<td><select id="grade_' + pid + '"' + reqAttr + '><option value="">--</option>';
+      for (g = 0; g < GRADES.length; g++) html += '<option>' + GRADES[g] + '</option>';
+      html += '</select></td>';
+      html += '<td><div style="display:flex;align-items:center;gap:2px"><span style="font-size:.75rem;color:#888">JSTC</span><input type="text" id="jstc_' + pid + '"' + reqAttr + ' pattern="^[0-9]{8}$" placeholder="12345678" style="width:90px"></div></td>';
+      html += '<td><select id="judge_' + pid + '">';
+      for (jl = 0; jl < JUDGE_LEVELS.length; jl++) html += '<option>' + JUDGE_LEVELS[jl] + '</option>';
+      html += '</select></td>';
+      html += '</tr>';
+    }
+    html += '</tbody></table>';
+  }
+  area.innerHTML = html;
+}
+
+function toggleVacant(pid) {
+  var checked = document.getElementById('vacant_' + pid).checked;
+  var row = document.getElementById('row_' + pid);
+  var inputs = row.querySelectorAll('input[type="text"], select');
+  var k;
+  if (checked) {
+    row.classList.add('disabled');
+    for (k = 0; k < inputs.length; k++) { if (inputs[k].type !== 'checkbox') { inputs[k].removeAttribute('required'); inputs[k].value = ''; } }
+  } else {
+    row.classList.remove('disabled');
+  }
+}
+
+function calcFee(count) {
+  var total = count * feePerTeam;
+  document.getElementById('feeDisplay').textContent = total.toLocaleString() + '円';
+  document.getElementById('feeDetail').textContent = count + 'チーム × ' + feePerTeam.toLocaleString() + '円';
+}
+
+function validateTeamRules() {
+  var teamCount = parseInt(document.getElementById('teamCount').value);
+  var i, j, pid, vcb, activeCount;
+  for (i = 0; i < teamCount; i++) {
+    activeCount = 0;
+    for (j = 0; j < 8; j++) {
+      pid = 't' + i + '_' + j;
+      vcb = document.getElementById('vacant_' + pid);
+      if (!vcb || !vcb.checked) activeCount++;
+    }
+    if (activeCount < 4) {
+      alert(TEAM_LABELS[i] + 'チームの有効選手が' + activeCount + '名です。最低4名必要です。');
+      return false;
+    }
+    if (teamCount > 1 && i < teamCount - 1 && activeCount < 6) {
+      alert(TEAM_LABELS[i] + 'チームの有効選手が' + activeCount + '名です。最下位チーム以外は最低6名必要です。');
+      return false;
+    }
+  }
+  return true;
+}
+
+function submitForm() {
+  var form = document.getElementById('entryForm');
+  if (!form.checkValidity()) { form.reportValidity(); return; }
+  if (!validateTeamRules()) return;
+
+  var teamCount = parseInt(document.getElementById('teamCount').value);
+  var i, j, pid, jstcEl, vcb;
+  for (i = 0; i < teamCount; i++) {
+    for (j = 0; j < 8; j++) {
+      pid = 't' + i + '_' + j;
+      vcb = document.getElementById('vacant_' + pid);
+      if (vcb && vcb.checked) continue;
+      jstcEl = document.getElementById('jstc_' + pid);
+      if (jstcEl && jstcEl.value && !/^[0-9]{8}$/.test(jstcEl.value)) {
+        alert(TEAM_LABELS[i] + 'チーム No.' + (j + 1) + 'の日連登録番号は半角数字8桁で入力してください。');
+        jstcEl.focus(); return;
+      }
+    }
+  }
+
+  var phone = document.getElementById('applicantPhone').value;
+  if (!/^0[0-9]{9,10}$/.test(phone)) { alert('携帯番号の形式が正しくありません。'); document.getElementById('applicantPhone').focus(); return; }
+
+  var genderEls = document.getElementsByName('gender');
+  var gender = '';
+  for (i = 0; i < genderEls.length; i++) { if (genderEls[i].checked) gender = genderEls[i].value; }
+
+  var coaches = [];
+  for (i = 0; i < teamCount; i++) {
+    coaches.push({
+      team: TEAM_LABELS[i],
+      name: document.getElementById('coach_name_' + i).value,
+      title: document.getElementById('coach_title_' + i).value
+    });
+  }
+
+  var teams = [];
+  for (i = 0; i < teamCount; i++) {
+    var players = [];
+    for (j = 0; j < 8; j++) {
+      pid = 't' + i + '_' + j;
+      vcb = document.getElementById('vacant_' + pid);
+      var isVacant = (vcb && vcb.checked);
+      if (isVacant) {
+        players.push({ no: j + 1, name: '', kana: '', grade: '', jstc: '', judge: '', vacant: true });
+      } else {
+        players.push({
+          no: j + 1,
+          name: document.getElementById('name_' + pid).value,
+          kana: document.getElementById('kana_' + pid).value,
+          grade: document.getElementById('grade_' + pid).value,
+          jstc: 'JSTC' + document.getElementById('jstc_' + pid).value,
+          judge: document.getElementById('judge_' + pid).value,
+          vacant: false
+        });
+      }
+    }
+    teams.push({ teamLabel: TEAM_LABELS[i], players: players });
+  }
+
+  var payload = {
+    entryType: 'team',
+    tournamentName: tournamentParam,
+    teamName: document.getElementById('teamName').value,
+    gender: gender,
+    district: document.getElementById('district').value,
+    leader: { name: document.getElementById('leaderName').value, title: document.getElementById('leaderTitle').value },
+    applicant: {
+      name: document.getElementById('applicantName').value,
+      title: document.getElementById('applicantTitle').value,
+      phone: phone,
+      email: document.getElementById('applicantEmail').value
+    },
+    coaches: coaches,
+    teams: teams,
+    fee: teamCount * feePerTeam,
+    feePerTeam: feePerTeam,
+    timestamp: new Date().toISOString()
+  };
+
+  sendData(payload);
+}
+
+function sendData(payload) {
+  var btn = document.getElementById('submitBtn');
+  var msg = document.getElementById('statusMsg');
+  btn.disabled = true;
+  msg.className = 'status-msg sending';
+  msg.textContent = '送信中...しばらくお待ちください';
+
+  fetch(GAS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify(payload)
+  }).then(function(res) {
+    return res.json();
+  }).then(function(data) {
+    if (data.status === 'ok') {
+      msg.className = 'status-msg success';
+      msg.innerHTML = '申込を受け付けました。<br>申込書の控え（PDF）を申込責任者のメールアドレスに送信しましたのでご確認ください。'
+        + '<div class="nav-btns">'
+        + '<a class="btn btn-green" href="index.html">年間予定に戻る</a>'
+        + (tournamentParam ? '<a class="btn btn-outline-green" href="detail.html?date=' + (urlParams.get('date') || '') + '">大会要項に戻る</a>' : '')
+        + '</div>';
+      btn.style.display = 'none';
+    } else {
+      throw new Error(data.message || 'エラーが発生しました');
+    }
+  }).catch(function(err) {
+    msg.className = 'status-msg error';
+    msg.textContent = '送信に失敗しました：' + err.message;
+    btn.disabled = false;
+  });
+}
+
+/* INIT */
+var urlParams = new URLSearchParams(window.location.search);
+var tournamentParam = urlParams.get('tournament') || '';
+var feePerTeam = parseInt(urlParams.get('fee')) || 8000;
+var maxTeams = parseInt(urlParams.get('maxTeams')) || 4;
+
+if (tournamentParam) {
+  document.getElementById('headerTournament').textContent = tournamentParam + '　';
+  document.title = tournamentParam + ' 団体戦 参加申込｜岩手県中学生ソフトテニス連盟';
+}
+
+/* チーム数セレクターを最大数に合わせて生成 */
+(function() {
+  var sel = document.getElementById('teamCount');
+  sel.innerHTML = '';
+  var labels = ['A', 'B', 'C', 'D'];
+  var i, opt, labelStr;
+  for (i = 1; i <= maxTeams; i++) {
+    opt = document.createElement('option');
+    opt.value = String(i);
+    labelStr = i + 'チーム（' + labels.slice(0, i).join('・') + '）';
+    opt.textContent = labelStr;
+    if (i === 1) opt.selected = true;
+    sel.appendChild(opt);
+  }
+})();
+
+buildForm();
+</script>
+</body>
+</html>
