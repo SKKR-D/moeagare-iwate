@@ -170,10 +170,7 @@ var COL = {
   OPEN: 9, COURT_OPEN: 10, RECEPTION: 11, MEETING: 12,
   CEREMONY: 13, GAME_START: 14, GAME_END: 15,
   QUALIFICATION: 16, CATEGORY: 17, FORMAT: 18, AWARDS: 19,
-  APPLICATION: 20, FEE: 21, FORM_URL: 22,
-  INDIV_FEE: 23, INDIV_OPEN_FEE: 24, INDIV_MAX_PAIRS: 25,
-  TEAM_FEE: 26, TEAM_MAX_TEAMS: 27,
-  NOTES: 28, STATUS: 29
+  APPLICATION: 20, FEE: 21, NOTES: 22, STATUS: 23
 };
 
 /* ========== GLOBALS ========== */
@@ -367,8 +364,7 @@ function processData(text) {
       endDate: endDate,
       name: row[COL.NAME],
       venue: row[COL.VENUE] || '',
-      category: getCategoryFromRow(row),
-      formUrl: row[COL.FORM_URL] || ''
+      category: getCategoryFromRow(row)
     });
   }
   events.sort(function(a, b) {
@@ -567,9 +563,6 @@ function openPanel(dateStr) {
         var detailDate = evt.startDate.getFullYear() + '-' + (evt.startDate.getMonth() + 1) + '-' + evt.startDate.getDate();
         html += '<a class="btn btn-green" href="detail.html?date=' + detailDate + '">大会要項を見る</a>';
       }
-      if (evt.formUrl) {
-        html += '<a class="btn btn-gold" href="' + evt.formUrl + '" target="_blank" rel="noopener">申込はこちら</a>';
-      }
       html += '</div>';
       html += '</div>';
     }
@@ -630,9 +623,6 @@ function renderList() {
     if (catLabel === '大会' || catLabel === '講習会' || catLabel === '強化練習会') {
       var detailDate = evt.startDate.getFullYear() + '-' + (evt.startDate.getMonth() + 1) + '-' + evt.startDate.getDate();
       html += '<a class="btn btn-green" href="detail.html?date=' + detailDate + '">大会要項を見る</a>';
-    }
-    if (evt.formUrl) {
-      html += '<a class="btn btn-gold" href="' + evt.formUrl + '" target="_blank" rel="noopener">申込はこちら</a>';
     }
     html += '</div>';
     html += '</div>';
