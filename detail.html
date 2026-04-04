@@ -35,6 +35,8 @@ a{color:inherit;text-decoration:none}
 .hero-card .badge{display:inline-block;padding:3px 12px;border-radius:20px;font-size:.7rem;font-weight:700;color:var(--white);margin-bottom:10px}
 .hero-card h2{font-size:1.3rem;font-weight:900;margin-bottom:8px}
 .hero-card .date{font-size:.9rem;color:var(--gold)}
+.hero-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.hero-btns .btn{font-size:.82rem;padding:9px 18px}
 
 /* INFO TABLE */
 .info-section{background:var(--white);border-radius:var(--radius);padding:20px;margin-bottom:16px;box-shadow:0 1px 6px rgba(0,0,0,.06)}
@@ -53,6 +55,8 @@ a{color:inherit;text-decoration:none}
 .btn{display:inline-block;padding:10px 20px;border-radius:8px;font-size:.85rem;font-weight:700;border:none;cursor:pointer;text-align:center;transition:opacity .2s;font-family:inherit}
 .btn-green{background:var(--green);color:var(--white)}
 .btn-gold{background:var(--gold);color:var(--white)}
+.btn-disabled{background:#aaa;color:var(--white);cursor:not-allowed;pointer-events:none;opacity:.6}
+.btn-deadline{display:block;font-size:.68rem;font-weight:500;opacity:.85;margin-top:2px}
 .btn-outline{background:var(--white);color:var(--green);border:2px solid var(--green)}
 
 .footer{text-align:center;padding:30px 20px;font-size:.7rem;color:var(--text-light)}
@@ -125,11 +129,10 @@ var DCOL = {
   OPEN: 9, COURT_OPEN: 10, RECEPTION: 11, MEETING: 12,
   CEREMONY: 13, GAME_START: 14, GAME_END: 15,
   QUALIFICATION: 16, CATEGORY: 17, FORMAT: 18, AWARDS: 19,
-  APPLICATION: 20, FEE: 21, FORM_URL: 22,
-  INDIV_FEE: 23, INDIV_OPEN_FEE: 24, INDIV_MAX_PAIRS: 25,
-  TEAM_FEE: 26, TEAM_MAX_TEAMS: 27,
-  NOTES: 28, STATUS: 29
+  APPLICATION: 20, FEE: 21, NOTES: 22, STATUS: 23
 };
+
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbwMaX6mOexotFkV6n5Y79QXO9IhDgBRvT4PHuCr9c9j435683_N7G8yKkQPcIi-wXtu/exec';
 
 var DOW = ['日','月','火','水','木','金','土'];
 
@@ -215,6 +218,60 @@ function escapeHtml(str) {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+var globalEntryConfigs = [];
+var DOW_DETAIL = ['日','月','火','水','木','金','土'];
+
+function buildEntryButtons(row, startDate) {
+  var html = '';
+  var detailDateParam = startDate.getFullYear() + '-' + (startDate.getMonth() + 1) + '-' + startDate.getDate();
+  var tournamentEnc = encodeURIComponent(row[DCOL.NAME] || '');
+  var today = new Date();
+  today = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  var i, cfg, page, params, deadlineDate, isPast, dlText;
+
+  for (i = 0; i < globalEntryConfigs.length; i++) {
+    cfg = globalEntryConfigs[i];
+    page = (cfg.type === '団体戦') ? 'entry-team.html' : 'entry-individual.html';
+    params = 'tournament=' + tournamentEnc + '&date=' + detailDateParam;
+    params += '&label=' + encodeURIComponent(cfg.label);
+    params += '&fee=' + cfg.fee;
+    if (cfg.openFee) params += '&openFee=' + cfg.openFee;
+    if (cfg.maxCount) params += (cfg.type === '団体戦' ? '&maxTeams=' : '&maxPairs=') + cfg.maxCount;
+
+    isPast = false;
+    dlText = '';
+    if (cfg.deadline) {
+      var dlParts = cfg.deadline.split('-');
+      deadlineDate = new Date(parseInt(dlParts[0]), parseInt(dlParts[1]) - 1, parseInt(dlParts[2]));
+      dlText = (deadlineDate.getMonth() + 1) + '/' + deadlineDate.getDate() + '(' + DOW_DETAIL[deadlineDate.getDay()] + ')〆切';
+      if (today > deadlineDate) {
+        isPast = true;
+      }
+    }
+
+    if (isPast) {
+      html += '<span class="btn btn-disabled">' + escapeHtml(cfg.label) + '（締切済み）</span>';
+    } else {
+      html += '<a class="btn btn-gold" href="' + page + '?' + params + '">' + escapeHtml(cfg.label) + ' 申込はこちら';
+      if (dlText) html += '<span class="btn-deadline">' + dlText + '</span>';
+      html += '</a>';
+    }
+  }
+
+  return html;
+}
+
+function fetchEntryConfig(dateStr) {
+  var url = GAS_URL + '?action=getEntryConfig&date=' + encodeURIComponent(dateStr);
+  return fetch(url).then(function(res) {
+    return res.json();
+  }).then(function(data) {
+    globalEntryConfigs = data.entries || [];
+  }).catch(function() {
+    globalEntryConfigs = [];
+  });
+}
+
 function renderDetail(row) {
   var startDate = parseDate(row[DCOL.START_DATE]);
   var endDate = row[DCOL.END_DATE] ? parseDate(row[DCOL.END_DATE]) : null;
@@ -284,6 +341,13 @@ function renderDetail(row) {
   html += '<span class="badge" style="background:' + cat.color + '">' + cat.label + '</span>';
   html += '<h2>' + escapeHtml(row[DCOL.NAME]) + '</h2>';
   html += '<div class="date">' + dateStr + '</div>';
+
+  /* 申込ボタンをヒーロー内に配置 */
+  var entryBtns = buildEntryButtons(row, startDate);
+  if (entryBtns) {
+    html += '<div class="hero-btns">' + entryBtns + '</div>';
+  }
+
   html += '</div>';
 
   /* Organization info */
@@ -329,33 +393,8 @@ function renderDetail(row) {
   }
 
   /* Buttons */
-  var detailDateParam = startDate.getFullYear() + '-' + (startDate.getMonth() + 1) + '-' + startDate.getDate();
-  var tournamentEnc = encodeURIComponent(row[DCOL.NAME] || '');
-
   html += '<div class="btn-row">';
-
-  /* 個人戦申込ボタン */
-  if (row[DCOL.INDIV_FEE]) {
-    var indivParams = 'tournament=' + tournamentEnc + '&date=' + detailDateParam;
-    indivParams += '&fee=' + row[DCOL.INDIV_FEE];
-    if (row[DCOL.INDIV_OPEN_FEE]) indivParams += '&openFee=' + row[DCOL.INDIV_OPEN_FEE];
-    if (row[DCOL.INDIV_MAX_PAIRS]) indivParams += '&maxPairs=' + row[DCOL.INDIV_MAX_PAIRS];
-    html += '<a class="btn btn-gold" href="entry-individual.html?' + indivParams + '">個人戦 申込はこちら</a>';
-  }
-
-  /* 団体戦申込ボタン */
-  if (row[DCOL.TEAM_FEE]) {
-    var teamParams = 'tournament=' + tournamentEnc + '&date=' + detailDateParam;
-    teamParams += '&fee=' + row[DCOL.TEAM_FEE];
-    if (row[DCOL.TEAM_MAX_TEAMS]) teamParams += '&maxTeams=' + row[DCOL.TEAM_MAX_TEAMS];
-    html += '<a class="btn btn-gold" href="entry-team.html?' + teamParams + '">団体戦 申込はこちら</a>';
-  }
-
-  /* 外部フォームURL（内部申込がない場合のフォールバック） */
-  if (row[DCOL.FORM_URL] && !row[DCOL.INDIV_FEE] && !row[DCOL.TEAM_FEE]) {
-    html += '<a class="btn btn-gold" href="' + row[DCOL.FORM_URL] + '" target="_blank" rel="noopener">申込フォームへ</a>';
-  }
-
+  html += buildEntryButtons(row, startDate);
   html += '<a class="btn btn-outline" href="rules.html">競技規則・諸規定を見る</a>';
   html += '<button class="btn btn-green" onclick="window.print()">🖨️ 大会要項をPDFで出力する</button>';
   html += '</div>';
@@ -370,7 +409,10 @@ function init() {
     return;
   }
 
-  fetchData().then(function(text) {
+  var dateStr = targetDate.getFullYear() + '-' + (targetDate.getMonth() + 1) + '-' + targetDate.getDate();
+
+  Promise.all([fetchData(), fetchEntryConfig(dateStr)]).then(function(results) {
+    var text = results[0];
     var rows = parseCSVFull(text);
     var found = null;
     var i, row, sd;
