@@ -193,7 +193,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--te
       <div class="player-section" id="playerArea"></div>
     </div>
 
-    <button type="button" class="btn btn-blue btn-block" id="submitBtn" onclick="submitForm()">個人戦の申込データを送信し、PDFの控えを受信する</button>
+    <button type="button" class="btn btn-blue btn-block" id="submitBtn" onclick="submitForm()">申込データを送信し、PDFの控えを受信する</button>
     <div class="status-msg" id="statusMsg"></div>
 
   </form>
@@ -372,6 +372,7 @@ function submitForm() {
   var payload = {
     entryType: 'individual',
     tournamentName: tournamentParam,
+    entryLabel: labelParam,
     teamName: document.getElementById('teamName').value,
     gender: gender,
     district: document.getElementById('district').value,
@@ -428,13 +429,16 @@ function sendData(payload) {
 /* INIT */
 var urlParams = new URLSearchParams(window.location.search);
 var tournamentParam = urlParams.get('tournament') || '';
+var labelParam = urlParams.get('label') || '個人戦';
 var feePerPair = parseInt(urlParams.get('fee')) || 1000;
 var feeOpenPair = parseInt(urlParams.get('openFee')) || 500;
 var maxPairs = parseInt(urlParams.get('maxPairs')) || 8;
 
 if (tournamentParam) {
-  document.getElementById('headerTournament').textContent = tournamentParam + '　';
-  document.title = tournamentParam + ' 個人戦 参加申込｜岩手県中学生ソフトテニス連盟';
+  document.getElementById('headerTournament').textContent = tournamentParam + '　' + labelParam + '　';
+  document.title = tournamentParam + ' ' + labelParam + ' 参加申込｜岩手県中学生ソフトテニス連盟';
+} else {
+  document.getElementById('headerTournament').textContent = labelParam + '　';
 }
 
 /* ペア数セレクターを最大数に合わせて生成 */
