@@ -37,8 +37,8 @@ a{color:inherit;text-decoration:none}
 .hero-card .date{font-size:.9rem;color:var(--gold)}
 .hero-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 .hero-btns .btn{font-size:.82rem;padding:9px 18px}
-.btn-outline-light{background:transparent;color:var(--white);border:2px solid rgba(255,255,255,.5)}
-.btn-outline-light:hover{background:rgba(255,255,255,.15)}
+.btn-outline-light{background:rgba(255,255,255,.15);color:var(--white);border:2px solid rgba(255,255,255,.7);font-weight:700}
+.btn-outline-light:hover{background:rgba(255,255,255,.25)}
 
 /* INFO TABLE */
 .info-section{background:var(--white);border-radius:var(--radius);padding:20px;margin-bottom:16px;box-shadow:0 1px 6px rgba(0,0,0,.06)}
@@ -346,8 +346,9 @@ function renderDetail(row) {
 
   /* ヒーロー内にすべてのボタンを配置 */
   var entryBtns = buildEntryButtons(row, startDate);
-  var navBtns = '<a class="btn btn-outline-light" href="rules.html">競技規則へ</a>';
-  navBtns += '<a class="btn btn-outline-light" href="dress-code.html">服装規定へ</a>';
+  var navBtns = '<a class="btn btn-outline-light" href="rules.html">競技規則・諸規定へ</a>';
+  navBtns += '<a class="btn btn-outline-light" href="dress-code.html">服装・ゼッケン規定へ</a>';
+  navBtns += '<button class="btn btn-outline-light" onclick="window.print()">🖨️ 大会要項をPDFで出力</button>';
   html += '<div class="hero-btns">' + entryBtns + navBtns + '</div>';
 
   html += '</div>';
@@ -397,9 +398,9 @@ function renderDetail(row) {
   /* Buttons */
   html += '<div class="btn-row">';
   html += buildEntryButtons(row, startDate);
-  html += '<a class="btn btn-outline" href="rules.html">競技規則へ</a>';
-  html += '<a class="btn btn-outline" href="dress-code.html">服装規定へ</a>';
-  html += '<button class="btn btn-green" onclick="window.print()">🖨️ 大会要項をPDFで出力する</button>';
+  html += '<a class="btn btn-outline" href="rules.html">競技規則・諸規定へ</a>';
+  html += '<a class="btn btn-outline" href="dress-code.html">服装・ゼッケン規定へ</a>';
+  html += '<button class="btn btn-green" onclick="window.print()">🖨️ 大会要項をPDFで出力</button>';
   html += '</div>';
 
   return html;
