@@ -369,18 +369,44 @@ function renderDetail(row) {
 
   /* ヒーロー内にすべてのボタンを配置 */
   var entryBtns = buildEntryButtons(row, startDate);
+  var hasPdfUrl = row[DCOL.PDF_URL] && row[DCOL.PDF_URL].length > 0;
+
   var navBtns = '';
-  if (row[DCOL.PDF_URL]) {
-    navBtns += '<a class="btn btn-outline-light" href="' + escapeHtml(row[DCOL.PDF_URL]) + '" target="_blank" rel="noopener">📄 要項PDFを見る</a>';
+  if (!hasPdfUrl) {
+    navBtns += '<a class="btn btn-outline-light" href="rules.html">競技規則・諸規定へ</a>';
+    navBtns += '<a class="btn btn-outline-light" href="dress-code.html">服装・ゼッケン規定へ</a>';
+    navBtns += '<button class="btn btn-outline-light" onclick="window.print()">🖨️ 大会要項をPDFで出力</button>';
+  } else {
+    navBtns += '<a class="btn btn-outline-light" href="dress-code.html">服装・ゼッケン規定へ</a>';
   }
-  navBtns += '<a class="btn btn-outline-light" href="rules.html">競技規則・諸規定へ</a>';
-  navBtns += '<a class="btn btn-outline-light" href="dress-code.html">服装・ゼッケン規定へ</a>';
-  navBtns += '<button class="btn btn-outline-light" onclick="window.print()">🖨️ 大会要項をPDFで出力</button>';
   html += '<div class="hero-btns">' + entryBtns + navBtns + '</div>';
 
   html += '</div>';
 
-  /* Organization info */
+  /* ===== PDF要項がある場合：PDFのみ表示 ===== */
+  if (hasPdfUrl) {
+    var pdfUrl = row[DCOL.PDF_URL];
+    /* Google Drive のURLをプレビュー用に変換 */
+    var embedUrl = pdfUrl;
+    if (pdfUrl.indexOf('drive.google.com') >= 0 && pdfUrl.indexOf('/file/d/') >= 0) {
+      var fileId = pdfUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+      if (fileId) embedUrl = 'https://drive.google.com/file/d/' + fileId[1] + '/preview';
+    }
+
+    html += '<div class="info-section" style="padding:0">';
+    html += '<iframe src="' + escapeHtml(embedUrl) + '" style="width:100%;height:80vh;min-height:500px;border:none;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.1)" allowfullscreen></iframe>';
+    html += '</div>';
+
+    /* 下部ボタン（申込＋服装規定のみ） */
+    html += '<div class="btn-row">';
+    html += buildEntryButtons(row, startDate);
+    html += '<a class="btn btn-outline" href="dress-code.html">服装・ゼッケン規定へ</a>';
+    html += '</div>';
+
+    return html;
+  }
+
+  /* ===== 通常モード：詳細テーブル表示 ===== */
   var orgRows = '';
   if (row[DCOL.ORGANIZER]) orgRows += '<tr><th>主催</th><td>' + escapeHtml(row[DCOL.ORGANIZER]) + '</td></tr>';
   if (row[DCOL.CO_ORGANIZER]) orgRows += '<tr><th>共催</th><td>' + escapeHtml(row[DCOL.CO_ORGANIZER]) + '</td></tr>';
@@ -425,9 +451,6 @@ function renderDetail(row) {
   /* Buttons */
   html += '<div class="btn-row">';
   html += buildEntryButtons(row, startDate);
-  if (row[DCOL.PDF_URL]) {
-    html += '<a class="btn btn-outline" href="' + escapeHtml(row[DCOL.PDF_URL]) + '" target="_blank" rel="noopener">📄 要項PDFを見る</a>';
-  }
   html += '<a class="btn btn-outline" href="rules.html">競技規則・諸規定へ</a>';
   html += '<a class="btn btn-outline" href="dress-code.html">服装・ゼッケン規定へ</a>';
   html += '<button class="btn btn-green" onclick="window.print()">🖨️ 大会要項をPDFで出力</button>';
