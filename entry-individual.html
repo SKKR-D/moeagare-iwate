@@ -226,6 +226,26 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--te
       <div class="player-section" id="playerArea"></div>
     </div>
 
+    <!-- 大会実績（条件付き表示） -->
+    <div class="card" id="resultsSection" style="display:none">
+      <h2>大会実績</h2>
+      <div class="form-row">
+        <label>県大会レベル以上の実績<span class="req">※必須</span></label>
+        <textarea id="tournamentResults" rows="3" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;font-family:inherit;font-size:.88rem" placeholder="実績がない場合は「なし」と入力してください"></textarea>
+      </div>
+    </div>
+
+    <!-- 書類提出（条件付き表示） -->
+    <div class="card" id="uploadSection" style="display:none">
+      <h2>書類提出</h2>
+      <div class="note-box" id="uploadNote"></div>
+      <div class="form-row">
+        <label>登録名簿（PDF）<span class="req">※必須</span></label>
+        <input type="file" id="uploadFile" accept=".pdf" style="font-size:.85rem">
+        <div class="hint">PDFファイルのみ（最大5MB）</div>
+      </div>
+    </div>
+
     <button type="button" class="btn btn-blue btn-block" id="submitBtn" onclick="showConfirm()">申込データを送信し、PDFの控えを受信する</button>
     <div class="status-msg" id="statusMsg"></div>
 
@@ -534,6 +554,7 @@ function buildPayload() {
     fee: parseInt(document.getElementById('feeDisplay').textContent.replace(/[^0-9]/g, '')),
     feePerPair: feePerPair,
     feeOpenPair: feeOpenPair,
+    tournamentResults: document.getElementById('tournamentResults') ? document.getElementById('tournamentResults').value : '',
     timestamp: new Date().toISOString()
   };
 }
@@ -542,7 +563,51 @@ function buildPayload() {
 function showConfirm() {
   if (!validateForm()) return;
 
+  // File upload validation
+  if (hasOption('書類提出')) {
+    var fileInput = document.getElementById('uploadFile');
+    if (!fileInput.files || fileInput.files.length === 0) {
+      alert('登録名簿のPDFファイルを選択してください。');
+      fileInput.focus();
+      return;
+    }
+    if (fileInput.files[0].size > 5 * 1024 * 1024) {
+      alert('ファイルサイズは5MB以下にしてください。');
+      return;
+    }
+  }
+
   var payload = buildPayload();
+
+  // 重複チェック
+  var btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = '確認中...';
+
+  var checkUrl = GAS_URL + '?action=checkDuplicate'
+    + '&tournament=' + encodeURIComponent(payload.tournamentName)
+    + '&label=' + encodeURIComponent(payload.entryLabel)
+    + '&teamName=' + encodeURIComponent(payload.teamName)
+    + '&gender=' + encodeURIComponent(payload.gender);
+
+  fetch(checkUrl).then(function(res) {
+    return res.json();
+  }).then(function(data) {
+    btn.disabled = false;
+    btn.textContent = '申込データを送信し、PDFの控えを受信する';
+    if (data.isDuplicate) {
+      alert('この大会・種別・チーム名・男女の組み合わせで既に申込済みです。\n修正が必要な場合は連盟幹事までご連絡ください。');
+      return;
+    }
+    showConfirmModal(payload);
+  }).catch(function() {
+    btn.disabled = false;
+    btn.textContent = '申込データを送信し、PDFの控えを受信する';
+    showConfirmModal(payload);
+  });
+}
+
+function showConfirmModal(payload) {
   var html = '';
 
   html += '<table class="modal-table">';
@@ -598,7 +663,25 @@ function esc(s) {
 function doSubmit() {
   closeConfirm();
   var payload = buildPayload();
-  sendData(payload);
+
+  // ファイルアップロードがある場合はBase64に変換
+  var fileInput = document.getElementById('uploadFile');
+  if (hasOption('書類提出') && fileInput && fileInput.files && fileInput.files.length > 0) {
+    var file = fileInput.files[0];
+    var reader = new FileReader();
+    reader.onload = function() {
+      var base64 = reader.result.split(',')[1];
+      payload.uploadedFile = {
+        name: file.name,
+        type: file.type,
+        data: base64
+      };
+      sendData(payload);
+    };
+    reader.readAsDataURL(file);
+  } else {
+    sendData(payload);
+  }
 }
 
 function sendData(payload) {
@@ -606,7 +689,7 @@ function sendData(payload) {
   var msg = document.getElementById('statusMsg');
   btn.disabled = true;
   msg.className = 'status-msg sending';
-  msg.textContent = '送信中...しばらくお待ちください';
+  msg.textContent = '送信中...しばらくお待ちください（PDFの生成に少しお時間をいただきます）';
 
   fetch(GAS_URL, {
     method: 'POST',
@@ -616,6 +699,13 @@ function sendData(payload) {
     return res.json();
   }).then(function(data) {
     if (data.status === 'ok') {
+      // localStorageに申込済み記録
+      try {
+        var applied = JSON.parse(localStorage.getItem('appliedEvents') || '[]');
+        applied.push({ tournament: payload.tournamentName, label: payload.entryLabel, team: payload.teamName, date: new Date().toISOString() });
+        localStorage.setItem('appliedEvents', JSON.stringify(applied));
+      } catch(e) {}
+
       msg.className = 'status-msg success';
       msg.innerHTML = '申込を受け付けました。<br>申込書の控え（PDF）を申込責任者のメールアドレスに送信しましたのでご確認ください。'
         + '<div class="nav-btns">'
@@ -640,12 +730,54 @@ var labelParam = urlParams.get('label') || '個人戦';
 var feePerPair = parseInt(urlParams.get('fee')) || 1000;
 var feeOpenPair = parseInt(urlParams.get('openFee')) || 500;
 var maxPairs = parseInt(urlParams.get('maxPairs')) || 8;
+var optionsStr = urlParams.get('options') || '';
+var entryOptions = optionsStr ? optionsStr.split(',') : [];
+
+function hasOption(name) {
+  var i;
+  for (i = 0; i < entryOptions.length; i++) {
+    if (entryOptions[i].indexOf(name) >= 0) return true;
+  }
+  return false;
+}
 
 if (tournamentParam) {
   document.getElementById('headerTournament').textContent = tournamentParam + '　' + labelParam + '　';
   document.title = tournamentParam + ' ' + labelParam + ' 参加申込｜岩手県中学生ソフトテニス連盟';
 } else {
   document.getElementById('headerTournament').textContent = labelParam + '　';
+}
+
+/* 他県選択の追加 */
+if (hasOption('他県')) {
+  var distSel = document.getElementById('district');
+  var extraGroup = document.createElement('optgroup');
+  extraGroup.label = '※他県からの申し込み';
+  var prefectures = ['青森県', '秋田県', '宮城県', '山形県', '福島県'];
+  var pi;
+  for (pi = 0; pi < prefectures.length; pi++) {
+    var opt = document.createElement('option');
+    opt.value = prefectures[pi];
+    opt.textContent = prefectures[pi];
+    extraGroup.appendChild(opt);
+  }
+  distSel.appendChild(extraGroup);
+}
+
+/* 実績入力の表示 */
+if (hasOption('実績')) {
+  document.getElementById('resultsSection').style.display = '';
+  document.getElementById('tournamentResults').setAttribute('required', '');
+}
+
+/* 書類提出の表示 */
+if (hasOption('書類提出')) {
+  document.getElementById('uploadSection').style.display = '';
+  document.getElementById('uploadFile').setAttribute('required', '');
+  var noteText = '登録名簿のPDFファイルを提出してください。';
+  if (hasOption('日連')) noteText = '日連の登録名簿（PDF）を提出してください。';
+  if (hasOption('スポ少')) noteText = 'スポ少登録名簿（PDF）を提出してください。';
+  document.getElementById('uploadNote').textContent = noteText;
 }
 
 (function() {
