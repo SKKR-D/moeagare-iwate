@@ -138,6 +138,26 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--te
           <label><input type="radio" name="gender" value="女子">女子</label>
         </div>
       </div>
+
+      <!-- クラブ種別選択（条件付き表示） -->
+      <div id="clubTypeSection" style="display:none">
+        <div class="form-row">
+          <label>出場区分<span class="req">※必須</span></label>
+          <div class="radio-group">
+            <label><input type="radio" name="clubType" value="クラブチーム" required onchange="onClubTypeChange()">クラブチームとして出場</label>
+            <label><input type="radio" name="clubType" value="スポ少登録チーム" onchange="onClubTypeChange()">スポ少登録チームとして出場</label>
+          </div>
+        </div>
+        <div id="clubUploadArea" style="display:none">
+          <div class="note-box" id="clubUploadNote"></div>
+          <div class="form-row">
+            <label id="clubUploadLabel">登録名簿（PDF）<span class="req">※必須</span></label>
+            <input type="file" id="clubUploadFile" accept=".pdf" style="font-size:.85rem">
+            <div class="hint">PDFファイルのみ（最大5MB）</div>
+          </div>
+        </div>
+      </div>
+
       <div class="form-row">
         <label>中体連地区<span class="req">※必須</span></label>
         <select id="district" required>
@@ -278,6 +298,31 @@ var BIRTH_RANGES = {
 };
 
 /* ========== SAME AS LEADER ========== */
+/* ========== CLUB TYPE ========== */
+function onClubTypeChange() {
+  var els = document.getElementsByName('clubType');
+  var val = '';
+  var i;
+  for (i = 0; i < els.length; i++) { if (els[i].checked) val = els[i].value; }
+
+  var area = document.getElementById('clubUploadArea');
+  var note = document.getElementById('clubUploadNote');
+  var fileInput = document.getElementById('clubUploadFile');
+
+  if (val === 'クラブチーム') {
+    area.style.display = '';
+    note.textContent = '日連の登録名簿（PDF）をアップロードしてください。';
+    fileInput.setAttribute('required', '');
+  } else if (val === 'スポ少登録チーム') {
+    area.style.display = '';
+    note.textContent = 'スポ少登録名簿（PDF）をアップロードしてください。';
+    fileInput.setAttribute('required', '');
+  } else {
+    area.style.display = 'none';
+    fileInput.removeAttribute('required');
+  }
+}
+
 function toggleSameAsLeader() {
   var checked = document.getElementById('sameAsLeader').checked;
   var fields = document.getElementById('applicantFields');
@@ -537,6 +582,12 @@ function buildPayload() {
     teams.push({ teamLabel: TEAM_LABELS[i], players: players });
   }
 
+  var clubTypeVal = '';
+  if (hasOption('出場区分')) {
+    var ctEls = document.getElementsByName('clubType');
+    for (i = 0; i < ctEls.length; i++) { if (ctEls[i].checked) clubTypeVal = ctEls[i].value; }
+  }
+
   return {
     entryType: 'team',
     tournamentName: tournamentParam,
@@ -544,6 +595,7 @@ function buildPayload() {
     teamName: document.getElementById('teamName').value,
     gender: gender,
     district: document.getElementById('district').value,
+    clubType: clubTypeVal,
     leader: { name: document.getElementById('leaderName').value, title: document.getElementById('leaderTitle').value },
     applicant: {
       name: getApplicantName(),
@@ -574,6 +626,22 @@ function showConfirm() {
     if (fileInput.files[0].size > 5 * 1024 * 1024) {
       alert('ファイルサイズは5MB以下にしてください。');
       return;
+    }
+  }
+
+  /* 出場区分の書類バリデーション */
+  if (hasOption('出場区分')) {
+    var clubFile = document.getElementById('clubUploadFile');
+    if (clubFile && clubFile.hasAttribute('required')) {
+      if (!clubFile.files || clubFile.files.length === 0) {
+        alert('登録名簿のPDFファイルをアップロードしてください。');
+        clubFile.focus();
+        return;
+      }
+      if (clubFile.files[0].size > 5 * 1024 * 1024) {
+        alert('ファイルサイズは5MB以下にしてください。');
+        return;
+      }
     }
   }
 
@@ -611,6 +679,7 @@ function showConfirmModal(payload) {
   html += '<table class="modal-table">';
   html += '<tr><th>チーム名</th><td>' + esc(payload.teamName) + '</td></tr>';
   html += '<tr><th>男女</th><td>' + esc(payload.gender) + '</td></tr>';
+  if (payload.clubType) html += '<tr><th>出場区分</th><td>' + esc(payload.clubType) + '</td></tr>';
   html += '<tr><th>地区</th><td>' + esc(payload.district) + '</td></tr>';
   html += '<tr><th>引率責任者</th><td>' + esc(payload.leader.name) + '（' + esc(payload.leader.title) + '）</td></tr>';
   html += '<tr><th>申込責任者</th><td>' + esc(payload.applicant.name) + '（' + esc(payload.applicant.title) + '）</td></tr>';
@@ -660,8 +729,18 @@ function doSubmit() {
   closeConfirm();
   var payload = buildPayload();
 
-  var fileInput = document.getElementById('uploadFile');
-  if (hasOption('書類提出') && fileInput && fileInput.files && fileInput.files.length > 0) {
+  /* ファイルアップロード（書類提出 or 出場区分のどちらか） */
+  var fileInput = null;
+  if (hasOption('出場区分')) {
+    var cf = document.getElementById('clubUploadFile');
+    if (cf && cf.files && cf.files.length > 0) fileInput = cf;
+  }
+  if (!fileInput && hasOption('書類提出')) {
+    var uf = document.getElementById('uploadFile');
+    if (uf && uf.files && uf.files.length > 0) fileInput = uf;
+  }
+
+  if (fileInput) {
     var file = fileInput.files[0];
     var reader = new FileReader();
     reader.onload = function() {
@@ -779,6 +858,11 @@ if (hasOption('書類提出')) {
   if (hasOption('日連')) noteText = '日連の登録名簿（PDF）を提出してください。';
   if (hasOption('スポ少')) noteText = 'スポ少登録名簿（PDF）を提出してください。';
   document.getElementById('uploadNote').textContent = noteText;
+}
+
+/* 出場区分（クラブ/スポ少選択＋書類提出）の表示 */
+if (hasOption('出場区分')) {
+  document.getElementById('clubTypeSection').style.display = '';
 }
 
 (function() {
