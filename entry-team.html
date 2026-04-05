@@ -42,22 +42,36 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--te
 .radio-group label{display:flex;align-items:center;gap:6px;font-size:.88rem;font-weight:500;cursor:pointer}
 .radio-group input{width:auto}
 
+.same-check{display:flex;align-items:center;gap:8px;margin:8px 0 4px;font-size:.82rem;font-weight:700;color:var(--green-dark);cursor:pointer}
+.same-check input{width:auto}
+
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:500px){.grid-2{grid-template-columns:1fr}}
 
 .note-box{background:#fff8e1;border:2px solid var(--gold);border-radius:8px;padding:10px 14px;font-size:.8rem;font-weight:700;color:#7a5d00;margin-bottom:12px}
 
-/* PLAYER TABLE */
-.player-section{overflow-x:auto}
-.player-table{width:100%;border-collapse:collapse;font-size:.8rem;margin-top:8px}
-.player-table th,.player-table td{padding:6px 8px;border:1px solid #ddd;text-align:left;vertical-align:middle}
-.player-table th{background:var(--green);color:var(--white);font-weight:700;font-size:.72rem;white-space:nowrap}
-.player-table input,.player-table select{width:100%;padding:6px;border:1px solid #ddd;border-radius:4px;font-size:.8rem;font-family:inherit}
-.player-table .team-header{background:var(--green-light);font-weight:700;font-size:.82rem;color:var(--green-dark)}
-.player-table tr.disabled td{background:#f0f0f0}
-.player-table tr.disabled input,.player-table tr.disabled select{background:#e8e8e8;color:#aaa;pointer-events:none}
-.vacancy-check{display:flex;align-items:center;gap:6px;font-size:.75rem}
-.vacancy-check input{width:auto}
+/* PLAYER CARDS (mobile-first) */
+.player-section{margin-top:8px}
+.team-block{border:2px solid #e0e0e0;border-radius:var(--radius);margin-bottom:16px;overflow:hidden}
+.team-header{background:var(--green-light);padding:10px 14px;font-weight:900;font-size:.88rem;color:var(--green-dark)}
+.player-card{padding:12px;border-top:1px solid #eee}
+.player-card.disabled{background:#f0f0f0;opacity:.5}
+.player-card.disabled input,.player-card.disabled select{pointer-events:none;background:#e8e8e8}
+.player-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.player-num{font-size:.85rem;font-weight:900;color:var(--green-dark)}
+.vacancy-check{display:inline-flex;align-items:center;gap:5px;font-size:.78rem;font-weight:700;color:var(--red);cursor:pointer;background:#fff5f5;padding:3px 10px;border-radius:20px;border:1.5px solid #e0b0b0}
+.vacancy-check input{width:auto;accent-color:var(--red)}
+.player-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.player-grid .full{grid-column:1/-1}
+.player-grid label{font-size:.7rem;font-weight:700;color:var(--text-light);margin-bottom:2px;display:block}
+.player-grid input,.player-grid select{width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:6px;font-size:.85rem;font-family:inherit}
+.player-grid input:focus,.player-grid select:focus{border-color:var(--green);outline:none}
+.jsta-wrap{display:flex;align-items:center;gap:4px}
+.jsta-wrap span{font-size:.75rem;color:#888;flex-shrink:0}
+.jsta-wrap input{flex:1}
+.birth-selects{display:flex;gap:4px}
+.birth-selects select{flex:1;padding:8px 4px;border:1.5px solid #ddd;border-radius:6px;font-size:.82rem;font-family:inherit}
+.hint-inline{font-size:.65rem;color:var(--text-light);font-weight:500}
 
 /* FEE */
 .fee-box{background:var(--green-light);border-radius:var(--radius);padding:16px;text-align:center;margin:16px 0}
@@ -69,14 +83,29 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--te
 .btn-green:hover{background:var(--green-dark)}
 .btn-green:disabled{background:#aaa;cursor:not-allowed}
 .btn-block{display:block;width:100%}
+.btn-outline-green{background:var(--white);color:var(--green-dark);border:2px solid var(--green)}
 
 .status-msg{text-align:center;padding:16px;border-radius:8px;font-size:.88rem;font-weight:700;margin-top:16px;display:none}
 .status-msg.success{display:block;background:#d4edda;color:#155724}
 .status-msg.success .nav-btns{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
 .status-msg.success .nav-btns .btn{font-size:.82rem;padding:10px 20px}
-.btn-outline-green{background:var(--white);color:var(--green-dark);border:2px solid var(--green)}
 .status-msg.error{display:block;background:#f8d7da;color:#721c24}
 .status-msg.sending{display:block;background:var(--green-light);color:var(--green-dark)}
+
+/* CONFIRM MODAL */
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:200;overflow-y:auto;padding:20px}
+.modal-overlay.show{display:flex;justify-content:center;align-items:flex-start}
+.modal-box{background:var(--white);border-radius:12px;max-width:700px;width:100%;padding:24px;margin:40px auto;box-shadow:0 10px 40px rgba(0,0,0,.3);animation:popIn .25s ease}
+@keyframes popIn{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-box h2{font-size:1rem;font-weight:900;color:var(--green-dark);margin-bottom:12px;text-align:center}
+.modal-table{width:100%;border-collapse:collapse;font-size:.82rem;margin-bottom:12px}
+.modal-table th,.modal-table td{padding:6px 10px;border:1px solid #ddd;text-align:left}
+.modal-table th{background:#f5f5f5;font-weight:700;width:110px;color:var(--text-light)}
+.modal-section{font-size:.85rem;font-weight:700;color:var(--green-dark);margin:14px 0 6px;padding-bottom:4px;border-bottom:1px solid var(--green)}
+.modal-player-table{width:100%;border-collapse:collapse;font-size:.78rem;margin-bottom:8px}
+.modal-player-table th,.modal-player-table td{padding:5px 8px;border:1px solid #ddd;text-align:left}
+.modal-player-table th{background:var(--green);color:var(--white);font-weight:700}
+.modal-btns{display:flex;gap:10px;justify-content:center;margin-top:16px}
 
 .footer{text-align:center;padding:30px 20px;font-size:.7rem;color:var(--text-light)}
 </style>
@@ -87,9 +116,9 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--te
   <div class="header-inner">
     <div class="header-title">
       <span class="icon">🎾</span>
-      <h1><small>岩手県中学生ソフトテニス連盟</small><span id="headerTournament"></span>団体戦 参加申込</h1>
+      <h1><small>岩手県中学生ソフトテニス連盟</small><span id="headerTournament"></span>参加申込</h1>
     </div>
-    <button class="back-btn" onclick="location.href='index.html'">← 戻る</button>
+    <button class="back-btn" onclick="history.back()">← 戻る</button>
   </div>
 </header>
 
@@ -140,18 +169,21 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--te
         </div>
       </div>
       <h3>申込責任者</h3>
-      <div class="grid-2">
-        <div class="form-row">
-          <label>氏名<span class="req">※必須</span></label>
-          <input type="text" id="applicantName" required>
-        </div>
-        <div class="form-row">
-          <label>役職<span class="req">※必須</span></label>
-          <select id="applicantTitle" required>
-            <option value="">選択してください</option>
-            <option>教職員</option><option>部活動指導員</option><option>外部コーチ</option>
-            <option>地域クラブ指導者</option><option>保護者</option>
-          </select>
+      <label class="same-check"><input type="checkbox" id="sameAsLeader" onchange="toggleSameAsLeader()">引率責任者と同じ</label>
+      <div id="applicantFields">
+        <div class="grid-2">
+          <div class="form-row">
+            <label>氏名<span class="req">※必須</span></label>
+            <input type="text" id="applicantName" required>
+          </div>
+          <div class="form-row">
+            <label>役職<span class="req">※必須</span></label>
+            <select id="applicantTitle" required>
+              <option value="">選択してください</option>
+              <option>教職員</option><option>部活動指導員</option><option>外部コーチ</option>
+              <option>地域クラブ指導者</option><option>保護者</option>
+            </select>
+          </div>
         </div>
       </div>
       <div class="grid-2">
@@ -172,8 +204,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--te
       <h2>エントリーチーム数・参加料</h2>
       <div class="form-row">
         <label>エントリーチーム数<span class="req">※必須</span></label>
-        <select id="teamCount" onchange="buildForm()">
-        </select>
+        <select id="teamCount" onchange="buildForm()"></select>
       </div>
       <div class="fee-box">
         <div class="amount" id="feeDisplay">---</div>
@@ -192,11 +223,23 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--te
       <div class="player-section" id="playerArea"></div>
     </div>
 
-    <button type="button" class="btn btn-green btn-block" id="submitBtn" onclick="submitForm()">申込データを送信し、PDFの控えを受信する</button>
+    <button type="button" class="btn btn-green btn-block" id="submitBtn" onclick="showConfirm()">申込データを送信し、PDFの控えを受信する</button>
     <div class="status-msg" id="statusMsg"></div>
 
   </form>
 </main>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-box">
+    <h2>📋 入力内容の確認</h2>
+    <div id="confirmContent"></div>
+    <div class="modal-btns">
+      <button class="btn btn-outline-green" onclick="closeConfirm()">修正する</button>
+      <button class="btn btn-green" onclick="doSubmit()">この内容で申し込む</button>
+    </div>
+  </div>
+</div>
 
 <footer class="footer">&copy; 岩手県中学生ソフトテニス連盟</footer>
 
@@ -208,6 +251,40 @@ var GRADES = ['1年', '2年', '3年'];
 var JUDGE_LEVELS = ['なし', 'jr.'];
 var COACH_TITLES = ['教職員', '部活動指導員', '外部コーチ', '地域クラブ指導者'];
 
+var BIRTH_RANGES = {
+  '1年': { min: '2013-04-02', max: '2014-04-01' },
+  '2年': { min: '2012-04-02', max: '2013-04-01' },
+  '3年': { min: '2011-04-02', max: '2012-04-01' }
+};
+
+/* ========== SAME AS LEADER ========== */
+function toggleSameAsLeader() {
+  var checked = document.getElementById('sameAsLeader').checked;
+  var fields = document.getElementById('applicantFields');
+  var nameEl = document.getElementById('applicantName');
+  var titleEl = document.getElementById('applicantTitle');
+  if (checked) {
+    fields.style.display = 'none';
+    nameEl.removeAttribute('required');
+    titleEl.removeAttribute('required');
+  } else {
+    fields.style.display = '';
+    nameEl.setAttribute('required', '');
+    titleEl.setAttribute('required', '');
+  }
+}
+
+function getApplicantName() {
+  if (document.getElementById('sameAsLeader').checked) return document.getElementById('leaderName').value;
+  return document.getElementById('applicantName').value;
+}
+
+function getApplicantTitle() {
+  if (document.getElementById('sameAsLeader').checked) return document.getElementById('leaderTitle').value;
+  return document.getElementById('applicantTitle').value;
+}
+
+/* ========== BUILD FORM ========== */
 function buildForm() {
   var count = parseInt(document.getElementById('teamCount').value);
   buildCoaches(count);
@@ -236,58 +313,112 @@ function buildPlayers(count) {
   var i, j, pid, g, jl;
 
   for (i = 0; i < count; i++) {
-    html += '<h3 style="margin-top:' + (i > 0 ? '20px' : '0') + '">' + TEAM_LABELS[i] + 'チーム（各チーム最大8名）</h3>';
-    html += '<table class="player-table"><thead><tr>';
-    html += '<th>No.</th><th>氏名</th><th>ふりがな</th><th>生年月日</th><th>学年</th><th>日連登録番号</th><th>審判資格</th>';
-    html += '</tr></thead><tbody>';
+    html += '<div class="team-block">';
+    html += '<div class="team-header">' + TEAM_LABELS[i] + 'チーム（各チーム最大8名）</div>';
 
     for (j = 0; j < 8; j++) {
       pid = 't' + i + '_' + j;
       var isRequired = (j < 4);
       var reqAttr = isRequired ? ' required' : '';
 
-      html += '<tr id="row_' + pid + '">';
-      html += '<td style="text-align:center;font-weight:700">' + (j + 1);
+      html += '<div class="player-card" id="card_' + pid + '">';
+      html += '<div class="player-top">';
+      html += '<span class="player-num">No.' + (j + 1) + '</span>';
       if (j >= 4) {
-        html += '<br><label class="vacancy-check"><input type="checkbox" id="vacant_' + pid + '" onchange="toggleVacant(\'' + pid + '\')">欠員</label>';
+        html += '<label class="vacancy-check"><input type="checkbox" id="vacant_' + pid + '" onchange="toggleVacant(\'' + pid + '\')">欠員にする</label>';
       }
-      html += '</td>';
-      html += '<td><input type="text" id="name_' + pid + '"' + reqAttr + ' placeholder="氏名"></td>';
-      html += '<td><input type="text" id="kana_' + pid + '"' + reqAttr + ' placeholder="ふりがな"></td>';
-      html += '<td><input type="date" id="birth_' + pid + '"' + reqAttr + '></td>';
-      html += '<td><select id="grade_' + pid + '"' + reqAttr + '><option value="">--</option>';
+      html += '</div>';
+      html += '<div class="player-grid">';
+      html += '<div class="full"><label>氏名</label><input type="text" id="name_' + pid + '"' + reqAttr + ' placeholder="氏名"></div>';
+      html += '<div class="full"><label>ふりがな</label><input type="text" id="kana_' + pid + '"' + reqAttr + ' placeholder="ふりがな"></div>';
+      html += '<div><label>学年</label><select id="grade_' + pid + '"' + reqAttr + ' onchange="onGradeChange(\'' + pid + '\')"><option value="">--</option>';
       for (g = 0; g < GRADES.length; g++) html += '<option>' + GRADES[g] + '</option>';
-      html += '</select></td>';
-      html += '<td><div style="display:flex;align-items:center;gap:2px"><span style="font-size:.75rem;color:#888">JSTC</span><input type="text" id="jstc_' + pid + '"' + reqAttr + ' pattern="^[0-9]{8}$" placeholder="12345678" style="width:90px"></div></td>';
-      html += '<td><select id="judge_' + pid + '">';
+      html += '</select></div>';
+      html += '<div class="full"><label>生年月日　<span class="hint-inline">※先に学年を選択してください</span></label><div class="birth-selects" id="birth_wrap_' + pid + '">';
+      html += '<select id="birth_y_' + pid + '"' + reqAttr + ' disabled><option value="">-- 学年を選択 --</option></select>';
+      html += '<select id="birth_m_' + pid + '"' + reqAttr + '><option value="">月</option>';
+      var bm;
+      for (bm = 1; bm <= 12; bm++) html += '<option value="' + bm + '">' + bm + '月</option>';
+      html += '</select>';
+      html += '<select id="birth_d_' + pid + '"' + reqAttr + '><option value="">日</option>';
+      var bd;
+      for (bd = 1; bd <= 31; bd++) html += '<option value="' + bd + '">' + bd + '日</option>';
+      html += '</select>';
+      html += '</div></div>';
+      html += '<div><label>日連登録番号</label><div class="jsta-wrap"><span>JSTA</span><input type="text" id="jstc_' + pid + '"' + reqAttr + ' pattern="^[0-9]{8}$" placeholder="12345678"></div></div>';
+      html += '<div><label>審判資格</label><select id="judge_' + pid + '">';
       for (jl = 0; jl < JUDGE_LEVELS.length; jl++) html += '<option>' + JUDGE_LEVELS[jl] + '</option>';
-      html += '</select></td>';
-      html += '</tr>';
+      html += '</select></div>';
+      html += '</div></div>';
     }
-    html += '</tbody></table>';
+    html += '</div>';
   }
   area.innerHTML = html;
 }
 
+/* ========== GRADE → BIRTH RANGE ========== */
+var GRADE_YEARS = {
+  '1年': [2013, 2014],
+  '2年': [2012, 2013],
+  '3年': [2011, 2012]
+};
+var HEISEI_MAP = { 2011: '平成23', 2012: '平成24', 2013: '平成25', 2014: '平成26' };
+
+function onGradeChange(pid) {
+  var grade = document.getElementById('grade_' + pid).value;
+  var yearSel = document.getElementById('birth_y_' + pid);
+  yearSel.innerHTML = '<option value="">年</option>';
+
+  if (grade && GRADE_YEARS[grade]) {
+    var years = GRADE_YEARS[grade];
+    var yi;
+    for (yi = 0; yi < years.length; yi++) {
+      var y = years[yi];
+      var opt = document.createElement('option');
+      opt.value = String(y);
+      opt.textContent = y + '年（' + HEISEI_MAP[y] + '年）';
+      yearSel.appendChild(opt);
+    }
+    yearSel.disabled = false;
+  } else {
+    yearSel.disabled = true;
+    yearSel.innerHTML = '<option value="">-- 学年を選択 --</option>';
+  }
+  yearSel.value = '';
+  document.getElementById('birth_m_' + pid).value = '';
+  document.getElementById('birth_d_' + pid).value = '';
+}
+
+function getBirthValue(pid) {
+  var y = document.getElementById('birth_y_' + pid).value;
+  var m = document.getElementById('birth_m_' + pid).value;
+  var d = document.getElementById('birth_d_' + pid).value;
+  if (!y || !m || !d) return '';
+  return y + '-' + (m.length === 1 ? '0' + m : m) + '-' + (d.length === 1 ? '0' + d : d);
+}
+
+/* ========== VACANCY TOGGLE ========== */
 function toggleVacant(pid) {
   var checked = document.getElementById('vacant_' + pid).checked;
-  var row = document.getElementById('row_' + pid);
-  var inputs = row.querySelectorAll('input[type="text"], select');
+  var card = document.getElementById('card_' + pid);
+  var inputs = card.querySelectorAll('input[type="text"], select');
   var k;
   if (checked) {
-    row.classList.add('disabled');
+    card.classList.add('disabled');
     for (k = 0; k < inputs.length; k++) { if (inputs[k].type !== 'checkbox') { inputs[k].removeAttribute('required'); inputs[k].value = ''; } }
   } else {
-    row.classList.remove('disabled');
+    card.classList.remove('disabled');
   }
 }
 
+/* ========== FEE ========== */
 function calcFee(count) {
   var total = count * feePerTeam;
   document.getElementById('feeDisplay').textContent = total.toLocaleString() + '円';
   document.getElementById('feeDetail').textContent = count + 'チーム × ' + feePerTeam.toLocaleString() + '円';
 }
 
+/* ========== TEAM RULES VALIDATION ========== */
 function validateTeamRules() {
   var teamCount = parseInt(document.getElementById('teamCount').value);
   var i, j, pid, vcb, activeCount;
@@ -310,13 +441,14 @@ function validateTeamRules() {
   return true;
 }
 
-function submitForm() {
+/* ========== VALIDATE ========== */
+function validateForm() {
   var form = document.getElementById('entryForm');
-  if (!form.checkValidity()) { form.reportValidity(); return; }
-  if (!validateTeamRules()) return;
+  if (!form.checkValidity()) { form.reportValidity(); return false; }
+  if (!validateTeamRules()) return false;
 
   var teamCount = parseInt(document.getElementById('teamCount').value);
-  var i, j, pid, jstcEl, vcb;
+  var i, j, pid, jstcEl, vcb, gradeVal;
   for (i = 0; i < teamCount; i++) {
     for (j = 0; j < 8; j++) {
       pid = 't' + i + '_' + j;
@@ -325,13 +457,27 @@ function submitForm() {
       jstcEl = document.getElementById('jstc_' + pid);
       if (jstcEl && jstcEl.value && !/^[0-9]{8}$/.test(jstcEl.value)) {
         alert(TEAM_LABELS[i] + 'チーム No.' + (j + 1) + 'の日連登録番号は半角数字8桁で入力してください。');
-        jstcEl.focus(); return;
+        jstcEl.focus(); return false;
+      }
+      var birthVal = getBirthValue(pid);
+      gradeVal = document.getElementById('grade_' + pid).value;
+      if (birthVal && gradeVal && BIRTH_RANGES[gradeVal]) {
+        if (birthVal < BIRTH_RANGES[gradeVal].min || birthVal > BIRTH_RANGES[gradeVal].max) {
+          alert(TEAM_LABELS[i] + 'チーム No.' + (j + 1) + 'の生年月日が' + gradeVal + 'の範囲外です。\n' + gradeVal + '：' + BIRTH_RANGES[gradeVal].min + ' ～ ' + BIRTH_RANGES[gradeVal].max);
+          document.getElementById('birth_y_' + pid).focus(); return false;
+        }
       }
     }
   }
-
   var phone = document.getElementById('applicantPhone').value;
-  if (!/^0[0-9]{9,10}$/.test(phone)) { alert('携帯番号の形式が正しくありません。'); document.getElementById('applicantPhone').focus(); return; }
+  if (!/^0[0-9]{9,10}$/.test(phone)) { alert('携帯番号の形式が正しくありません。'); document.getElementById('applicantPhone').focus(); return false; }
+  return true;
+}
+
+/* ========== BUILD PAYLOAD ========== */
+function buildPayload() {
+  var teamCount = parseInt(document.getElementById('teamCount').value);
+  var i, j, pid;
 
   var genderEls = document.getElementsByName('gender');
   var gender = '';
@@ -351,7 +497,7 @@ function submitForm() {
     var players = [];
     for (j = 0; j < 8; j++) {
       pid = 't' + i + '_' + j;
-      vcb = document.getElementById('vacant_' + pid);
+      var vcb = document.getElementById('vacant_' + pid);
       var isVacant = (vcb && vcb.checked);
       if (isVacant) {
         players.push({ no: j + 1, name: '', kana: '', grade: '', birth: '', jstc: '', judge: '', vacant: true });
@@ -361,8 +507,8 @@ function submitForm() {
           name: document.getElementById('name_' + pid).value,
           kana: document.getElementById('kana_' + pid).value,
           grade: document.getElementById('grade_' + pid).value,
-          birth: document.getElementById('birth_' + pid).value,
-          jstc: 'JSTC' + document.getElementById('jstc_' + pid).value,
+          birth: getBirthValue(pid),
+          jstc: 'JSTA' + document.getElementById('jstc_' + pid).value,
           judge: document.getElementById('judge_' + pid).value,
           vacant: false
         });
@@ -371,7 +517,7 @@ function submitForm() {
     teams.push({ teamLabel: TEAM_LABELS[i], players: players });
   }
 
-  var payload = {
+  return {
     entryType: 'team',
     tournamentName: tournamentParam,
     entryLabel: labelParam,
@@ -380,9 +526,9 @@ function submitForm() {
     district: document.getElementById('district').value,
     leader: { name: document.getElementById('leaderName').value, title: document.getElementById('leaderTitle').value },
     applicant: {
-      name: document.getElementById('applicantName').value,
-      title: document.getElementById('applicantTitle').value,
-      phone: phone,
+      name: getApplicantName(),
+      title: getApplicantTitle(),
+      phone: document.getElementById('applicantPhone').value,
       email: document.getElementById('applicantEmail').value
     },
     coaches: coaches,
@@ -391,8 +537,65 @@ function submitForm() {
     feePerTeam: feePerTeam,
     timestamp: new Date().toISOString()
   };
+}
 
-  sendData(payload);
+/* ========== CONFIRM MODAL ========== */
+function showConfirm() {
+  if (!validateForm()) return;
+  var payload = buildPayload();
+  var html = '';
+
+  html += '<table class="modal-table">';
+  html += '<tr><th>チーム名</th><td>' + esc(payload.teamName) + '</td></tr>';
+  html += '<tr><th>男女</th><td>' + esc(payload.gender) + '</td></tr>';
+  html += '<tr><th>地区</th><td>' + esc(payload.district) + '</td></tr>';
+  html += '<tr><th>引率責任者</th><td>' + esc(payload.leader.name) + '（' + esc(payload.leader.title) + '）</td></tr>';
+  html += '<tr><th>申込責任者</th><td>' + esc(payload.applicant.name) + '（' + esc(payload.applicant.title) + '）</td></tr>';
+  html += '<tr><th>メール</th><td>' + esc(payload.applicant.email) + '</td></tr>';
+  html += '<tr><th>参加料合計</th><td>' + payload.fee.toLocaleString() + '円</td></tr>';
+  html += '</table>';
+
+  html += '<div class="modal-section">監督情報</div>';
+  html += '<table class="modal-player-table"><tr><th>チーム</th><th>氏名</th><th>役職</th></tr>';
+  var ci;
+  for (ci = 0; ci < payload.coaches.length; ci++) {
+    html += '<tr><td>' + esc(payload.coaches[ci].team) + '</td><td>' + esc(payload.coaches[ci].name) + '</td><td>' + esc(payload.coaches[ci].title) + '</td></tr>';
+  }
+  html += '</table>';
+
+  var ti, tj, team, pl;
+  for (ti = 0; ti < payload.teams.length; ti++) {
+    team = payload.teams[ti];
+    html += '<div class="modal-section">' + team.teamLabel + 'チーム 選手情報</div>';
+    html += '<table class="modal-player-table"><tr><th>No.</th><th>氏名</th><th>学年</th><th>生年月日</th><th>日連登録番号</th></tr>';
+    for (tj = 0; tj < team.players.length; tj++) {
+      pl = team.players[tj];
+      if (pl.vacant) {
+        html += '<tr><td>' + pl.no + '</td><td colspan="4" style="color:#999">（欠員）</td></tr>';
+      } else if (pl.name) {
+        html += '<tr><td>' + pl.no + '</td><td>' + esc(pl.name) + '</td><td>' + esc(pl.grade) + '</td><td>' + esc(pl.birth) + '</td><td>' + esc(pl.jstc) + '</td></tr>';
+      }
+    }
+    html += '</table>';
+  }
+
+  document.getElementById('confirmContent').innerHTML = html;
+  document.getElementById('confirmModal').classList.add('show');
+}
+
+function closeConfirm() {
+  document.getElementById('confirmModal').classList.remove('show');
+}
+
+function esc(s) {
+  if (!s) return '';
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/* ========== SUBMIT ========== */
+function doSubmit() {
+  closeConfirm();
+  sendData(buildPayload());
 }
 
 function sendData(payload) {
@@ -427,7 +630,7 @@ function sendData(payload) {
   });
 }
 
-/* INIT */
+/* ========== INIT ========== */
 var urlParams = new URLSearchParams(window.location.search);
 var tournamentParam = urlParams.get('tournament') || '';
 var labelParam = urlParams.get('label') || '団体戦';
@@ -441,17 +644,15 @@ if (tournamentParam) {
   document.getElementById('headerTournament').textContent = labelParam + '　';
 }
 
-/* チーム数セレクターを最大数に合わせて生成 */
 (function() {
   var sel = document.getElementById('teamCount');
   sel.innerHTML = '';
   var labels = ['A', 'B', 'C', 'D'];
-  var i, opt, labelStr;
+  var i, opt;
   for (i = 1; i <= maxTeams; i++) {
     opt = document.createElement('option');
     opt.value = String(i);
-    labelStr = i + 'チーム（' + labels.slice(0, i).join('・') + '）';
-    opt.textContent = labelStr;
+    opt.textContent = i + 'チーム（' + labels.slice(0, i).join('・') + '）';
     if (i === 1) opt.selected = true;
     sel.appendChild(opt);
   }
