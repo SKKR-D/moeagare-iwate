@@ -131,7 +131,7 @@ var DCOL = {
   OPEN: 9, COURT_OPEN: 10, RECEPTION: 11, MEETING: 12,
   CEREMONY: 13, GAME_START: 14, GAME_END: 15,
   QUALIFICATION: 16, CATEGORY: 17, FORMAT: 18, AWARDS: 19,
-  APPLICATION: 20, FEE: 21, NOTES: 22, STATUS: 23
+  APPLICATION: 20, FEE: 21, NOTES: 22, PDF_URL: 23, STATUS: 24
 };
 
 var GAS_URL = 'https://script.google.com/macros/s/AKfycbwMaX6mOexotFkV6n5Y79QXO9IhDgBRvT4PHuCr9c9j435683_N7G8yKkQPcIi-wXtu/exec';
@@ -229,19 +229,40 @@ function buildEntryButtons(row, startDate) {
   var tournamentEnc = encodeURIComponent(row[DCOL.NAME] || '');
   var today = new Date();
   today = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  var i, cfg, page, params, deadlineDate, isPast, dlText;
+  var i, cfg, page, params, deadlineDate, isPast, isBeforeStart, dlText, startText;
 
   for (i = 0; i < globalEntryConfigs.length; i++) {
     cfg = globalEntryConfigs[i];
-    page = (cfg.type === '団体戦') ? 'entry-team.html' : 'entry-individual.html';
+    if (cfg.type === '合宿' || cfg.type === '選考会') {
+      page = 'entry-other.html';
+    } else if (cfg.type === '団体戦') {
+      page = 'entry-team.html';
+    } else {
+      page = 'entry-individual.html';
+    }
     params = 'tournament=' + tournamentEnc + '&date=' + detailDateParam;
     params += '&label=' + encodeURIComponent(cfg.label);
     params += '&fee=' + cfg.fee;
     if (cfg.openFee) params += '&openFee=' + cfg.openFee;
     if (cfg.maxCount) params += (cfg.type === '団体戦' ? '&maxTeams=' : '&maxPairs=') + cfg.maxCount;
+    if (cfg.options && cfg.options.length > 0) params += '&options=' + encodeURIComponent(cfg.options.join(','));
 
     isPast = false;
+    isBeforeStart = false;
     dlText = '';
+    startText = '';
+
+    // 申込開始日チェック
+    if (cfg.startDate) {
+      var sdParts = cfg.startDate.split('-');
+      var entryStartDate = new Date(parseInt(sdParts[0]), parseInt(sdParts[1]) - 1, parseInt(sdParts[2]));
+      startText = (entryStartDate.getMonth() + 1) + '/' + entryStartDate.getDate() + '(' + DOW_DETAIL[entryStartDate.getDay()] + ')開始';
+      if (today < entryStartDate) {
+        isBeforeStart = true;
+      }
+    }
+
+    // 締切チェック
     if (cfg.deadline) {
       var dlParts = cfg.deadline.split('-');
       deadlineDate = new Date(parseInt(dlParts[0]), parseInt(dlParts[1]) - 1, parseInt(dlParts[2]));
@@ -253,6 +274,8 @@ function buildEntryButtons(row, startDate) {
 
     if (isPast) {
       html += '<span class="btn btn-disabled">' + escapeHtml(cfg.label) + '（締切済み）</span>';
+    } else if (isBeforeStart) {
+      html += '<span class="btn btn-disabled">' + escapeHtml(cfg.label) + '<span class="btn-deadline">' + startText + '</span></span>';
     } else {
       html += '<a class="btn btn-gold" href="' + page + '?' + params + '">' + escapeHtml(cfg.label) + ' 申込はこちら';
       if (dlText) html += '<span class="btn-deadline">' + dlText + '</span>';
@@ -346,7 +369,11 @@ function renderDetail(row) {
 
   /* ヒーロー内にすべてのボタンを配置 */
   var entryBtns = buildEntryButtons(row, startDate);
-  var navBtns = '<a class="btn btn-outline-light" href="rules.html">競技規則・諸規定へ</a>';
+  var navBtns = '';
+  if (row[DCOL.PDF_URL]) {
+    navBtns += '<a class="btn btn-outline-light" href="' + escapeHtml(row[DCOL.PDF_URL]) + '" target="_blank" rel="noopener">📄 要項PDFを見る</a>';
+  }
+  navBtns += '<a class="btn btn-outline-light" href="rules.html">競技規則・諸規定へ</a>';
   navBtns += '<a class="btn btn-outline-light" href="dress-code.html">服装・ゼッケン規定へ</a>';
   navBtns += '<button class="btn btn-outline-light" onclick="window.print()">🖨️ 大会要項をPDFで出力</button>';
   html += '<div class="hero-btns">' + entryBtns + navBtns + '</div>';
@@ -398,6 +425,9 @@ function renderDetail(row) {
   /* Buttons */
   html += '<div class="btn-row">';
   html += buildEntryButtons(row, startDate);
+  if (row[DCOL.PDF_URL]) {
+    html += '<a class="btn btn-outline" href="' + escapeHtml(row[DCOL.PDF_URL]) + '" target="_blank" rel="noopener">📄 要項PDFを見る</a>';
+  }
   html += '<a class="btn btn-outline" href="rules.html">競技規則・諸規定へ</a>';
   html += '<a class="btn btn-outline" href="dress-code.html">服装・ゼッケン規定へ</a>';
   html += '<button class="btn btn-green" onclick="window.print()">🖨️ 大会要項をPDFで出力</button>';
