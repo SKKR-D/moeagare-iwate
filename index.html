@@ -65,6 +65,7 @@ a{color:inherit;text-decoration:none}
 .event-card.past:hover{opacity:.65;transform:none}
 .event-card.past .card-name{color:var(--text-light)}
 .ended-badge{display:inline-block;background:#ddd;color:#888;font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:4px;margin-left:8px;vertical-align:middle}
+.applied-badge{display:inline-block;background:#d4edda;color:#155724;font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:4px;margin-left:8px;vertical-align:middle}
 
 /* ========== ALERT BANNER ========== */
 .alert-banner{background:#fff8e1;border:2px solid var(--gold);border-radius:var(--radius);padding:12px 16px;margin-bottom:20px}
@@ -119,7 +120,7 @@ var COL = {
   OPEN: 9, COURT_OPEN: 10, RECEPTION: 11, MEETING: 12,
   CEREMONY: 13, GAME_START: 14, GAME_END: 15,
   QUALIFICATION: 16, CATEGORY: 17, FORMAT: 18, AWARDS: 19,
-  APPLICATION: 20, FEE: 21, NOTES: 22, STATUS: 23
+  APPLICATION: 20, FEE: 21, NOTES: 22, PDF_URL: 23, STATUS: 24
 };
 
 /* ========== MONTH COLORS (pastel) ========== */
@@ -301,6 +302,7 @@ function renderCard(evt, isPast) {
   html += '<div class="card-date">' + dateStr + '</div>';
   html += '<span class="badge" style="background:' + (isPast ? '#aaa' : cat.color) + '">' + cat.label + '</span>';
   if (isPast) html += '<span class="ended-badge">イベント終了</span>';
+  if (!isPast && isApplied(evt.name)) html += '<span class="applied-badge">✔ 申込済み</span>';
   html += '</div>';
 
   html += '<div class="card-name">' + escapeHtml(evt.name) + '</div>';
@@ -323,6 +325,17 @@ function renderCard(evt, isPast) {
 
   html += '</div></div>';
   return html;
+}
+
+function isApplied(eventName) {
+  try {
+    var applied = JSON.parse(localStorage.getItem('appliedEvents') || '[]');
+    var i;
+    for (i = 0; i < applied.length; i++) {
+      if (applied[i].tournament === eventName) return true;
+    }
+  } catch(e) {}
+  return false;
 }
 
 function escapeHtml(str) {
