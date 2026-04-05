@@ -334,17 +334,17 @@ function buildPlayers(count) {
 
   for (i = 0; i < count; i++) {
     html += '<div class="team-block">';
-    html += '<div class="team-header">' + TEAM_LABELS[i] + 'チーム（各チーム最大8名）</div>';
+    html += '<div class="team-header">' + TEAM_LABELS[i] + 'チーム（最大8名・最低' + minPlayers + '名）</div>';
 
     for (j = 0; j < 8; j++) {
       pid = 't' + i + '_' + j;
-      var isRequired = (j < 4);
+      var isRequired = (j < minPlayers);
       var reqAttr = isRequired ? ' required' : '';
 
       html += '<div class="player-card" id="card_' + pid + '">';
       html += '<div class="player-top">';
       html += '<span class="player-num">No.' + (j + 1) + '</span>';
-      if (j >= 4) {
+      if (j >= minPlayers) {
         html += '<label class="vacancy-check"><input type="checkbox" id="vacant_' + pid + '" onchange="toggleVacant(\'' + pid + '\')">欠員にする</label>';
       }
       html += '</div>';
@@ -449,8 +449,8 @@ function validateTeamRules() {
       vcb = document.getElementById('vacant_' + pid);
       if (!vcb || !vcb.checked) activeCount++;
     }
-    if (activeCount < 4) {
-      alert(TEAM_LABELS[i] + 'チームの有効選手が' + activeCount + '名です。最低4名必要です。');
+    if (activeCount < minPlayers) {
+      alert(TEAM_LABELS[i] + 'チームの有効選手が' + activeCount + '名です。最低' + minPlayers + '名必要です。');
       return false;
     }
     if (teamCount > 1 && i < teamCount - 1 && activeCount < 6) {
@@ -721,6 +721,7 @@ var feePerTeam = parseInt(urlParams.get('fee')) || 8000;
 var maxTeams = parseInt(urlParams.get('maxTeams')) || 4;
 var optionsStr = urlParams.get('options') || '';
 var entryOptions = optionsStr ? optionsStr.split(',') : [];
+var minPlayers = 4;
 
 function hasOption(name) {
   var i;
@@ -729,6 +730,17 @@ function hasOption(name) {
   }
   return false;
 }
+
+/* 最低人数オプションの適用 */
+(function() {
+  var i;
+  for (i = 0; i < entryOptions.length; i++) {
+    var match = entryOptions[i].match(/最低(\d+)名/);
+    if (match) {
+      minPlayers = parseInt(match[1]);
+    }
+  }
+})();
 
 if (tournamentParam) {
   document.getElementById('headerTournament').textContent = tournamentParam + '　' + labelParam + '　';
