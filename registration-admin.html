@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>団体登録管理｜岩手県中学生ソフトテニス連盟</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --main:#1b3a5c;--main-dark:#0f2440;--main-light:#e8eef6;
+  --gold:#c8a020;--white:#fff;--gray:#f5f5f0;
+  --text:#222;--text-light:#666;--radius:10px;--red:#b33030;
+}
+html{font-size:14px}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--text)}
+
+/* PASSWORD SCREEN */
+.pw-screen{display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px}
+.pw-box{background:var(--white);border-radius:12px;padding:40px;max-width:400px;width:100%;box-shadow:0 4px 20px rgba(0,0,0,.1);text-align:center}
+.pw-box h1{font-size:1.1rem;color:var(--main);margin-bottom:6px}
+.pw-box p{font-size:.8rem;color:var(--text-light);margin-bottom:20px}
+.pw-box input{width:100%;padding:12px;border:2px solid #ddd;border-radius:8px;font-size:1rem;text-align:center;font-family:inherit;outline:none;margin-bottom:12px}
+.pw-box input:focus{border-color:var(--main)}
+.pw-box .btn{width:100%;padding:12px;border-radius:8px;font-size:.92rem;font-weight:700;border:none;cursor:pointer;font-family:inherit;background:var(--main);color:var(--white)}
+.pw-error{color:var(--red);font-size:.8rem;margin-bottom:10px;display:none}
+
+/* MAIN CONTENT */
+.admin-content{display:none}
+.header{background:linear-gradient(135deg,var(--main-dark),var(--main));color:var(--white);padding:14px 20px}
+.header-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.header h1{font-size:1rem;font-weight:700}
+.header h1 small{display:block;font-size:.7rem;color:var(--gold)}
+.header-actions{display:flex;gap:8px}
+.header-actions .btn{padding:8px 14px;border-radius:6px;font-size:.78rem;font-weight:700;border:none;cursor:pointer;font-family:inherit}
+.btn-gold{background:var(--gold);color:var(--white)}
+.btn-white{background:var(--white);color:var(--main)}
+.btn-red{background:var(--red);color:var(--white)}
+
+.main{max-width:1100px;margin:0 auto;padding:16px}
+
+/* SUMMARY */
+.summary-bar{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.summary-card{background:var(--white);border-radius:8px;padding:14px 20px;box-shadow:0 1px 4px rgba(0,0,0,.06);flex:1;min-width:140px;text-align:center}
+.summary-card .num{font-size:1.6rem;font-weight:900;color:var(--main)}
+.summary-card .label{font-size:.72rem;color:var(--text-light)}
+.summary-card.warn .num{color:var(--red)}
+
+/* TABLE */
+.table-wrap{background:var(--white);border-radius:var(--radius);box-shadow:0 1px 6px rgba(0,0,0,.06);overflow-x:auto}
+.reg-table{width:100%;border-collapse:collapse;font-size:.8rem}
+.reg-table th,.reg-table td{padding:8px 10px;border-bottom:1px solid #eee;text-align:left;white-space:nowrap}
+.reg-table th{background:var(--main);color:var(--white);font-weight:700;position:sticky;top:0}
+.reg-table tr:hover{background:var(--main-light)}
+.reg-table .clickable{color:var(--main);font-weight:700;cursor:pointer;text-decoration:underline}
+.reg-table .transfer-name{font-family:monospace;font-size:.75rem;background:#f0f0f0;padding:2px 6px;border-radius:4px}
+.paid-check{width:18px;height:18px;cursor:pointer;accent-color:var(--main)}
+.paid-label{font-size:.72rem;font-weight:700}
+.paid-label.yes{color:var(--main)}
+.paid-label.no{color:var(--red)}
+
+/* DETAIL MODAL */
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:200;overflow-y:auto;padding:20px}
+.modal-overlay.show{display:flex;justify-content:center;align-items:flex-start}
+.modal-box{background:var(--white);border-radius:12px;max-width:700px;width:100%;padding:24px;margin:40px auto;box-shadow:0 10px 40px rgba(0,0,0,.3)}
+.modal-box h2{font-size:1rem;font-weight:900;color:var(--main);margin-bottom:12px;text-align:center}
+.modal-table{width:100%;border-collapse:collapse;font-size:.82rem;margin-bottom:12px}
+.modal-table th,.modal-table td{padding:6px 10px;border:1px solid #ddd;text-align:left}
+.modal-table th{background:#f5f5f5;font-weight:700;width:120px}
+.modal-section{font-size:.85rem;font-weight:700;color:var(--main);margin:14px 0 6px;border-bottom:1px solid var(--main);padding-bottom:4px}
+.modal-btns{display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+.modal-btns .btn{padding:10px 20px;border-radius:8px;font-size:.82rem;font-weight:700;border:none;cursor:pointer;font-family:inherit}
+
+.loading{text-align:center;padding:40px;color:var(--text-light)}
+
+/* PRINT */
+@media print{
+  .header,.pw-screen,.summary-bar,.modal-overlay{display:none !important}
+  .admin-content{display:block !important}
+  .reg-table th{background:#1b3a5c !important;color:#fff !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .main{padding:0;max-width:100%}
+}
+</style>
+</head>
+<body>
+
+<!-- PASSWORD SCREEN -->
+<div class="pw-screen" id="pwScreen">
+  <div class="pw-box">
+    <h1>🔒 団体登録管理</h1>
+    <p>岩手県中学生ソフトテニス連盟<br>管理者用ページです</p>
+    <div class="pw-error" id="pwError">パスワードが違います</div>
+    <input type="password" id="pwInput" placeholder="パスワードを入力" onkeydown="if(event.key==='Enter')checkPw()">
+    <button class="btn" onclick="checkPw()">ログイン</button>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="admin-content" id="adminContent">
+
+<header class="header">
+  <div class="header-inner">
+    <h1><small>岩手県中学生ソフトテニス連盟</small>団体登録管理</h1>
+    <div class="header-actions">
+      <button class="btn btn-gold" onclick="exportListPdf()">📄 団体一覧PDF出力</button>
+      <button class="btn btn-white" onclick="loadData()">🔄 更新</button>
+    </div>
+  </div>
+</header>
+
+<main class="main">
+  <div class="summary-bar" id="summaryBar"></div>
+  <div class="table-wrap">
+    <table class="reg-table" id="regTable">
+      <thead>
+        <tr>
+          <th>No.</th>
+          <th>振込照合名</th>
+          <th>団体名</th>
+          <th>種別</th>
+          <th>地区</th>
+          <th>代表者</th>
+          <th>選手数</th>
+          <th>登録料</th>
+          <th>入金確認</th>
+          <th>登録日</th>
+        </tr>
+      </thead>
+      <tbody id="regBody">
+        <tr><td colspan="10" class="loading">読み込み中...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal-box">
+    <h2 id="detailTitle">団体詳細</h2>
+    <div id="detailContent"></div>
+    <div class="modal-btns">
+      <button class="btn btn-gold" onclick="printDetail()">📄 この団体のPDFを出力</button>
+      <button class="btn btn-white" style="border:2px solid var(--main)" onclick="closeDetail()">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbwMaX6mOexotFkV6n5Y79QXO9IhDgBRvT4PHuCr9c9j435683_N7G8yKkQPcIi-wXtu/exec';
+var ADMIN_PW = 'iwatestc2030';
+var allRegistrations = [];
+var currentDetail = null;
+
+/* ========== PASSWORD ========== */
+function checkPw() {
+  var input = document.getElementById('pwInput').value;
+  if (input === ADMIN_PW) {
+    document.getElementById('pwScreen').style.display = 'none';
+    document.getElementById('adminContent').style.display = 'block';
+    loadData();
+  } else {
+    document.getElementById('pwError').style.display = 'block';
+    document.getElementById('pwInput').value = '';
+    document.getElementById('pwInput').focus();
+  }
+}
+
+/* ========== LOAD DATA ========== */
+function loadData() {
+  document.getElementById('regBody').innerHTML = '<tr><td colspan="10" class="loading">読み込み中...</td></tr>';
+
+  fetch(GAS_URL + '?action=getRegistrations').then(function(res) {
+    return res.json();
+  }).then(function(data) {
+    allRegistrations = data.registrations || [];
+    renderTable();
+    renderSummary();
+  }).catch(function(err) {
+    document.getElementById('regBody').innerHTML = '<tr><td colspan="10" class="loading">データの読み込みに失敗しました</td></tr>';
+  });
+}
+
+/* ========== RENDER TABLE ========== */
+function renderTable() {
+  var body = document.getElementById('regBody');
+  if (allRegistrations.length === 0) {
+    body.innerHTML = '<tr><td colspan="10" class="loading">登録データがありません</td></tr>';
+    return;
+  }
+
+  var html = '';
+  var i, r;
+  for (i = 0; i < allRegistrations.length; i++) {
+    r = allRegistrations[i];
+    var regNo = String(r.regNo || (i + 1)).padStart(3, '0');
+    r._regNo = regNo;
+    r._transferName = r.transferName || regNo;
+
+    var paidClass = r.paid ? 'yes' : 'no';
+    var paidText = r.paid ? '入金済' : '未入金';
+    var playerCount = 0;
+    try { playerCount = JSON.parse(r.playersJson || '[]').length; } catch(e) {}
+
+    var dateStr = '';
+    if (r.timestamp) {
+      var d = new Date(r.timestamp);
+      dateStr = (d.getMonth() + 1) + '/' + d.getDate();
+    }
+
+    html += '<tr>';
+    html += '<td>' + regNo + '</td>';
+    html += '<td><span class="transfer-name">' + esc(transferName) + '</span></td>';
+    html += '<td><span class="clickable" onclick="showDetail(' + i + ')">' + esc(r.teamName) + '</span></td>';
+    html += '<td>' + esc(r.category) + '</td>';
+    html += '<td>' + esc(r.district) + '</td>';
+    html += '<td>' + esc(r.repName) + '</td>';
+    html += '<td>' + playerCount + '名</td>';
+    html += '<td>' + (r.fee || 0).toLocaleString() + '円</td>';
+    html += '<td><input type="checkbox" class="paid-check" ' + (r.paid ? 'checked' : '') + ' onchange="togglePaid(' + i + ', this.checked)"> <span class="paid-label ' + paidClass + '">' + paidText + '</span></td>';
+    html += '<td>' + dateStr + '</td>';
+    html += '</tr>';
+  }
+  body.innerHTML = html;
+}
+
+/* ========== SUMMARY ========== */
+function renderSummary() {
+  var total = allRegistrations.length;
+  var paid = 0;
+  var unpaid = 0;
+  var totalFee = 0;
+  var paidFee = 0;
+  var i, r;
+  for (i = 0; i < allRegistrations.length; i++) {
+    r = allRegistrations[i];
+    totalFee += (r.fee || 0);
+    if (r.paid) { paid++; paidFee += (r.fee || 0); }
+    else { unpaid++; }
+  }
+
+  var html = '';
+  html += '<div class="summary-card"><div class="num">' + total + '</div><div class="label">登録団体数</div></div>';
+  html += '<div class="summary-card"><div class="num">' + paid + '</div><div class="label">入金済み</div></div>';
+  html += '<div class="summary-card warn"><div class="num">' + unpaid + '</div><div class="label">未入金</div></div>';
+  html += '<div class="summary-card"><div class="num">' + totalFee.toLocaleString() + '円</div><div class="label">登録料合計</div></div>';
+  html += '<div class="summary-card"><div class="num">' + paidFee.toLocaleString() + '円</div><div class="label">入金済み額</div></div>';
+  document.getElementById('summaryBar').innerHTML = html;
+}
+
+/* ========== TOGGLE PAID ========== */
+function togglePaid(idx, checked) {
+  var r = allRegistrations[idx];
+  r.paid = checked;
+
+  fetch(GAS_URL + '?action=updateRegPaid&row=' + r.sheetRow + '&paid=' + (checked ? '1' : '0')).then(function(res) {
+    return res.json();
+  }).then(function() {
+    renderTable();
+    renderSummary();
+  }).catch(function() {
+    alert('入金状態の更新に失敗しました。ページを再読み込みしてください。');
+  });
+}
+
+/* ========== DETAIL ========== */
+function showDetail(idx) {
+  var r = allRegistrations[idx];
+  currentDetail = r;
+  var players = [];
+  try { players = JSON.parse(r.playersJson || '[]'); } catch(e) {}
+
+  document.getElementById('detailTitle').textContent = r.teamName + '（' + r.category + '）';
+
+  var html = '';
+  html += '<table class="modal-table">';
+  html += '<tr><th>登録No.</th><td>' + esc(r._regNo) + '</td></tr>';
+  html += '<tr><th>振込照合名</th><td><span class="transfer-name">' + esc(r._transferName) + '</span></td></tr>';
+  html += '<tr><th>団体名</th><td>' + esc(r.teamName) + '</td></tr>';
+  html += '<tr><th>ふりがな</th><td>' + esc(r.teamKana) + '</td></tr>';
+  html += '<tr><th>種別</th><td>' + esc(r.category) + '</td></tr>';
+  html += '<tr><th>地区</th><td>' + esc(r.district) + '</td></tr>';
+  html += '<tr><th>代表者</th><td>' + esc(r.repName) + '（' + esc(r.repKana) + '）</td></tr>';
+  html += '<tr><th>連絡先</th><td>' + esc(r.repPhone) + '</td></tr>';
+  html += '<tr><th>メール</th><td>' + esc(r.repEmail) + '</td></tr>';
+  html += '<tr><th>登録料</th><td>' + (r.fee || 0).toLocaleString() + '円</td></tr>';
+  html += '<tr><th>入金状況</th><td>' + (r.paid ? '✅ 入金済み' : '❌ 未入金') + '</td></tr>';
+  html += '</table>';
+
+  html += '<div class="modal-section">選手一覧（' + players.length + '名）</div>';
+  html += '<table class="modal-table"><tr><th style="width:40px">No.</th><th>氏名</th><th style="width:50px">学年</th><th style="width:50px">性別</th></tr>';
+  var i;
+  for (i = 0; i < players.length; i++) {
+    html += '<tr><td>' + (i + 1) + '</td><td>' + esc(players[i].name) + '</td><td>' + esc(players[i].grade) + '</td><td>' + esc(players[i].gender) + '</td></tr>';
+  }
+  html += '</table>';
+
+  document.getElementById('detailContent').innerHTML = html;
+  document.getElementById('detailModal').classList.add('show');
+}
+
+function closeDetail() {
+  document.getElementById('detailModal').classList.remove('show');
+  currentDetail = null;
+}
+
+function printDetail() {
+  if (!currentDetail) return;
+  var win = window.open('', '_blank');
+  var content = document.getElementById('detailContent').innerHTML;
+  win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>' + esc(currentDetail.teamName) + ' 登録内容</title>');
+  win.document.write('<style>body{font-family:"Noto Sans JP",sans-serif;padding:20px;font-size:12px}h1{font-size:16px;text-align:center;margin-bottom:4px}p.sub{text-align:center;font-size:10px;color:#666;margin-bottom:16px}table{width:100%;border-collapse:collapse;margin-bottom:12px}th,td{padding:5px 8px;border:1px solid #ccc;text-align:left}th{background:#f0f0f0;font-weight:bold;width:120px}.transfer-name{font-family:monospace;background:#f0f0f0;padding:2px 6px;border-radius:3px}</style>');
+  win.document.write('</head><body>');
+  win.document.write('<h1>' + esc(currentDetail.teamName) + '　団体登録内容</h1>');
+  win.document.write('<p class="sub">岩手県中学生ソフトテニス連盟　令和8年度</p>');
+  win.document.write(content);
+  win.document.write('<p style="text-align:center;font-size:9px;color:#888;margin-top:20px">岩手県中学生ソフトテニス連盟　団体登録管理</p>');
+  win.document.write('</body></html>');
+  win.document.close();
+  setTimeout(function() { win.print(); }, 500);
+}
+
+/* ========== LIST PDF ========== */
+function exportListPdf() {
+  var win = window.open('', '_blank');
+  win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>団体登録一覧</title>');
+  win.document.write('<style>body{font-family:"Noto Sans JP",sans-serif;padding:16px;font-size:10px}h1{font-size:14px;text-align:center;margin-bottom:4px}p.sub{text-align:center;font-size:9px;color:#666;margin-bottom:12px}table{width:100%;border-collapse:collapse}th,td{padding:4px 6px;border:1px solid #ccc;text-align:left;white-space:nowrap}th{background:#1b3a5c;color:#fff;font-weight:bold;-webkit-print-color-adjust:exact;print-color-adjust:exact}.paid{color:green;font-weight:bold}.unpaid{color:red;font-weight:bold}.mono{font-family:monospace;font-size:9px}p.footer{text-align:center;font-size:8px;color:#888;margin-top:12px}</style>');
+  win.document.write('</head><body>');
+  win.document.write('<h1>岩手県中学生ソフトテニス連盟　令和8年度 団体登録一覧</h1>');
+  var now = new Date();
+  win.document.write('<p class="sub">' + now.getFullYear() + '年' + (now.getMonth()+1) + '月' + now.getDate() + '日時点　登録' + allRegistrations.length + '団体</p>');
+  win.document.write('<table><tr><th>No.</th><th>振込照合名</th><th>団体名</th><th>種別</th><th>地区</th><th>代表者</th><th>選手数</th><th>登録料</th><th>入金</th></tr>');
+
+  var i, r, pc;
+  for (i = 0; i < allRegistrations.length; i++) {
+    r = allRegistrations[i];
+    pc = 0;
+    try { pc = JSON.parse(r.playersJson || '[]').length; } catch(e) {}
+    var paidStr = r.paid ? '<span class="paid">済</span>' : '<span class="unpaid">未</span>';
+    win.document.write('<tr><td>' + r._regNo + '</td><td class="mono">' + esc(r._transferName) + '</td><td>' + esc(r.teamName) + '</td><td>' + esc(r.category) + '</td><td>' + esc(r.district) + '</td><td>' + esc(r.repName) + '</td><td>' + pc + '</td><td>' + (r.fee||0).toLocaleString() + '</td><td>' + paidStr + '</td></tr>');
+  }
+  win.document.write('</table>');
+  win.document.write('<p class="footer">岩手県中学生ソフトテニス連盟　団体登録管理</p>');
+  win.document.write('</body></html>');
+  win.document.close();
+  setTimeout(function() { win.print(); }, 500);
+}
+
+function esc(s) { if (!s) return ''; return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+</script>
+</body>
+</html>

@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>団体登録｜岩手県中学生ソフトテニス連盟</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --main:#1b3a5c;--main-dark:#0f2440;--main-light:#e8eef6;
+  --gold:#c8a020;--white:#fff;--gray:#f5f5f0;
+  --text:#222;--text-light:#666;--radius:10px;--red:#b33030;
+}
+html{font-size:15px}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--text);min-height:100vh}
+.header{background:linear-gradient(135deg,var(--main-dark),var(--main));color:var(--white);padding:16px 20px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.3)}
+.header-inner{max-width:800px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.header-title h1{font-size:1rem;font-weight:700}
+.header-title h1 small{display:block;font-size:.7rem;font-weight:500;color:var(--gold)}
+.back-btn{background:rgba(255,255,255,.15);color:var(--white);border:none;padding:8px 14px;border-radius:6px;font-size:.8rem;cursor:pointer;font-family:inherit}
+.main{max-width:800px;margin:0 auto;padding:20px}
+.card{background:var(--white);border-radius:var(--radius);padding:20px;margin-bottom:16px;box-shadow:0 1px 6px rgba(0,0,0,.06)}
+.card h2{font-size:.9rem;font-weight:900;color:var(--main);margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid var(--main)}
+.form-row{margin-bottom:12px}
+.form-row label{display:block;font-size:.78rem;font-weight:700;color:var(--text-light);margin-bottom:4px}
+.form-row label .req{color:var(--red);font-size:.7rem;margin-left:4px}
+.form-row input,.form-row select,.form-row textarea{width:100%;padding:10px 12px;border:2px solid #ddd;border-radius:8px;font-size:.88rem;font-family:inherit;outline:none}
+.form-row input:focus,.form-row select:focus{border-color:var(--main)}
+.hint{font-size:.7rem;color:var(--text-light);margin-top:2px}
+.radio-group{display:flex;gap:16px;margin-top:4px;flex-wrap:wrap}
+.radio-group label{display:flex;align-items:center;gap:6px;font-size:.88rem;font-weight:500;cursor:pointer}
+.radio-group input{width:auto}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:500px){.grid-2{grid-template-columns:1fr}}
+
+.player-card{border:1.5px solid #e0e0e0;border-radius:8px;padding:12px;margin-bottom:10px}
+.player-card .p-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.player-card .p-num{font-weight:900;color:var(--main);font-size:.88rem}
+.player-card .p-remove{background:none;border:none;color:var(--red);font-size:.8rem;cursor:pointer;margin-left:auto;font-family:inherit}
+.player-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+@media(max-width:500px){.player-grid{grid-template-columns:1fr 1fr}}
+.player-grid .full{grid-column:1/-1}
+.player-grid label{font-size:.7rem;font-weight:700;color:var(--text-light);display:block;margin-bottom:2px}
+.player-grid input,.player-grid select{width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:6px;font-size:.85rem;font-family:inherit}
+.add-btn{display:block;width:100%;padding:10px;border:2px dashed #ccc;border-radius:8px;background:none;font-size:.85rem;color:var(--text-light);cursor:pointer;font-family:inherit;text-align:center;margin-top:8px}
+.add-btn:hover{border-color:var(--main);color:var(--main)}
+
+.fee-box{background:var(--main-light);border-radius:var(--radius);padding:16px;text-align:center;margin:16px 0}
+.fee-box .amount{font-size:1.6rem;font-weight:900;color:var(--main)}
+.fee-box .detail{font-size:.78rem;color:var(--text-light);margin-top:4px}
+
+.btn{display:inline-block;padding:14px 28px;border-radius:8px;font-size:.92rem;font-weight:700;border:none;cursor:pointer;text-align:center;font-family:inherit;transition:all .2s;line-height:1.4}
+.btn-main{background:var(--main);color:var(--white)}
+.btn-main:hover{background:var(--main-dark)}
+.btn-main:disabled{background:#aaa;cursor:not-allowed}
+.btn-block{display:block;width:100%}
+.btn-outline{background:var(--white);color:var(--main);border:2px solid var(--main)}
+
+.status-msg{text-align:center;padding:16px;border-radius:8px;font-size:.88rem;font-weight:700;margin-top:16px;display:none}
+.status-msg.success{display:block;background:#d4edda;color:#155724}
+.status-msg.success .nav-btns{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.status-msg.success .nav-btns .btn{font-size:.82rem;padding:10px 20px}
+.status-msg.error{display:block;background:#f8d7da;color:#721c24}
+.status-msg.sending{display:block;background:var(--main-light);color:var(--main)}
+
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:200;overflow-y:auto;padding:20px}
+.modal-overlay.show{display:flex;justify-content:center;align-items:flex-start}
+.modal-box{background:var(--white);border-radius:12px;max-width:700px;width:100%;padding:24px;margin:40px auto;box-shadow:0 10px 40px rgba(0,0,0,.3)}
+.modal-box h2{font-size:1rem;font-weight:900;color:var(--main);margin-bottom:12px;text-align:center}
+.modal-table{width:100%;border-collapse:collapse;font-size:.82rem;margin-bottom:12px}
+.modal-table th,.modal-table td{padding:6px 10px;border:1px solid #ddd;text-align:left}
+.modal-table th{background:#f5f5f5;font-weight:700;width:120px}
+.modal-section{font-size:.85rem;font-weight:700;color:var(--main);margin:14px 0 6px;border-bottom:1px solid var(--main);padding-bottom:4px}
+.modal-btns{display:flex;gap:10px;justify-content:center;margin-top:16px}
+.footer{text-align:center;padding:30px 20px;font-size:.7rem;color:var(--text-light)}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="header-title">
+      <h1><small>岩手県中学生ソフトテニス連盟</small>令和8年度 団体登録</h1>
+    </div>
+    <button class="back-btn" onclick="location.href='index.html'">← 年間予定へ</button>
+  </div>
+</header>
+
+<main class="main">
+  <form id="regForm" onsubmit="return false;">
+
+    <div class="card">
+      <h2>団体情報</h2>
+      <div class="grid-2">
+        <div class="form-row">
+          <label>団体名<span class="req">※必須</span></label>
+          <input type="text" id="teamName" required placeholder="例：○○中学校、○○ソフトテニスクラブ">
+        </div>
+        <div class="form-row">
+          <label>ふりがな<span class="req">※必須</span></label>
+          <input type="text" id="teamKana" required placeholder="例：おとべちゅうがっこう">
+        </div>
+      </div>
+      <div class="form-row">
+        <label>種別<span class="req">※必須</span></label>
+        <div class="radio-group">
+          <label><input type="radio" name="category" value="男子" required onchange="calcFee()">男子</label>
+          <label><input type="radio" name="category" value="女子" onchange="calcFee()">女子</label>
+          <label><input type="radio" name="category" value="男女" onchange="calcFee()">男女</label>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>参加地区名<span class="req">※必須</span></label>
+        <select id="district" required>
+          <option value="">選択してください</option>
+          <option>久慈</option><option>二戸</option><option>岩手</option>
+          <option>盛岡</option><option>紫波</option><option>花巻</option>
+          <option>和賀</option><option>胆江</option><option>一関</option>
+          <option>気仙</option><option>遠野</option><option>釜石・大槌</option>
+          <option>宮古</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>顧問・代表者情報</h2>
+      <div class="grid-2">
+        <div class="form-row">
+          <label>氏名<span class="req">※必須</span></label>
+          <input type="text" id="repName" required>
+        </div>
+        <div class="form-row">
+          <label>ふりがな<span class="req">※必須</span></label>
+          <input type="text" id="repKana" required>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="form-row">
+          <label>連絡先（携帯番号）<span class="req">※必須</span></label>
+          <input type="tel" id="repPhone" required pattern="^0[0-9]{9,10}$" placeholder="09012345678">
+          <div class="hint">ハイフンなし</div>
+        </div>
+        <div class="form-row">
+          <label>メールアドレス<span class="req">※必須</span></label>
+          <input type="email" id="repEmail" required placeholder="example@mail.com">
+          <div class="hint">登録確認書・振込案内をこのアドレスに送信します</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>選手情報</h2>
+      <div style="background:#e3f2fd;border-radius:8px;padding:14px;margin-bottom:14px">
+        <div style="font-size:.82rem;font-weight:700;color:#0056b3;margin-bottom:8px">📥 Excelファイルから一括読み込み（任意）</div>
+        <div style="font-size:.75rem;color:#666;margin-bottom:8px">Excelファイル（.xlsx / .xls）の最初のシートから「氏名・学年・性別」を読み込みます。<br>1行目がヘッダー（氏名・学年・性別の列があること）、2行目以降がデータです。</div>
+        <input type="file" id="excelFile" accept=".xlsx,.xls" style="font-size:.82rem" onchange="importExcel(this)">
+        <div class="hint" id="importStatus"></div>
+      </div>
+      <div id="playerArea"></div>
+      <button type="button" class="add-btn" onclick="addPlayer()">＋ 選手を手動で追加</button>
+    </div>
+
+    <div class="card">
+      <h2>登録料</h2>
+      <div class="fee-box">
+        <div class="amount" id="feeDisplay">---</div>
+        <div class="detail" id="feeDetail">種別を選択してください</div>
+      </div>
+      <div class="hint" style="text-align:center">※ 男子：3,000円 ／ 女子：3,000円 ／ 男女：4,000円</div>
+    </div>
+
+    <button type="button" class="btn btn-main btn-block" id="submitBtn" onclick="showConfirm()">登録内容を確認する</button>
+    <div class="status-msg" id="statusMsg"></div>
+  </form>
+</main>
+
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-box">
+    <h2>📋 登録内容の確認</h2>
+    <div id="confirmContent"></div>
+    <div class="modal-btns">
+      <button class="btn btn-outline" onclick="closeConfirm()">修正する</button>
+      <button class="btn btn-main" onclick="doSubmit()">この内容で登録する</button>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">&copy; 岩手県中学生ソフトテニス連盟</footer>
+
+<script>
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbwMaX6mOexotFkV6n5Y79QXO9IhDgBRvT4PHuCr9c9j435683_N7G8yKkQPcIi-wXtu/exec';
+var CATEGORY_FEES = { '男子': 3000, '女子': 3000, '男女': 4000 };
+var GRADES = ['1年', '2年', '3年'];
+var GENDERS = ['男', '女'];
+var playerCount = 0;
+
+function addPlayer() {
+  var area = document.getElementById('playerArea');
+  var idx = playerCount;
+  playerCount++;
+  var div = document.createElement('div');
+  div.className = 'player-card';
+  div.id = 'pl_' + idx;
+  var html = '';
+  html += '<div class="p-top"><span class="p-num">選手 ' + (document.querySelectorAll('.player-card').length + 1) + '</span>';
+  html += '<button type="button" class="p-remove" onclick="removePlayer(' + idx + ')">✕ 削除</button></div>';
+  html += '<div class="player-grid">';
+  html += '<div class="full"><label>氏名<span class="req">※必須</span></label><input type="text" id="plname_' + idx + '" required placeholder="氏名"></div>';
+  html += '<div><label>学年<span class="req">※必須</span></label><select id="plgrade_' + idx + '" required><option value="">--</option>';
+  var g;
+  for (g = 0; g < GRADES.length; g++) html += '<option>' + GRADES[g] + '</option>';
+  html += '</select></div>';
+  html += '<div><label>性別<span class="req">※必須</span></label><select id="plgender_' + idx + '" required><option value="">--</option>';
+  var s;
+  for (s = 0; s < GENDERS.length; s++) html += '<option>' + GENDERS[s] + '</option>';
+  html += '</select></div>';
+  html += '</div>';
+  div.innerHTML = html;
+  area.appendChild(div);
+  calcFee();
+  return idx;
+}
+
+/* ========== EXCEL IMPORT ========== */
+function importExcel(input) {
+  var statusEl = document.getElementById('importStatus');
+  if (!input.files || input.files.length === 0) return;
+  var file = input.files[0];
+
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var data = new Uint8Array(e.target.result);
+      var workbook = XLSX.read(data, { type: 'array' });
+      var sheetName = workbook.SheetNames[0];
+      var sheet = workbook.Sheets[sheetName];
+      var rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+      if (rows.length < 2) {
+        statusEl.textContent = '❌ データが見つかりません（2行目以降にデータが必要です）';
+        statusEl.style.color = '#b33030';
+        return;
+      }
+
+      // ヘッダーから列を特定
+      var header = rows[0];
+      var nameCol = -1, gradeCol = -1, genderCol = -1;
+      var ci;
+      for (ci = 0; ci < header.length; ci++) {
+        var h = String(header[ci] || '').replace(/\s/g, '');
+        if (h.indexOf('氏名') >= 0 || h.indexOf('名前') >= 0 || h === '選手名') nameCol = ci;
+        if (h.indexOf('学年') >= 0) gradeCol = ci;
+        if (h.indexOf('性別') >= 0) genderCol = ci;
+      }
+
+      if (nameCol === -1) {
+        statusEl.textContent = '❌ 「氏名」列が見つかりません。ヘッダー行に「氏名」を含む列が必要です。';
+        statusEl.style.color = '#b33030';
+        return;
+      }
+
+      // 既存の選手をクリア
+      document.getElementById('playerArea').innerHTML = '';
+      playerCount = 0;
+
+      var imported = 0;
+      var ri;
+      for (ri = 1; ri < rows.length; ri++) {
+        var row = rows[ri];
+        var name = row[nameCol] ? String(row[nameCol]).replace(/\s/g, '') : '';
+        if (!name) continue;
+
+        var idx = addPlayer();
+
+        document.getElementById('plname_' + idx).value = name;
+
+        if (gradeCol >= 0 && row[gradeCol]) {
+          var gradeVal = normalizeGrade(String(row[gradeCol]));
+          if (gradeVal) document.getElementById('plgrade_' + idx).value = gradeVal;
+        }
+
+        if (genderCol >= 0 && row[genderCol]) {
+          var genderVal = normalizeGender(String(row[genderCol]));
+          if (genderVal) document.getElementById('plgender_' + idx).value = genderVal;
+        }
+
+        imported++;
+      }
+
+      statusEl.textContent = '✅ ' + imported + '名の選手を読み込みました。内容を確認し、不足があれば手動で修正してください。';
+      statusEl.style.color = '#155724';
+      renumber();
+    } catch (err) {
+      statusEl.textContent = '❌ ファイルの読み込みに失敗しました：' + err.message;
+      statusEl.style.color = '#b33030';
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function normalizeGrade(val) {
+  val = val.replace(/\s/g, '');
+  if (val.indexOf('1') >= 0 || val.indexOf('１') >= 0) return '1年';
+  if (val.indexOf('2') >= 0 || val.indexOf('２') >= 0) return '2年';
+  if (val.indexOf('3') >= 0 || val.indexOf('３') >= 0) return '3年';
+  return '';
+}
+
+function normalizeGender(val) {
+  val = val.replace(/\s/g, '');
+  if (val.indexOf('男') >= 0 || val === 'M' || val === 'm') return '男';
+  if (val.indexOf('女') >= 0 || val === 'F' || val === 'f') return '女';
+  return '';
+}
+
+function removePlayer(idx) {
+  var el = document.getElementById('pl_' + idx);
+  if (el) el.remove();
+  renumber();
+  calcFee();
+}
+
+function renumber() {
+  var cards = document.querySelectorAll('.player-card');
+  var i;
+  for (i = 0; i < cards.length; i++) {
+    cards[i].querySelector('.p-num').textContent = '選手 ' + (i + 1);
+  }
+}
+
+function calcFee() {
+  var cat = getCategory();
+  if (cat && CATEGORY_FEES[cat] !== undefined) {
+    var total = CATEGORY_FEES[cat];
+    document.getElementById('feeDisplay').textContent = total.toLocaleString() + '円';
+    document.getElementById('feeDetail').textContent = cat + '：' + total.toLocaleString() + '円';
+  } else {
+    document.getElementById('feeDisplay').textContent = '---';
+    document.getElementById('feeDetail').textContent = '種別を選択してください';
+  }
+}
+
+function getPlayers() {
+  var cards = document.querySelectorAll('.player-card');
+  var result = [];
+  var i, card, id;
+  for (i = 0; i < cards.length; i++) {
+    card = cards[i];
+    id = card.id.replace('pl_', '');
+    result.push({
+      name: document.getElementById('plname_' + id).value,
+      grade: document.getElementById('plgrade_' + id).value,
+      gender: document.getElementById('plgender_' + id).value
+    });
+  }
+  return result;
+}
+
+function getCategory() {
+  var els = document.getElementsByName('category');
+  var i;
+  for (i = 0; i < els.length; i++) { if (els[i].checked) return els[i].value; }
+  return '';
+}
+
+function buildPayload() {
+  var players = getPlayers();
+  return {
+    action: 'registration',
+    teamName: document.getElementById('teamName').value,
+    teamKana: document.getElementById('teamKana').value,
+    category: getCategory(),
+    district: document.getElementById('district').value,
+    representative: {
+      name: document.getElementById('repName').value,
+      kana: document.getElementById('repKana').value,
+      phone: document.getElementById('repPhone').value,
+      email: document.getElementById('repEmail').value
+    },
+    players: players,
+    fee: CATEGORY_FEES[getCategory()] || 0,
+    timestamp: new Date().toISOString()
+  };
+}
+
+function showConfirm() {
+  var form = document.getElementById('regForm');
+  if (!form.checkValidity()) { form.reportValidity(); return; }
+  var players = getPlayers();
+  if (players.length === 0) { alert('選手を1名以上追加してください。'); return; }
+
+  var payload = buildPayload();
+
+  // 重複チェック
+  var btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = '確認中...';
+
+  var checkUrl = GAS_URL + '?action=checkRegDuplicate&teamName=' + encodeURIComponent(payload.teamName) + '&category=' + encodeURIComponent(payload.category);
+  fetch(checkUrl).then(function(res) { return res.json(); }).then(function(data) {
+    btn.disabled = false;
+    btn.textContent = '登録内容を確認する';
+    if (data.isDuplicate) {
+      alert('「' + payload.teamName + '（' + payload.category + '）」は既に登録済みです。\n修正が必要な場合は連盟幹事までご連絡ください。');
+      return;
+    }
+    showConfirmModal(payload);
+  }).catch(function() {
+    btn.disabled = false;
+    btn.textContent = '登録内容を確認する';
+    showConfirmModal(payload);
+  });
+}
+
+function showConfirmModal(payload) {
+  var html = '';
+  html += '<table class="modal-table">';
+  html += '<tr><th>団体名</th><td>' + esc(payload.teamName) + '</td></tr>';
+  html += '<tr><th>ふりがな</th><td>' + esc(payload.teamKana) + '</td></tr>';
+  html += '<tr><th>種別</th><td>' + esc(payload.category) + '</td></tr>';
+  html += '<tr><th>地区</th><td>' + esc(payload.district) + '</td></tr>';
+  html += '<tr><th>代表者</th><td>' + esc(payload.representative.name) + '（' + esc(payload.representative.kana) + '）</td></tr>';
+  html += '<tr><th>連絡先</th><td>' + esc(payload.representative.phone) + '</td></tr>';
+  html += '<tr><th>メール</th><td>' + esc(payload.representative.email) + '</td></tr>';
+  html += '<tr><th>登録料</th><td>' + payload.fee.toLocaleString() + '円</td></tr>';
+  html += '</table>';
+
+  html += '<div class="modal-section">選手一覧（' + payload.players.length + '名）</div>';
+  html += '<table class="modal-table"><tr><th style="width:40px">No.</th><th>氏名</th><th style="width:50px">学年</th><th style="width:50px">性別</th></tr>';
+  var i;
+  for (i = 0; i < payload.players.length; i++) {
+    html += '<tr><td>' + (i + 1) + '</td><td>' + esc(payload.players[i].name) + '</td><td>' + esc(payload.players[i].grade) + '</td><td>' + esc(payload.players[i].gender) + '</td></tr>';
+  }
+  html += '</table>';
+
+  document.getElementById('confirmContent').innerHTML = html;
+  document.getElementById('confirmModal').classList.add('show');
+}
+
+function closeConfirm() { document.getElementById('confirmModal').classList.remove('show'); }
+function esc(s) { if (!s) return ''; return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+function doSubmit() {
+  closeConfirm();
+  var payload = buildPayload();
+  var btn = document.getElementById('submitBtn');
+  var msg = document.getElementById('statusMsg');
+  btn.disabled = true;
+  msg.className = 'status-msg sending';
+  msg.textContent = '送信中...登録書類の生成に少しお時間をいただきます';
+
+  fetch(GAS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify(payload)
+  }).then(function(res) { return res.json(); }).then(function(data) {
+    if (data.status === 'ok') {
+      msg.className = 'status-msg success';
+      msg.innerHTML = '団体登録を受け付けました。<br>登録確認書・振込案内（PDF）をメールで送信しました。'
+        + '<div class="nav-btns"><a class="btn btn-main" href="index.html">年間予定に戻る</a></div>';
+      btn.style.display = 'none';
+    } else {
+      throw new Error(data.message || 'エラーが発生しました');
+    }
+  }).catch(function(err) {
+    msg.className = 'status-msg error';
+    msg.textContent = '送信に失敗しました：' + err.message;
+    btn.disabled = false;
+  });
+}
+
+addPlayer();
+</script>
+</body>
+</html>
