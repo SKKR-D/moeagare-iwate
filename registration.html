@@ -19,6 +19,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--te
 .header-title h1{font-size:1rem;font-weight:700}
 .header-title h1 small{display:block;font-size:.7rem;font-weight:500;color:var(--gold)}
 .back-btn{background:rgba(255,255,255,.15);color:var(--white);border:none;padding:8px 14px;border-radius:6px;font-size:.8rem;cursor:pointer;font-family:inherit}
+.back-btn:disabled{opacity:0.4;cursor:not-allowed;} /* ★追加：無効化時のスタイル */
 .main{max-width:800px;margin:0 auto;padding:20px}
 .card{background:var(--white);border-radius:var(--radius);padding:20px;margin-bottom:16px;box-shadow:0 1px 6px rgba(0,0,0,.06)}
 .card h2{font-size:.9rem;font-weight:900;color:var(--main);margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid var(--main)}
@@ -75,7 +76,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--te
 .modal-btns{display:flex;gap:10px;justify-content:center;margin-top:16px}
 .footer{text-align:center;padding:30px 20px;font-size:.7rem;color:var(--text-light)}
 
-/* ★追加：未入力時のロック（グレーアウト）スタイル */
 .disabled-card {
   position: relative;
 }
@@ -118,7 +118,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--te
     <div class="header-title">
       <h1><small>岩手県中学生ソフトテニス連盟</small>令和8年度 団体登録</h1>
     </div>
-    <button class="back-btn" onclick="location.href='index.html'">← 年間予定へ</button>
+    <button class="back-btn" disabled title="現在は準備中のため利用できません">← 年間予定へ</button>
   </div>
 </header>
 
@@ -233,17 +233,15 @@ var GRADES = ['1年', '2年', '3年'];
 var GENDERS = ['男', '女'];
 var playerCount = 0;
 
-// ★追加：ページ読み込み時に、入力監視イベントを一括設定
 window.addEventListener('DOMContentLoaded', function() {
   var inputs = document.querySelectorAll('#teamName, #teamKana, input[name="category"], #district, #repName, #repKana, #repPhone, #repEmail');
   for (var i = 0; i < inputs.length; i++) {
     inputs[i].addEventListener('input', checkFormReady);
     inputs[i].addEventListener('change', checkFormReady);
   }
-  checkFormReady(); // 初期ロード時にも判定を実行
+  checkFormReady();
 });
 
-// ★追加：上部の必須項目がすべて埋まっているか判定し、選手情報カードのロックを解除する関数
 function checkFormReady() {
   var tName = document.getElementById('teamName').value.trim();
   var tKana = document.getElementById('teamKana').value.trim();
@@ -260,7 +258,6 @@ function checkFormReady() {
   var phoneValid = phoneEl.checkValidity();
   var emailValid = emailEl.checkValidity();
 
-  // すべて入力されていて、かつ電話・メールの形式が正しいか
   var isReady = tName && tKana && cat && dist && rName && rKana && rPhone && phoneValid && rEmail && emailValid;
 
   var pCard = document.getElementById('playerCard');
@@ -299,7 +296,6 @@ function addPlayer() {
   return idx;
 }
 
-/* ========== EXCEL IMPORT ========== */
 function importExcel(input) {
   var statusEl = document.getElementById('importStatus');
   if (!input.files || input.files.length === 0) return;
@@ -436,12 +432,10 @@ function calcFee() {
   }
 }
 
-// ★修正：種別が「後から変更された場合」に矛盾する選手がいたらリセットする処理を追加
 function updateGenders() {
   var cat = getCategory();
   var cards = document.querySelectorAll('.player-card');
   
-  // 変更された種別と、既に入力されている選手の性別に矛盾がないかチェック
   var hasConflict = false;
   for (var i = 0; i < cards.length; i++) {
     var id = cards[i].id.replace('pl_', '');
@@ -453,7 +447,6 @@ function updateGenders() {
     if (cat === '女子' && currentVal === '男') hasConflict = true;
   }
 
-  // 矛盾が生じた場合はアラートを出して選手リストをリセット
   if (hasConflict) {
     alert('⚠️ 選択された「種別」と、現在入力されている選手の「性別」に矛盾が生じたため、選手リストをリセットしました。\nお手数ですが再度選手を入力してください。');
     document.getElementById('playerArea').innerHTML = '';
@@ -461,10 +454,9 @@ function updateGenders() {
     document.getElementById('importStatus').textContent = '';
     document.getElementById('excelFile').value = '';
     addPlayer();
-    return; // addPlayer内で再度updateGendersが呼ばれるのでここで終了
+    return;
   }
 
-  // 矛盾がなければ、通常通り性別の固定・解除を行う
   for (var i = 0; i < cards.length; i++) {
     var id = cards[i].id.replace('pl_', '');
     var sel = document.getElementById('plgender_' + id);
@@ -597,8 +589,9 @@ function doSubmit() {
   }).then(function(res) { return res.json(); }).then(function(data) {
     if (data.status === 'ok') {
       msg.className = 'status-msg success';
+      // ★修正：登録完了後に表示されるボタンも無効化
       msg.innerHTML = '団体登録を受け付けました。<br>登録確認書・振込案内（PDF）をメールで送信しました。'
-        + '<div class="nav-btns"><a class="btn btn-main" href="index.html">年間予定に戻る</a></div>';
+        + '<div class="nav-btns"><button class="btn btn-main" disabled style="opacity:0.5;cursor:not-allowed;">年間予定に戻る</button></div>';
       btn.style.display = 'none';
     } else {
       throw new Error(data.message || 'エラーが発生しました');
