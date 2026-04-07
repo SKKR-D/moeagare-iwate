@@ -106,9 +106,9 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--te
       <div class="form-row">
         <label>種別<span class="req">※必須</span></label>
         <div class="radio-group">
-          <label><input type="radio" name="category" value="男子" required onchange="calcFee()">男子</label>
-          <label><input type="radio" name="category" value="女子" onchange="calcFee()">女子</label>
-          <label><input type="radio" name="category" value="男女" onchange="calcFee()">男女</label>
+          <label><input type="radio" name="category" value="男子" required onchange="calcFee(); updateGenders()">男子</label>
+          <label><input type="radio" name="category" value="女子" onchange="calcFee(); updateGenders()">女子</label>
+          <label><input type="radio" name="category" value="男女" onchange="calcFee(); updateGenders()">男女</label>
         </div>
       </div>
       <div class="form-row">
@@ -220,6 +220,7 @@ function addPlayer() {
   div.innerHTML = html;
   area.appendChild(div);
   calcFee();
+  updateGenders(); // ★修正点：選手追加時に性別の固定処理を呼び出す
   return idx;
 }
 
@@ -259,6 +260,29 @@ function importExcel(input) {
         statusEl.textContent = '❌ 「氏名」列が見つかりません。ヘッダー行に「氏名」を含む列が必要です。';
         statusEl.style.color = '#b33030';
         return;
+      }
+
+      // ★修正点：Excelアップロード時の性別エラーチェック★
+      var cat = getCategory();
+      if (cat === '男子' || cat === '女子') {
+        for (var ri = 1; ri < rows.length; ri++) {
+          var row = rows[ri];
+          if (genderCol >= 0 && row[genderCol]) {
+            var gVal = normalizeGender(String(row[genderCol]));
+            if (cat === '男子' && gVal === '女') {
+              statusEl.textContent = '❌ 男子チームが選択されているため、女子の選手は登録できません。Excelファイルの性別を確認して、再度アップロードしてください';
+              statusEl.style.color = '#b33030';
+              input.value = ''; // ファイルをリセット
+              return;
+            }
+            if (cat === '女子' && gVal === '男') {
+              statusEl.textContent = '❌ 女子チームが選択されているため、男子の選手は登録できません。Excelファイルの性別を確認して、再度アップロードしてください';
+              statusEl.style.color = '#b33030';
+              input.value = ''; // ファイルをリセット
+              return;
+            }
+          }
+        }
       }
 
       // 既存の選手をクリア
@@ -339,6 +363,27 @@ function calcFee() {
   } else {
     document.getElementById('feeDisplay').textContent = '---';
     document.getElementById('feeDetail').textContent = '種別を選択してください';
+  }
+}
+
+// ★修正点：種別の選択状況に応じて選手の性別を自動判定・固定する関数
+function updateGenders() {
+  var cat = getCategory();
+  var cards = document.querySelectorAll('.player-card');
+  for (var i = 0; i < cards.length; i++) {
+    var id = cards[i].id.replace('pl_', '');
+    var sel = document.getElementById('plgender_' + id);
+    if (!sel) continue;
+    
+    if (cat === '男子') {
+      sel.value = '男';
+      sel.disabled = true; // 変更不可にする
+    } else if (cat === '女子') {
+      sel.value = '女';
+      sel.disabled = true; // 変更不可にする
+    } else {
+      sel.disabled = false; // 男女チームの場合は選択可能
+    }
   }
 }
 
