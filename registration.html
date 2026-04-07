@@ -100,7 +100,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--te
         </div>
         <div class="form-row">
           <label>ふりがな<span class="req">※必須</span></label>
-          <input type="text" id="teamKana" required placeholder="例：まるまるちゅうがっこう">
+          <input type="text" id="teamKana" required placeholder="例：まるまるちゅうがっこう、まるまるそふとてにすくらぶ">
         </div>
       </div>
       <div class="form-row">
@@ -115,11 +115,11 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--te
         <label>参加地区名<span class="req">※必須</span></label>
         <select id="district" required>
           <option value="">選択してください</option>
-          <option>久慈</option><option>二戸</option><option>岩手</option>
-          <option>盛岡</option><option>紫波</option><option>花巻</option>
-          <option>和賀</option><option>胆江</option><option>一関</option>
-          <option>気仙</option><option>遠野</option><option>釜石・大槌</option>
-          <option>宮古</option>
+          <option>01_久慈</option><option>02_二戸</option><option>03_岩手</option>
+          <option>04_盛岡</option><option>05_紫波</option><option>06_花巻</option>
+          <option>07_和賀</option><option>08_胆江</option><option>09_一関</option>
+          <option>10_気仙</option><option>11_釜石・大槌</option><option>12_遠野</option>
+          <option>13_宮古</option>
         </select>
       </div>
     </div>
@@ -220,7 +220,7 @@ function addPlayer() {
   div.innerHTML = html;
   area.appendChild(div);
   calcFee();
-  updateGenders(); // ★修正点：選手追加時に性別の固定処理を呼び出す
+  updateGenders();
   return idx;
 }
 
@@ -245,7 +245,6 @@ function importExcel(input) {
         return;
       }
 
-      // ヘッダーから列を特定
       var header = rows[0];
       var nameCol = -1, gradeCol = -1, genderCol = -1;
       var ci;
@@ -262,7 +261,7 @@ function importExcel(input) {
         return;
       }
 
-      // ★修正点：Excelアップロード時の性別エラーチェック★
+      // ★修正点：エラーメッセージを大きく目立たせる
       var cat = getCategory();
       if (cat === '男子' || cat === '女子') {
         for (var ri = 1; ri < rows.length; ri++) {
@@ -270,22 +269,19 @@ function importExcel(input) {
           if (genderCol >= 0 && row[genderCol]) {
             var gVal = normalizeGender(String(row[genderCol]));
             if (cat === '男子' && gVal === '女') {
-              statusEl.textContent = '❌ 男子チームが選択されているため、女子の選手は登録できません。Excelファイルの性別を確認して、再度アップロードしてください';
-              statusEl.style.color = '#b33030';
-              input.value = ''; // ファイルをリセット
+              statusEl.innerHTML = '<div style="font-size: 1rem; font-weight: 900; line-height: 1.5; padding: 12px; margin-top: 12px; border: 2px solid #b33030; border-radius: 8px; background-color: #fffafb; color: #b33030;">❌ 男子チームが選択されているため、女子の選手は登録できません。<br>Excelファイルの性別を確認して、再度アップロードしてください</div>';
+              input.value = ''; 
               return;
             }
             if (cat === '女子' && gVal === '男') {
-              statusEl.textContent = '❌ 女子チームが選択されているため、男子の選手は登録できません。Excelファイルの性別を確認して、再度アップロードしてください';
-              statusEl.style.color = '#b33030';
-              input.value = ''; // ファイルをリセット
+              statusEl.innerHTML = '<div style="font-size: 1rem; font-weight: 900; line-height: 1.5; padding: 12px; margin-top: 12px; border: 2px solid #b33030; border-radius: 8px; background-color: #fffafb; color: #b33030;">❌ 女子チームが選択されているため、男子の選手は登録できません。<br>Excelファイルの性別を確認して、再度アップロードしてください</div>';
+              input.value = ''; 
               return;
             }
           }
         }
       }
 
-      // 既存の選手をクリア
       document.getElementById('playerArea').innerHTML = '';
       playerCount = 0;
 
@@ -366,7 +362,6 @@ function calcFee() {
   }
 }
 
-// ★修正点：種別の選択状況に応じて選手の性別を自動判定・固定する関数
 function updateGenders() {
   var cat = getCategory();
   var cards = document.querySelectorAll('.player-card');
@@ -377,12 +372,12 @@ function updateGenders() {
     
     if (cat === '男子') {
       sel.value = '男';
-      sel.disabled = true; // 変更不可にする
+      sel.disabled = true; 
     } else if (cat === '女子') {
       sel.value = '女';
-      sel.disabled = true; // 変更不可にする
+      sel.disabled = true; 
     } else {
-      sel.disabled = false; // 男女チームの場合は選択可能
+      sel.disabled = false; 
     }
   }
 }
@@ -438,7 +433,6 @@ function showConfirm() {
 
   var payload = buildPayload();
 
-  // 重複チェック
   var btn = document.getElementById('submitBtn');
   btn.disabled = true;
   btn.textContent = '確認中...';
