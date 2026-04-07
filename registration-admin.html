@@ -84,7 +84,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--te
 </head>
 <body>
 
-<!-- PASSWORD SCREEN -->
 <div class="pw-screen" id="pwScreen">
   <div class="pw-box">
     <h1>🔒 団体登録管理</h1>
@@ -95,7 +94,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--te
   </div>
 </div>
 
-<!-- MAIN CONTENT -->
 <div class="admin-content" id="adminContent">
 
 <header class="header">
@@ -135,7 +133,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--te
 
 </div>
 
-<!-- DETAIL MODAL -->
 <div class="modal-overlay" id="detailModal">
   <div class="modal-box">
     <h2 id="detailTitle">団体詳細</h2>
@@ -211,7 +208,8 @@ function renderTable() {
 
     html += '<tr>';
     html += '<td>' + regNo + '</td>';
-    html += '<td><span class="transfer-name">' + esc(transferName) + '</span></td>';
+    // 修正箇所: transferName → r._transferName
+    html += '<td><span class="transfer-name">' + esc(r._transferName) + '</span></td>';
     html += '<td><span class="clickable" onclick="showDetail(' + i + ')">' + esc(r.teamName) + '</span></td>';
     html += '<td>' + esc(r.category) + '</td>';
     html += '<td>' + esc(r.district) + '</td>';
