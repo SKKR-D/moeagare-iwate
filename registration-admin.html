@@ -169,13 +169,25 @@ function loadData() {
   document.getElementById('regBody').innerHTML = '<tr><td colspan="10" class="loading">読み込み中...</td></tr>';
 
   fetch(GAS_URL + '?action=getRegistrations').then(function(res) {
+    if (!res.ok) throw new Error('通信エラー (ステータス: ' + res.status + ')');
     return res.json();
   }).then(function(data) {
     allRegistrations = data.registrations || [];
     renderTable();
     renderSummary();
   }).catch(function(err) {
-    document.getElementById('regBody').innerHTML = '<tr><td colspan="10" class="loading">データの読み込みに失敗しました</td></tr>';
+    console.error(err);
+    var errMsg = err.message || err.toString();
+    var hint = '';
+    
+    // エラー内容に応じたヒントを表示
+    if (errMsg.includes('Unexpected token') || errMsg.includes('JSON')) {
+       hint = '<br><br><b style="color:#d32f2f;">【💡ほぼ確実な原因】</b><br>GAS側のデプロイ設定が間違っています。<br>GASの画面右上「デプロイを管理」から、アクセスできるユーザーを<b>「全員」</b>にして再デプロイしてください。（「Googleアカウントを持つ全員」だとこのエラーになります）';
+    } else if (errMsg.includes('Failed to fetch') || errMsg.includes('NetworkError')) {
+       hint = '<br><br><b style="color:#d32f2f;">【💡原因の可能性】</b><br>通信がブロックされました。GASのURLが正しいか、またはブラウザのセキュリティ設定を確認してください。';
+    }
+
+    document.getElementById('regBody').innerHTML = '<tr><td colspan="10" style="text-align:center; padding:40px; color:var(--text);"><b style="color:var(--red); font-size:1.1rem;">データの読み込みに失敗しました</b><br><br><span style="font-size:0.85rem; background:#fdd; padding:4px 8px; border-radius:4px;">エラー詳細: ' + errMsg + '</span>' + hint + '</td></tr>';
   });
 }
 
@@ -187,64 +199,73 @@ function renderTable() {
     return;
   }
 
-  var html = '';
-  var i, r;
-  for (i = 0; i < allRegistrations.length; i++) {
-    r = allRegistrations[i];
-    var regNo = String(r.regNo || (i + 1)).padStart(3, '0');
-    r._regNo = regNo;
-    r._transferName = r.transferName || regNo;
+  try {
+    var html = '';
+    var i, r;
+    for (i = 0; i < allRegistrations.length; i++) {
+      r = allRegistrations[i];
+      var regNo = String(r.regNo || (i + 1)).padStart(3, '0');
+      r._regNo = regNo;
+      r._transferName = r.transferName || regNo;
 
-    var paidClass = r.paid ? 'yes' : 'no';
-    var paidText = r.paid ? '入金済' : '未入金';
-    var playerCount = 0;
-    try { playerCount = JSON.parse(r.playersJson || '[]').length; } catch(e) {}
+      var paidClass = r.paid ? 'yes' : 'no';
+      var paidText = r.paid ? '入金済' : '未入金';
+      var playerCount = 0;
+      try { playerCount = JSON.parse(r.playersJson || '[]').length; } catch(e) {}
 
-    var dateStr = '';
-    if (r.timestamp) {
-      var d = new Date(r.timestamp);
-      dateStr = (d.getMonth() + 1) + '/' + d.getDate();
+      var dateStr = '';
+      if (r.timestamp) {
+        var d = new Date(r.timestamp);
+        dateStr = (d.getMonth() + 1) + '/' + d.getDate();
+      }
+
+      html += '<tr>';
+      html += '<td>' + regNo + '</td>';
+      html += '<td><span class="transfer-name">' + esc(r._transferName) + '</span></td>';
+      html += '<td><span class="clickable" onclick="showDetail(' + i + ')">' + esc(r.teamName) + '</span></td>';
+      html += '<td>' + esc(r.category) + '</td>';
+      html += '<td>' + esc(r.district) + '</td>';
+      html += '<td>' + esc(r.repName) + '</td>';
+      html += '<td>' + playerCount + '名</td>';
+      html += '<td>' + (Number(r.fee) || 0).toLocaleString() + '円</td>';
+      html += '<td><input type="checkbox" class="paid-check" ' + (r.paid ? 'checked' : '') + ' onchange="togglePaid(' + i + ', this.checked)"> <span class="paid-label ' + paidClass + '">' + paidText + '</span></td>';
+      html += '<td>' + dateStr + '</td>';
+      html += '</tr>';
     }
-
-    html += '<tr>';
-    html += '<td>' + regNo + '</td>';
-    // 修正箇所: transferName → r._transferName
-    html += '<td><span class="transfer-name">' + esc(r._transferName) + '</span></td>';
-    html += '<td><span class="clickable" onclick="showDetail(' + i + ')">' + esc(r.teamName) + '</span></td>';
-    html += '<td>' + esc(r.category) + '</td>';
-    html += '<td>' + esc(r.district) + '</td>';
-    html += '<td>' + esc(r.repName) + '</td>';
-    html += '<td>' + playerCount + '名</td>';
-    html += '<td>' + (r.fee || 0).toLocaleString() + '円</td>';
-    html += '<td><input type="checkbox" class="paid-check" ' + (r.paid ? 'checked' : '') + ' onchange="togglePaid(' + i + ', this.checked)"> <span class="paid-label ' + paidClass + '">' + paidText + '</span></td>';
-    html += '<td>' + dateStr + '</td>';
-    html += '</tr>';
+    body.innerHTML = html;
+  } catch(err) {
+    console.error(err);
+    body.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:40px; color:var(--red);"><b>表の描画中にエラーが発生しました</b><br><span style="font-size:0.8rem;">' + err.message + '</span></td></tr>';
   }
-  body.innerHTML = html;
 }
 
 /* ========== SUMMARY ========== */
 function renderSummary() {
-  var total = allRegistrations.length;
-  var paid = 0;
-  var unpaid = 0;
-  var totalFee = 0;
-  var paidFee = 0;
-  var i, r;
-  for (i = 0; i < allRegistrations.length; i++) {
-    r = allRegistrations[i];
-    totalFee += (r.fee || 0);
-    if (r.paid) { paid++; paidFee += (r.fee || 0); }
-    else { unpaid++; }
-  }
+  try {
+    var total = allRegistrations.length;
+    var paid = 0;
+    var unpaid = 0;
+    var totalFee = 0;
+    var paidFee = 0;
+    var i, r;
+    for (i = 0; i < allRegistrations.length; i++) {
+      r = allRegistrations[i];
+      var f = Number(r.fee) || 0;
+      totalFee += f;
+      if (r.paid) { paid++; paidFee += f; }
+      else { unpaid++; }
+    }
 
-  var html = '';
-  html += '<div class="summary-card"><div class="num">' + total + '</div><div class="label">登録団体数</div></div>';
-  html += '<div class="summary-card"><div class="num">' + paid + '</div><div class="label">入金済み</div></div>';
-  html += '<div class="summary-card warn"><div class="num">' + unpaid + '</div><div class="label">未入金</div></div>';
-  html += '<div class="summary-card"><div class="num">' + totalFee.toLocaleString() + '円</div><div class="label">登録料合計</div></div>';
-  html += '<div class="summary-card"><div class="num">' + paidFee.toLocaleString() + '円</div><div class="label">入金済み額</div></div>';
-  document.getElementById('summaryBar').innerHTML = html;
+    var html = '';
+    html += '<div class="summary-card"><div class="num">' + total + '</div><div class="label">登録団体数</div></div>';
+    html += '<div class="summary-card"><div class="num">' + paid + '</div><div class="label">入金済み</div></div>';
+    html += '<div class="summary-card warn"><div class="num">' + unpaid + '</div><div class="label">未入金</div></div>';
+    html += '<div class="summary-card"><div class="num">' + totalFee.toLocaleString() + '円</div><div class="label">登録料合計</div></div>';
+    html += '<div class="summary-card"><div class="num">' + paidFee.toLocaleString() + '円</div><div class="label">入金済み額</div></div>';
+    document.getElementById('summaryBar').innerHTML = html;
+  } catch(err) {
+    console.error('Summary Error:', err);
+  }
 }
 
 /* ========== TOGGLE PAID ========== */
@@ -282,7 +303,7 @@ function showDetail(idx) {
   html += '<tr><th>代表者</th><td>' + esc(r.repName) + '（' + esc(r.repKana) + '）</td></tr>';
   html += '<tr><th>連絡先</th><td>' + esc(r.repPhone) + '</td></tr>';
   html += '<tr><th>メール</th><td>' + esc(r.repEmail) + '</td></tr>';
-  html += '<tr><th>登録料</th><td>' + (r.fee || 0).toLocaleString() + '円</td></tr>';
+  html += '<tr><th>登録料</th><td>' + (Number(r.fee) || 0).toLocaleString() + '円</td></tr>';
   html += '<tr><th>入金状況</th><td>' + (r.paid ? '✅ 入金済み' : '❌ 未入金') + '</td></tr>';
   html += '</table>';
 
@@ -336,7 +357,7 @@ function exportListPdf() {
     pc = 0;
     try { pc = JSON.parse(r.playersJson || '[]').length; } catch(e) {}
     var paidStr = r.paid ? '<span class="paid">済</span>' : '<span class="unpaid">未</span>';
-    win.document.write('<tr><td>' + r._regNo + '</td><td class="mono">' + esc(r._transferName) + '</td><td>' + esc(r.teamName) + '</td><td>' + esc(r.category) + '</td><td>' + esc(r.district) + '</td><td>' + esc(r.repName) + '</td><td>' + pc + '</td><td>' + (r.fee||0).toLocaleString() + '</td><td>' + paidStr + '</td></tr>');
+    win.document.write('<tr><td>' + r._regNo + '</td><td class="mono">' + esc(r._transferName) + '</td><td>' + esc(r.teamName) + '</td><td>' + esc(r.category) + '</td><td>' + esc(r.district) + '</td><td>' + esc(r.repName) + '</td><td>' + pc + '</td><td>' + (Number(r.fee)||0).toLocaleString() + '</td><td>' + paidStr + '</td></tr>');
   }
   win.document.write('</table>');
   win.document.write('<p class="footer">岩手県中学生ソフトテニス連盟　団体登録管理</p>');
@@ -345,7 +366,11 @@ function exportListPdf() {
   setTimeout(function() { win.print(); }, 500);
 }
 
-function esc(s) { if (!s) return ''; return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+// エスケープ処理をより強固に修正
+function esc(s) { 
+  if (s === null || s === undefined) return ''; 
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); 
+}
 </script>
 </body>
 </html>
