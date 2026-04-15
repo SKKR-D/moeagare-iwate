@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>【公式】団体戦スコアシート</title>
+    <meta name="theme-color" content="#0f172a">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #f1f5f9; --surface: #ffffff; --surface2: #e2e8f0; --border: #94a3b8; --text: #0f172a; --text-dim: #475569; --blue: #0ea5e9; --blue-active: #0284c7; --red: #f97316; --red-active: #ea580c; --gold: #d97706; --gold-bg: #fef3c7; --cyan: #0891b2; --green: #16a34a; --error: #f43f5e; --error-bg: #fff1f2; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+        body { font-family: 'Noto Sans JP', sans-serif; background: #cbd5e1; color: var(--text); height: 100vh; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; overflow-y: auto; padding: 16px; }
+        .modal-overlay.hidden { display: none; }
+        .modal-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; width: 100%; max-width: 500px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); margin-bottom: 20px;}
+        .input-label { font-size: 0.75rem; color: var(--text-dim); margin-bottom: 4px; display: block; font-weight: bold; margin-top: 12px; border-bottom: 1px solid var(--surface2); padding-bottom: 4px; }
+        .name-input { width: 100%; padding: 12px; background: var(--surface); border: 2px solid var(--border); border-radius: 8px; font-size: 1rem; font-weight: bold; transition: 0.2s;}
+        .input-error { border: 2px solid var(--error) !important; background-color: var(--error-bg) !important; }
+        .option-group { display: flex; gap: 6px; margin-bottom: 12px; }
+        .opt-btn { flex: 1; padding: 12px 4px; background: var(--surface2); border: 2px solid var(--border); border-radius: 8px; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: 0.2s;}
+        .opt-btn.sel-gold { background: var(--gold-bg); border-color: var(--gold); color: var(--gold); }
+        .confirm-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--blue-active), #0369a1); border: none; border-radius: 10px; color: #fff; font-size: 1.1rem; font-weight: 900; margin-top: 12px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .confirm-btn.gold { background: linear-gradient(135deg, var(--gold), #b45309); } .confirm-btn.green { background: linear-gradient(135deg, var(--green), #15803d); }
+        .confirm-btn:disabled { background: #94a3b8; cursor: not-allowed; opacity: 0.6; box-shadow: none; }
+        .back-btn-text { width: 100%; margin-top: 15px; padding: 10px; background: transparent; border: none; color: var(--text-dim); font-weight: bold; font-size: 0.9rem; cursor: pointer; text-decoration: underline; }
+        .order-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 12px; }
+        .order-title { font-weight: 900; font-size: 0.9rem; margin-bottom: 10px; border-bottom: 2px solid var(--border); padding-bottom: 4px; display: flex; justify-content: space-between; align-items: center;}
+        .team-mini-label { font-size: 0.75rem; font-weight: 900; margin-bottom: 2px; display: flex; justify-content: space-between; align-items: center;}
+        .op-check-label { font-size: 0.75rem; color: var(--text-dim); font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+        .order-row { display: flex; gap: 6px; } .order-row input { flex: 1; padding: 10px; font-size: 0.9rem; border-radius: 6px; border: 1px solid var(--border); font-weight: bold; background: white;}
+        .order-vs-divider { text-align: center; font-size: 0.7rem; font-weight: 900; margin: 6px 0; color: var(--text-dim);}
+        .app { width: 100%; max-width: 600px; height: 100vh; display: flex; flex-direction: column; background: var(--bg); position: relative; overflow: hidden; }
+        .header { padding: 10px 12px; background: var(--surface); border-bottom: 2px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; min-height: 90px; }
+        .score-num-wrap { padding: 2px 10px; border-radius: 6px; font-weight: 900; color: white; min-width: 40px; text-align: center; font-family: 'Arial Black', sans-serif; }
+        .bg-blue { background-color: var(--blue-active); } .bg-red { background-color: var(--red-active); }
+        .game-score-display { font-size: 2.2rem; font-weight: 900; display: flex; align-items: center; }
+        .team-score-badge { background: #1e293b; color: white; border-radius: 8px; padding: 4px 10px; text-align: center; }
+        .battle-area { flex: 1; display: flex; gap: 8px; padding: 8px; min-height: 0; }
+        .team-column { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+        .huge-point-btn { flex: 2; border: none; border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; position: relative; background: #0f172a; box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 4px 8px rgba(0,0,0,0.2); transition: 0.1s; }
+        .huge-point-btn:active { transform: scale(0.97); } .btn-left { border-bottom: 8px solid var(--blue-active); } .btn-right { border-bottom: 8px solid var(--red-active); }
+        .btn-team-name { font-size: 1rem; font-weight: bold; position: absolute; top: 15px; width: 90%; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #cbd5e1; }
+        .btn-score-num { font-family: 'Arial Black', sans-serif; font-size: clamp(5rem, 30vh, 12rem); font-weight: 900; line-height: 1; margin-top: 5px;}
+        .btn-left .btn-score-num { color: #38bdf8; text-shadow: 0 0 15px rgba(56, 189, 248, 0.3); } .btn-right .btn-score-num { color: #fb923c; text-shadow: 0 0 15px rgba(251, 146, 60, 0.3); }
+        .fault-btn { width: 100%; padding: 15px; background: var(--surface); border: 3px solid var(--gold); border-radius: 12px; color: var(--gold); font-weight: 900; cursor: pointer; font-size: 1.5rem; margin-top: auto; }
+        .fault-btn.warn { background: var(--red-active); color: #fff; border-color: var(--red-active); }
+        .p-pair-box { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; } .p-row { display: flex; align-items: center; background: var(--surface); border: 2px solid var(--border); border-radius: 10px; padding: 8px; height: 48px; position: relative; transition: 0.2s;}
+        .p-name { flex: 1; font-weight: 900; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-left: 5px; }
+        .role-badge { font-size: 0.8rem; font-weight: 900; padding: 2px 6px; border-radius: 6px; display: none; color: white; margin-right: 4px; min-width: 24px; text-align: center; }
+        .role-badge.show-s { display: inline-block; background: var(--gold); color: #000; } .role-badge.show-r { display: inline-block; background: var(--cyan); }
+        .active-server { background: var(--gold-bg) !important; border-color: var(--gold) !important; } .active-receiver { background: #e0f7fa !important; border-color: var(--cyan) !important; }
+        .sub-header { display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; background: #1e293b; color: white; font-size: 0.9rem; font-weight: 900; }
+        .result-header { text-align: center; border-bottom: 2px solid var(--surface2); padding-bottom: 15px; margin-bottom: 15px; } .rh-score { font-family: 'Arial Black', sans-serif; font-size: 2.5rem; font-weight: 900; }
+        .send-status { text-align: center; font-size: 0.8rem; padding: 6px; border-radius: 6px; margin-top: 8px; display: none; }
+        .send-status.success { display: block; background: #dcfce7; color: #166534; }
+        .send-status.error { display: block; background: #fef2f2; color: #991b1b; }
+    </style>
+</head>
+<body>
+    <div id="modal" class="modal-overlay">
+        <div class="modal-card">
+            <div id="step-mode">
+                <h1 style="text-align: center; font-weight: 900; color: var(--blue-active); font-size: 2rem; margin-bottom: 25px;">TEAM MATCH</h1>
+                <p style="text-align:center; font-size:0.8rem; color:var(--text-dim); margin-bottom:15px;">審判アプリの開始方法</p>
+                <button class="confirm-btn gold" onclick="setAppMode('auto')">📡 本部割当から読込 (推奨)</button>
+                <button class="confirm-btn" style="background:var(--blue-active);" onclick="setAppMode('manual')">⌨ 試合番号を手入力</button>
+            </div>
+            <div id="step-auto" style="display:none;">
+                <h2 style="text-align:center; margin-bottom: 20px;">担当コート選択</h2>
+                <select id="auto-c-sel" class="name-input" style="font-size:1.5rem; text-align:center; height:60px;"></select>
+                <button class="confirm-btn gold" id="btn-auto-fetch" onclick="fetchByCourt()">試合データを取得 ➔</button>
+                <button class="back-btn-text" onclick="step('mode')">← 戻る</button>
+            </div>
+            <div id="step-manual" style="display:none;">
+                <h2 style="text-align:center; margin-bottom: 15px;">試合番号入力</h2>
+                <input type="text" class="name-input" id="match-id-input" placeholder="プログラム番号 (例: T001)" style="text-align:center; font-size:1.5rem; text-transform:uppercase;">
+                <button class="confirm-btn gold" id="btn-manual-fetch" onclick="fetchMatchData()">選手データを読込 ➔</button>
+                <button class="back-btn-text" onclick="step('mode')">← 戻る</button>
+            </div>
+            <div id="step-setup" style="display:none;">
+                <h3 style="text-align:center; margin-bottom: 10px;">ルール・会場設定</h3>
+                <div style="display: flex; gap: 5px;"><input type="text" id="t1-no" class="name-input" placeholder="No." style="width:70px;"><input id="t1-name" class="name-input" placeholder="チーム1名" oninput="validateSetup()"></div>
+                <div style="display: flex; gap: 5px;"><input type="text" id="t2-no" class="name-input" placeholder="No." style="width:70px;"><input id="t2-name" class="name-input" placeholder="チーム2名" oninput="validateSetup()"></div>
+                <p class="input-label">📌 方式/ゲーム数</p>
+                <div class="option-group" id="playmode-opts"><button class="opt-btn sel-gold" onclick="selPlayMode('first_to_2')">2点先取終了</button><button class="opt-btn" onclick="selPlayMode('all')">全3試合行う</button></div>
+                <div class="option-group" id="match-opts"><button class="opt-btn" onclick="selMatch(5)">5ゲーム</button><button class="opt-btn sel-gold" onclick="selMatch(7)">7ゲーム</button></div>
+                <div style="display: flex; gap: 5px;"><select id="v-sel" class="name-input" onchange="updateCourtSelect('v-sel','c-sel','c-inp'); validateSetup();" style="flex: 2;"><option value="一関運動公園">一関運動公園</option><option value="和賀川グリーンパーク">和賀川GP</option><option value="日居城野公園">日居城野公園</option><option value="太田テニスコート">太田テニスコート</option><option value="その他">その他</option></select><select id="c-sel" class="name-input" style="flex: 1;" onchange="validateSetup()"></select><input id="c-inp" class="name-input" style="flex: 1; display: none;" oninput="validateSetup()"></div>
+                <button class="confirm-btn green" id="btn-to-order" onclick="goToStep1()" disabled>オーダー確認へ ➔</button>
+                <button class="back-btn-text" onclick="step('mode')">← 最初に戻る</button>
+            </div>
+            <div id="step-1" style="display:none;">
+                <h3 style="text-align:center; margin-bottom: 10px;">オーダー確認</h3>
+                <p style="text-align:center; font-size:0.75rem; color:var(--error); font-weight:bold; margin-bottom:10px; display:none;" id="order-error-hint">⚠️ 未入力の項目があります</p>
+                <div class="order-box"><div class="order-title">第1マッチ</div><div class="team-mini-label" style="color:var(--blue-active);"><span id="l-m1-t1">🔵 T1</span></div><div class="order-row"><input id="o1A" oninput="validateOrder()"><input id="o1B" oninput="validateOrder()"></div><div class="order-vs-divider">VS</div><div class="team-mini-label" style="color:var(--red-active);"><span id="l-m1-t2">🔴 T2</span></div><div class="order-row"><input id="o1C" oninput="validateOrder()"><input id="o1D" oninput="validateOrder()"></div></div>
+                <div class="order-box"><div class="order-title">第2マッチ</div><div class="team-mini-label" style="color:var(--blue-active);"><span id="l-m2-t1">🔵 T1</span></div><div class="order-row"><input id="o2A" oninput="validateOrder()"><input id="o2B" oninput="validateOrder()"></div><div class="order-vs-divider">VS</div><div class="team-mini-label" style="color:var(--red-active);"><span id="l-m2-t2">🔴 T2</span></div><div class="order-row"><input id="o2C" oninput="validateOrder()"><input id="o2D" oninput="validateOrder()"></div></div>
+                <div class="order-box"><div class="order-title">第3マッチ</div><div class="team-mini-label" style="color:var(--blue-active);"><span id="l-m3-t1">🔵 T1</span><label class="op-check-label"><input type="checkbox" id="o3opL" onchange="validateOrder()"> OP(不戦敗)</label></div><div class="order-row"><input id="o3A" oninput="validateOrder()"><input id="o3B" oninput="validateOrder()"></div><div class="order-vs-divider">VS</div><div class="team-mini-label" style="color:var(--red-active);"><span id="l-m3-t2">🔴 T2</span><label class="op-check-label"><input type="checkbox" id="o3opR" onchange="validateOrder()"> OP(不戦敗)</label></div><div class="order-row"><input id="o3C" oninput="validateOrder()"><input id="o3D" oninput="validateOrder()"></div></div>
+                <button class="confirm-btn" id="btn-start" onclick="submitOrderAndProceed()" disabled>決定して次へ ➔</button>
+                <button class="back-btn-text" onclick="step('setup')">← 戻る</button>
+            </div>
+            <div id="step-match-select" style="display:none;">
+                <h3 style="text-align:center; margin-bottom:15px;">担当マッチ選択</h3>
+                <p style="font-size:0.85rem; color:var(--text-dim); text-align:center; margin-bottom:15px;">このスマホで審判を行うマッチを選んでください。</p>
+                <div class="option-group" id="ms-opts"><button class="opt-btn sel-gold" onclick="selMLock(1)" id="ms1">第1マッチ</button><button class="opt-btn" onclick="selMLock(2)" id="ms2">第2マッチ</button><button class="opt-btn" onclick="selMLock(3)" id="ms3">第3マッチ</button></div>
+                <button class="confirm-btn gold" onclick="startAssignedMatch()">担当を開始する ➔</button>
+                <button class="back-btn-text" onclick="step(1)">← オーダー確認へ戻る</button>
+            </div>
+            <div id="step-2" style="display:none;">
+                <h3 id="pos-title">準備</h3>
+                <div id="serve-area-full"><p class="input-label" style="text-align:center;">最初のサーバー陣営</p><div class="option-group"><button class="opt-btn" onclick="setServeTeam(0)" id="bsL">🔵 T1</button><button class="opt-btn" onclick="setServeTeam(1)" id="bsR">🔴 T2</button></div></div>
+                <div id="pos-opts" style="display:none;"><div id="game-info-simple" style="text-align:center; font-weight:bold; color:var(--blue-active); margin-bottom:10px;"></div><p class="input-label">🎾 サーブ</p><div class="option-group" id="s-opts"></div><p class="input-label">↗ レシーブ（クロス）</p><div class="option-group" id="r-opts"></div><button class="confirm-btn gold" id="btn-game-start" onclick="closeModal(); update();">試合開始！</button></div>
+                <button class="back-btn-text" id="btn-back-step1" onclick="step('match-select')">← 戻る</button>
+            </div>
+            <div id="step-3" style="display:none;">
+                <div class="result-header"><div id="res-winner" style="font-weight:900; color:var(--gold); font-size:1.4rem;">勝者</div><div class="rh-score" id="res-score">4-0</div></div>
+                <p style="text-align:center; font-weight:bold; margin-top:10px;">団体戦スコア：<span id="res-tsL" style="color:var(--blue-active);">0</span> - <span id="res-tsR" style="color:var(--red-active);">0</span></p>
+                <button class="confirm-btn gold" id="btn-next" onclick="processTeamResult()">決定して次へ ➔</button>
+            </div>
+            <div id="step-post-match-choice" style="display:none;">
+                <h2 style="text-align:center; margin-bottom:20px;">マッチ終了</h2>
+                <button class="confirm-btn gold" onclick="goToNextMatch()">▶ 次のマッチの審判をする</button>
+                <button class="confirm-btn" style="background:#475569;" onclick="showFinal()">📊 最終結果・送信画面へ</button>
+                <button class="back-btn-text" onclick="location.reload()">🚪 最初に戻る</button>
+            </div>
+            <div id="step-4" style="display:none;">
+                <div class="result-header"><h2>最終結果</h2><div id="fin-winner" style="font-weight:900; font-size:1.5rem; color:var(--blue-active);">WINNER</div><div class="rh-score" id="fin-score">2-1</div></div>
+                <div id="fin-list" style="margin:20px 0; background: #fff; padding: 10px; border-radius: 12px; border: 1px solid #ddd;"></div>
+                <button class="confirm-btn green" id="btn-send" onclick="sendToCloud()">☁ 本部に全結果を送信</button>
+                <div class="send-status" id="sendStatus"></div>
+                <button class="back-btn-text" onclick="location.reload()">最初に戻る</button>
+            </div>
+        </div>
+    </div>
+    <div class="app">
+        <div class="header">
+            <div><div id="main-court" style="font-size:0.7rem; font-weight:900; color:var(--text-dim); overflow:hidden; white-space:nowrap; width:100px;">会場</div><div id="main-game" style="font-size:1.2rem; font-weight:900;">1G</div></div>
+            <div style="text-align:center;">Gカウント<div class="game-score-display" id="gs-container"><span id="gsL" class="score-num-wrap bg-blue">0</span><span style="color:#ccc;margin:0 5px;">-</span><span id="gsR" class="score-num-wrap bg-red">0</span></div></div>
+            <div style="text-align:right;">団体戦<div class="team-score-badge"><span class="team-score-text"><span id="tsL" style="color:var(--blue-active);">0</span>-<span id="tsR" style="color:var(--red-active);">0</span></span></div></div>
+        </div>
+        <div class="sub-header"><div id="main-m-label">第1マッチ</div><div style="display:flex; gap:15px;"><span onclick="S.swapped=!S.swapped;update();" style="cursor:pointer;">🔄 入替</span><span onclick="undo()" style="cursor:pointer;">↩️ 戻す</span></div></div>
+        <div id="battle-area" class="battle-area"><div class="team-column left-team" id="col-L"><button class="huge-point-btn btn-left" onclick="addPoint('L')"><div id="btL" class="btn-team-name">T1</div><div id="ptL" class="btn-score-num">0</div></button><div class="p-pair-box"><div class="p-row" id="row-A"><span class="role-badge" id="bA"></span><div class="p-name" id="nmA">A</div></div><div class="p-row" id="row-B"><span class="role-badge" id="bB"></span><div class="p-name" id="nmB">B</div></div></div></div><div class="team-column right-team" id="col-R"><button class="huge-point-btn btn-right" onclick="addPoint('R')"><div id="btR" class="btn-team-name">T2</div><div id="ptR" class="btn-score-num">0</div></button><div class="p-pair-box"><div class="p-row" id="row-C"><span class="role-badge" id="bC"></span><div class="p-name" id="nmC">C</div></div><div class="p-row" id="row-D"><span class="role-badge" id="bD"></span><div class="p-name" id="nmD">D</div></div></div></div></div>
+        <div style="padding:0 8px 8px;"><button class="fault-btn" id="f-btn" onclick="handleFault()">FAULT</button></div>
+    </div>
+    <script>
+        // ============================================================
+        // DXシステム連携用API URL
+        // ============================================================
+        const API = "https://script.google.com/macros/s/AKfycbyxWcuPgEZZS5zma0xxXOu-LvC0GTP4-ArSao_Y119N7zP_k_xWf6PoSGd5RIeaGLIy/exec";
+        const VENUE_CONFIG = { "一関運動公園":{max:16}, "和賀川グリーンパーク":{max:18}, "日居城野公園":{max:8}, "太田テニスコート":{max:16}, "その他":{manual:true} };
+        let appMode = 'auto', TS = { meta:{ id:'', court:'', round:'', maxG:7, winG:4, playMode:'first_to_2' }, tNos:{L:'',R:''}, teams:{L:'T1',R:'T2'}, matchOrders:[], matchResults:[null, null, null], winsL:0, winsR:0, currentMatchNum:1 };
+        let S = getInitialMatchState(), history = [];
+        function getInitialMatchState() { return { maxG:7, winG:4, gL:0, gR:0, pL:0, pR:0, totalP:0, fault:0, isFinal:false, startTeam:null, curServTeam:null, sOrder:[], rOrder:[], names:{A:'',B:'',C:'',D:''}, hist:[], swapped:false }; }
+        function step(n) { document.querySelectorAll('.modal-card > div').forEach(el=>el.style.display='none'); document.getElementById('step-'+n).style.display='block'; }
+        function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+        function setAppMode(m) { appMode = m; if(m === 'auto') { initCourtSelector('auto-c-sel'); step('auto'); } else { step('manual'); } }
+        function initCourtSelector(id) { const sel = document.getElementById(id); sel.innerHTML = '<option value="">▼ コートを選択 ▼</option>'; for(let i=1; i<=18; i++) sel.innerHTML += `<option value="${i}コート">${i}コート</option>`; }
+
+        // ============================================================
+        // DX連携：コート自動取得（「コート指定済み」の試合を検索）
+        // ============================================================
+        async function fetchByCourt() {
+            const court = document.getElementById('auto-c-sel').value; if(!court) return alert("コートを選択してください");
+            const btn = document.getElementById('btn-auto-fetch'); btn.disabled = true; btn.textContent = "検索中...";
+            try {
+                const progRes = await fetch(API + "?action=getProgress").then(r => r.json());
+                const assigned = progRes.find(m => m.court === court && (m.status === "コート指定済み" || m.status === "試合中"));
+                if(!assigned) throw new Error("このコートに割当済の試合がありません。\n本部管理画面でコートを割り当ててください。");
+                TS.meta.court = court; TS.meta.round = assigned.round || "";
+                await loadMatchById(assigned.matchId);
+            } catch(e) { alert(e.message); } finally { btn.disabled = false; btn.textContent = "試合データを取得 ➔"; }
+        }
+
+        async function fetchMatchData() {
+            const id = document.getElementById('match-id-input').value.trim().toUpperCase(); if(!id) return alert("番号を入力してください");
+            const btn = document.getElementById('btn-manual-fetch'); btn.disabled = true;
+            try {
+                const progRes = await fetch(API + "?action=getProgress").then(r => r.json());
+                const assigned = progRes.find(m => m.matchId === id);
+                TS.meta.round = assigned ? (assigned.round || "") : "";
+                await loadMatchById(id);
+            } catch(e) { alert(e.message); } finally { btn.disabled = false; }
+        }
+
+        async function loadMatchById(matchId) {
+            try { const res = await fetch(API + "?action=getMatchData&matchId=" + matchId).then(r => r.json()); if(res.error) throw new Error(res.error); TS.meta.id = res.matchId; document.getElementById('t1-no').value = res.t1No || ""; document.getElementById('t1-name').value = res.t1Name || ""; document.getElementById('t2-no').value = res.t2No || ""; document.getElementById('t2-name').value = res.t2Name || ""; document.getElementById('o1A').value = res.t1[0] || ""; document.getElementById('o1B').value = res.t1[1] || ""; document.getElementById('o1C').value = res.t2[0] || ""; document.getElementById('o1D').value = res.t2[1] || ""; document.getElementById('o2A').value = res.t1[2] || ""; document.getElementById('o2B').value = res.t1[3] || ""; document.getElementById('o2C').value = res.t2[2] || ""; document.getElementById('o2D').value = res.t2[3] || ""; document.getElementById('o3A').value = res.t1[4] || ""; document.getElementById('o3B').value = res.t1[5] || ""; document.getElementById('o3C').value = res.t2[4] || ""; document.getElementById('o3D').value = res.t2[5] || ""; updateCourtSelect('v-sel','c-sel','c-inp'); validateSetup(); validateOrder(); step('setup'); } catch(e) { alert(e.message); }
+        }
+        function validateSetup() { const t1 = document.getElementById('t1-name').value; const t2 = document.getElementById('t2-name').value; const v = document.getElementById('v-sel').value; const conf = VENUE_CONFIG[v] || VENUE_CONFIG["その他"]; const c = conf.manual ? document.getElementById('c-inp').value : document.getElementById('c-sel').value; document.getElementById('btn-to-order').disabled = !(t1 && t2 && c); }
+        function validateOrder() { const fields = ["o1A","o1B","o1C","o1D","o2A","o2B","o2C","o2D","o3A","o3B","o3C","o3D"]; let allOk = true; fields.forEach(id => { const el = document.getElementById(id); let req = true; if(id.startsWith('o3')){ if((id.endsWith('A')||id.endsWith('B')) && document.getElementById('o3opL').checked) req = false; if((id.endsWith('C')||id.endsWith('D')) && document.getElementById('o3opR').checked) req = false; } if(req && el.value.trim()===""){ el.classList.add('input-error'); allOk = false; } else { el.classList.remove('input-error'); } }); document.getElementById('btn-start').disabled = !allOk; document.getElementById('order-error-hint').style.display = allOk ? 'none' : 'block'; }
+        function selPlayMode(m) { TS.meta.playMode = m; document.querySelectorAll('#playmode-opts .opt-btn').forEach((b,i)=>b.className='opt-btn'+(i===(m==='first_to_2'?0:1)?' sel-gold':'')); }
+        function selMatch(n) { TS.meta.maxG = n; TS.meta.winG = n===7?4:3; document.querySelectorAll('#match-opts .opt-btn').forEach((b,i)=>b.className='opt-btn'+(i===(n===5?0:1)?' sel-gold':'')); }
+        function updateCourtSelect(vId, sId, iId) { const v = document.getElementById(vId).value, conf = VENUE_CONFIG[v]||VENUE_CONFIG["その他"], sel = document.getElementById(sId), inp = document.getElementById(iId); if(conf.manual){ sel.style.display='none'; inp.style.display='block'; } else { sel.style.display='block'; inp.style.display='none'; sel.innerHTML=''; for(let i=1;i<=conf.max;i++) sel.innerHTML+=`<option value="${i}コート">${i}コート</option>`; } }
+        
+        function goToStep1() { 
+            TS.tNos = {L:document.getElementById('t1-no').value, R:document.getElementById('t2-no').value}; 
+            TS.teams = {L:document.getElementById('t1-name').value||'T1', R:document.getElementById('t2-name').value||'T2'}; 
+            if(appMode === 'manual') { const v = document.getElementById('v-sel').value; TS.meta.court = v + " " + (VENUE_CONFIG[v].manual ? document.getElementById('c-inp').value : document.getElementById('c-sel').value); } 
+            let dispL = TS.tNos.L ? `${TS.tNos.L}_${TS.teams.L}` : TS.teams.L;
+            let dispR = TS.tNos.R ? `${TS.tNos.R}_${TS.teams.R}` : TS.teams.R;
+            for(let i=1; i<=3; i++){ document.getElementById(`l-m${i}-t1`).innerText = "🔵 " + dispL; document.getElementById(`l-m${i}-t2`).innerText = "🔴 " + dispR; } 
+            document.getElementById('bsL').textContent="🔵 " + dispL; document.getElementById('bsR').textContent="🔴 " + dispR; 
+            step(1); validateOrder(); 
+        }
+
+        // ============================================================
+        // DX連携：オーダー確定時にステータスを「試合中」に更新
+        // ============================================================
+        function submitOrderAndProceed() {
+            TS.matchOrders = []; TS.matchResults = [null, null, null]; TS.winsL = 0; TS.winsR = 0; const circles = ['⓪','①','②','③','④','⑤','⑥','⑦']; let winChar = circles[TS.meta.winG] || '④';
+            for(let i=1; i<=3; i++){ let a=document.getElementById(`o${i}A`).value, b=document.getElementById(`o${i}B`).value, c=document.getElementById(`o${i}C`).value, d=document.getElementById(`o${i}D`).value; if(i===3){ let isL_OP = document.getElementById('o3opL').checked; let isR_OP = document.getElementById('o3opR').checked; if(isL_OP){a = a?a+'(OP)':'(OP)'; b = b?b+'(OP)':'(OP)';} if(isR_OP){c = c?c+'(OP)':'(OP)'; d = d?d+'(OP)':'(OP)';} if (isL_OP && !isR_OP) { TS.winsR++; TS.matchResults[2] = { A:a, B:b, C:c, D:d, gL:0, gR:TS.meta.winG, displayScore: `R - ${winChar}`, winner: "R", uiScoreHtml: `R - ${winChar}<br><span style="font-size:0.8rem; color:var(--text-dim); font-weight:normal;">(0-${TS.meta.winG})</span>` }; } else if (isR_OP && !isL_OP) { TS.winsL++; TS.matchResults[2] = { A:a, B:b, C:c, D:d, gL:TS.meta.winG, gR:0, displayScore: `${winChar} - R`, winner: "L", uiScoreHtml: `${winChar} - R<br><span style="font-size:0.8rem; color:var(--text-dim); font-weight:normal;">(${TS.meta.winG}-0)</span>` }; } else if (isL_OP && isR_OP) { TS.matchResults[2] = { A:a, B:b, C:c, D:d, gL:0, gR:0, displayScore: `R - R`, winner: "D", uiScoreHtml: `R - R` }; } } TS.matchOrders.push({A:a,B:b,C:c,D:d}); }
+
+            // DX連携：試合中に更新
+            if (TS.meta.id) {
+                fetch(API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({ type: "UPDATE_PROGRESS", matchId: TS.meta.id, status: "試合中" })
+                }).catch(e => console.log("ステータス送信エラー:", e));
+            }
+
+            selMLock(1); step('match-select');
+        }
+
+        function selMLock(n) { TS.currentMatchNum=n; [1,2,3].forEach(i=>document.getElementById(`ms${i}`).className='opt-btn'+(i===n?' sel-gold':'')); }
+        function startAssignedMatch() { prepMatch(TS.currentMatchNum); }
+        function prepMatch(n) { if (TS.matchResults[n-1]) { alert(`第${n}マッチはすでに不戦勝(OP)で決着しています。`); return; } S = getInitialMatchState(); S.maxG = TS.meta.maxG; S.winG = TS.meta.winG; history = []; const o = TS.matchOrders[n-1]; S.names = {A:o.A||'A',B:o.B||'B',C:o.C||'C',D:o.D||'D'}; document.getElementById('pos-title').textContent = `第${n}マッチ 準備`; document.getElementById('game-info-simple').textContent = "【1G目】"; document.getElementById('btn-game-start').textContent = "第1ゲームを開始"; document.getElementById('serve-area-full').style.display="block"; document.getElementById('pos-opts').style.display="none"; document.getElementById('btn-back-step1').style.display="block"; update(); step(2); }
+        function setServeTeam(t) { S.startTeam=t; S.curServTeam=t; document.getElementById('bsL').className='opt-btn'+(t===0?' sel-gold':''); document.getElementById('bsR').className='opt-btn'+(t===1?' sel-gold':''); buildPosSelection(); document.getElementById('pos-opts').style.display="block"; }
+        function buildPosSelection() { const sSide = S.curServTeam===0?['A','B']:['C','D'], rSide = S.curServTeam===0?['C','D']:['A','B']; S.sOrder=[sSide[0],sSide[1]]; S.rOrder=[rSide[0],rSide[1]]; const mk = (id, list, d) => { const el = document.getElementById(id); el.innerHTML=''; list.forEach(p=>{ const b = document.createElement('button'); b.className = 'opt-btn'+(p===d?' sel-gold':''); b.textContent = S.names[p]; b.onclick=()=>{ if(id==='s-opts') S.sOrder=[p, list.find(x=>x!==p)]; else S.rOrder=[p, list.find(x=>x!==p)]; mk(id, list, p); }; el.appendChild(b); }); }; mk('s-opts', sSide, sSide[0]); mk('r-opts', rSide, rSide[0]); }
+        function addPoint(w) { history.push(JSON.stringify(S)); S.hist.push(w); if(w==='L') S.pL++; else S.pR++; S.fault=0; S.totalP++; if(!checkEnd()){ if(S.isFinal&&S.totalP>0&&(S.totalP-2)%4===0){alert("チェンジサイズ"); S.swapped=!S.swapped;} update(); } }
+        function handleFault() { if(S.curServTeam===null)return; if(S.fault===0){ S.fault=1; document.getElementById('f-btn').textContent="2nd SRV"; document.getElementById('f-btn').classList.add('warn'); } else { addPoint(S.curServTeam===0?'R':'L'); document.getElementById('f-btn').textContent="FAULT"; document.getElementById('f-btn').classList.remove('warn'); } }
+        function checkEnd() { const b = S.isFinal?7:4, win = S.pL>=b&&S.pL-S.pR>=2 ? 'L' : S.pR>=b&&S.pR-S.pL>=2 ? 'R' : null; if(win){ win==='L'?S.gL++:S.gR++; update(); setTimeout(()=>{ if(S.gL===TS.meta.winG||S.gR===TS.meta.winG) showMatchRes(); else { S.pL=0; S.pR=0; S.totalP=0; S.hist=[]; S.curServTeam=1-S.curServTeam; if(S.gL+S.gR===TS.meta.maxG-1) S.isFinal=true; const nG = S.gL+S.gR+1; alert((S.gL+S.gR)%2!==0?"チェンジサイズ":"チェンジサービス"); if((S.gL+S.gR)%2!==0) S.swapped=!S.swapped; document.getElementById('game-info-simple').textContent = S.isFinal?"【ファイナル】":`【${nG}G目】`; document.getElementById('btn-game-start').textContent = S.isFinal?"ファイナルゲームを開始":`第${nG}ゲームを開始`; document.getElementById('serve-area-full').style.display="none"; document.getElementById('btn-back-step1').style.display="none"; buildPosSelection(); document.getElementById('pos-opts').style.display="block"; step(2); document.getElementById('modal').classList.remove('hidden'); update(); } }, 100); return true; } return false; }
+        
+        function update() { const getServ = () => { if(S.curServTeam===null) return null; if(!S.isFinal) return { s: S.sOrder[Math.floor(S.totalP/2)%2], r: S.rOrder[S.totalP%2], t: S.curServTeam }; const blk = Math.floor(S.totalP/2)%4, pb = S.totalP%2; if(blk===0) return {s:S.sOrder[0], r:S.rOrder[pb], t:S.curServTeam}; if(blk===1) return {s:S.rOrder[0], r:S.sOrder[pb], t:1-S.curServTeam}; if(blk===2) return {s:S.sOrder[1], r:S.rOrder[pb], t:S.curServTeam}; return {s:S.rOrder[1], r:S.sOrder[pb], t:1-S.curServTeam}; }; const inf=getServ(), d = ((l,r,f)=>{ const b=f?6:3; if(l<b||r<b)return{l,r}; if(l===r)return{l:'D',r:'D'}; return l>r?{l:'A',r:'D'}:{l:'D',r:'A'}; })(S.pL, S.pR, S.isFinal); document.getElementById('gsL').textContent=S.gL; document.getElementById('gsR').textContent=S.gR; document.getElementById('ptL').textContent=d.l; document.getElementById('ptR').textContent=d.r; document.getElementById('main-game').textContent=S.isFinal?'Final':(S.gL+S.gR+1)+'G'; ['A','B','C','D'].forEach(p=>{ document.getElementById('nm'+p).textContent=S.names[p]||'選手'; const row=document.getElementById('row-'+p), b=document.getElementById('b'+p); row.className='p-row'; b.className='role-badge'; if(inf && p===inf.s){row.classList.add('active-server'); b.classList.add('show-s'); b.textContent='S';} if(inf && p===inf.r){row.classList.add('active-receiver'); b.classList.add('show-r'); b.textContent='R';} }); const rev = S.swapped?'row-reverse':'row'; document.getElementById('battle-area').style.flexDirection=rev; document.getElementById('gs-container').style.flexDirection=rev; document.getElementById('main-court').textContent=TS.meta.court; document.getElementById('tsL').textContent=TS.winsL; document.getElementById('tsR').textContent=TS.winsR; 
+        let dispL = TS.tNos.L ? `${TS.tNos.L}_${TS.teams.L}` : TS.teams.L;
+        let dispR = TS.tNos.R ? `${TS.tNos.R}_${TS.teams.R}` : TS.teams.R;
+        document.getElementById('btL').textContent=dispL; document.getElementById('btR').textContent=dispR; 
+        let roundBadge = TS.meta.round ? `<span style="background:#f1f5f9; color:#0f172a; padding:2px 8px; border-radius:4px; font-size:0.75rem; margin-right:10px; font-weight:900;">${TS.meta.round}</span>` : ''; document.getElementById('main-m-label').innerHTML = `${roundBadge}第${TS.currentMatchNum}マッチ`; }
+        function undo() { if(history.length){ S=JSON.parse(history.pop()); update(); } }
+        function showMatchRes() { let dispL = TS.tNos.L ? `${TS.tNos.L}_${TS.teams.L}` : TS.teams.L; let dispR = TS.tNos.R ? `${TS.tNos.R}_${TS.teams.R}` : TS.teams.R; document.getElementById('res-winner').textContent=S.gL>S.gR?dispL:dispR; document.getElementById('res-score').textContent=`${S.gL}-${S.gR}`; let tempL = TS.winsL; let tempR = TS.winsR; if(S.gL > S.gR) tempL++; else tempR++; document.getElementById('res-tsL').textContent=tempL; document.getElementById('res-tsR').textContent=tempR; step(3); document.getElementById('modal').classList.remove('hidden'); }
+        function processTeamResult() { let winner = S.gL > S.gR ? "L" : "R"; if (winner === "L") TS.winsL++; else TS.winsR++; const circles = ['⓪','①','②','③','④','⑤','⑥','⑦']; let gL_str = winner === "L" ? (circles[S.gL] || S.gL) : S.gL; let gR_str = winner === "R" ? (circles[S.gR] || S.gR) : S.gR; TS.matchResults[TS.currentMatchNum - 1] = { A:S.names.A, B:S.names.B, C:S.names.C, D:S.names.D, gL:S.gL, gR:S.gR, winner:winner, displayScore:`${gL_str}-${gR_str}`, uiScoreHtml:`${gL_str} - ${gR_str}` }; const over = TS.meta.playMode==='first_to_2' && (TS.winsL>=2 || TS.winsR>=2); if(TS.currentMatchNum>=3 || over) { showFinal(); } else { step('post-match-choice'); } }
+        function goToNextMatch() { TS.currentMatchNum++; if (TS.matchResults[TS.currentMatchNum - 1] != null) { showFinal(); } else { prepMatch(TS.currentMatchNum); } }
+        
+        function showFinal() { let dispL = TS.tNos.L ? `${TS.tNos.L}_${TS.teams.L}` : TS.teams.L; let dispR = TS.tNos.R ? `${TS.tNos.R}_${TS.teams.R}` : TS.teams.R; document.getElementById('fin-score').textContent=`${TS.winsL}-${TS.winsR}`; document.getElementById('fin-winner').textContent=TS.winsL>TS.winsR?dispL+" WIN!":dispR+" WIN!"; let h=''; TS.matchResults.forEach((r,i)=>{ if (!r) return; let isL_OP = r.A.includes('(OP)') || r.B.includes('(OP)'); let isR_OP = r.C.includes('(OP)') || r.D.includes('(OP)'); let lblL = "", lblR = ""; if (isL_OP && !isR_OP) { lblL = '<div style="font-size:0.65rem; color:var(--text-dim);">(不戦敗)</div>'; lblR = '<div style="font-size:0.65rem; color:var(--blue-active); font-weight:bold;">(不戦勝)</div>'; } if (isR_OP && !isL_OP) { lblL = '<div style="font-size:0.65rem; color:var(--blue-active); font-weight:bold;">(不戦勝)</div>'; lblR = '<div style="font-size:0.65rem; color:var(--text-dim);">(不戦敗)</div>'; } let pA = r.A.replace('(OP)',''); let pB = r.B.replace('(OP)',''); let pC = r.C.replace('(OP)',''); let pD = r.D.replace('(OP)',''); h+=`<div style="font-size:0.85rem; border-bottom:1px solid #eee; padding:10px 5px; display:flex; justify-content:space-between; align-items:center;"><span style="font-weight:900; color:var(--text-dim); width:25px;">M${i+1}</span><span style="flex:1; text-align:right; line-height:1.4; padding-right:10px;">${lblL}<b>${pA}</b><br><b>${pB}</b></span><div style="text-align:center; color:var(--gold); font-size:1.4rem; font-weight:900; min-width:60px;">${r.uiScoreHtml}</div><span style="flex:1; text-align:left; line-height:1.4; padding-left:10px;">${lblR}<b>${pC}</b><br><b>${pD}</b></span></div>`; }); document.getElementById('fin-list').innerHTML=h; document.getElementById('sendStatus').className='send-status'; document.getElementById('sendStatus').textContent=''; step(4); }
+
+        // ============================================================
+        // DX連携：全結果送信（TEAM_FINAL_SUMMARY → 進行管理「終了」に自動更新）
+        // ============================================================
+        async function sendToCloud() {
+            const btn = document.getElementById('btn-send');
+            const statusEl = document.getElementById('sendStatus');
+            btn.disabled = true; btn.textContent = "送信中...";
+            statusEl.className = 'send-status'; statusEl.textContent = '';
+
+            const summary = {
+                type: "TEAM_FINAL_SUMMARY",
+                matchId: TS.meta.id,
+                court: TS.meta.court,
+                teamLNo: TS.tNos.L,
+                teamL: TS.teams.L,
+                teamRNo: TS.tNos.R,
+                teamR: TS.teams.R,
+                winsL: TS.winsL,
+                winsR: TS.winsR,
+                matchResults: TS.matchResults
+            };
+
+            try {
+                const res = await fetch(API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify(summary)
+                });
+                const result = await res.json();
+
+                if (result.status === "success") {
+                    btn.textContent = "✅ 送信済";
+                    statusEl.className = 'send-status success';
+                    statusEl.textContent = '本部への送信が完了しました。試合ステータスは「終了」に更新されました。';
+                } else {
+                    throw new Error(result.message || "送信エラー");
+                }
+            } catch(e) {
+                // no-corsフォールバック
+                try {
+                    await fetch(API, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'text/plain' },
+                        body: JSON.stringify(summary)
+                    });
+                    btn.textContent = "✅ 送信済";
+                    statusEl.className = 'send-status success';
+                    statusEl.textContent = '本部への送信が完了しました。';
+                } catch(e2) {
+                    btn.textContent = "☁ 再送信";
+                    btn.disabled = false;
+                    statusEl.className = 'send-status error';
+                    statusEl.textContent = '通信エラー: ' + e2.message;
+                }
+            }
+        }
+
+        window.onload = () => { updateCourtSelect('v-sel','c-sel','c-inp'); };
+    </script>
+</body>
+</html>
