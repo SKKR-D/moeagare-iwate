@@ -356,7 +356,7 @@ body {
       <input type="text" id="courtInput" placeholder="例: 1, A, 第3コート" oninput="previewCourtConflict()">
     </div>
     <div id="courtConflictPreview" style="font-size:12px;margin-bottom:12px;min-height:20px;"></div>
-    <button class="btn-submit" onclick="submitCourtChange()">割り当て</button>
+    <button class="btn-submit" id="courtSubmitBtn" onclick="submitCourtChange()">割り当て</button>
   </div>
 </div>
 
@@ -501,15 +501,12 @@ const changeStatus = async (matchId, newStatus) => {
     const result = await apiPost({ type: "UPDATE_PROGRESS", matchId, status: newStatus });
     if (result.error || result.status === "error") {
       showToast(result.error || result.message, "error");
-      await refreshAll(); // エラー時はサーバーから再取得して正しい状態に戻す
+      await refreshAll();
       return;
     }
-    // サーバーが返す最終ステータスで更新
     const finalStatus = result.newStatus || newStatus;
-    const m = state.progress.find(p => p.matchId === matchId);
-    if (m) m.status = finalStatus;
-    renderProgressTable();
     showToast(`${matchId} → ${finalStatus}`);
+    await refreshAll();
   } catch (err) {
     showToast("エラー: " + err.message, "error");
   }
@@ -530,45 +527,53 @@ const previewCourtConflict = () => {
   const court = document.getElementById('courtInput').value.trim();
   const matchId = document.getElementById('courtMatchId').value;
   const preview = document.getElementById('courtConflictPreview');
-  if (!court) { preview.innerHTML = ''; return; }
+  const btn = document.getElementById('courtSubmitBtn');
+
+  if (!court) {
+    preview.innerHTML = '';
+    btn.disabled = false;
+    return;
+  }
 
   const sameCourt = state.progress.filter(m =>
-    m.court === court && m.matchId !== matchId &&
+    String(m.court) === court && m.matchId !== matchId &&
     (m.status === "試合中" || m.status === "コート指定済み")
   );
 
+  const hasPlaying = sameCourt.some(m => m.status === "試合中");
+  const hasAssigned = sameCourt.some(m => m.status === "コート指定済み");
+
   if (sameCourt.length === 0) {
     preview.innerHTML = `<span style="color:var(--c-accent);">✅ コート「${court}」は空いています</span>`;
-  } else {
+    btn.disabled = false;
+  } else if (hasAssigned) {
+    // 「コート指定済み」が既にある → 割当不可
     const lines = sameCourt.map(m => `${m.matchId}（${m.status}）`).join(', ');
-    const hasConflict = sameCourt.some(m => m.status === "コート指定済み");
-    if (hasConflict) {
-      preview.innerHTML = `<span style="color:var(--c-danger);">⚠️ コート「${court}」に「コート指定済み」の試合があります: ${lines}</span>`;
-    } else {
-      preview.innerHTML = `<span style="color:var(--c-accent2);">ℹ️ コート「${court}」の状況: ${lines}（次の試合として割当可能）</span>`;
-    }
+    preview.innerHTML = `<span style="color:var(--c-danger);">⛔ 割当不可：コート「${court}」に「コート指定済み」の試合があります → ${lines}</span>`;
+    btn.disabled = true;
+  } else if (hasPlaying) {
+    // 「試合中」のみ → 次の試合として割当OK
+    const lines = sameCourt.map(m => `${m.matchId}（${m.status}）`).join(', ');
+    preview.innerHTML = `<span style="color:var(--c-accent2);">✅ 次の試合として割当可能（現在: ${lines}）</span>`;
+    btn.disabled = false;
   }
 };
+
 const submitCourtChange = async () => {
   const matchId = document.getElementById('courtMatchId').value;
   const court = document.getElementById('courtInput').value.trim();
   if (!court) { showToast("コート番号を入力してください", "error"); return; }
+
   try {
     const result = await apiPost({ type: "UPDATE_PROGRESS", matchId, court });
     if (result.error || result.status === "error") {
       showToast(result.error || result.message, "error");
       return;
     }
-    const m = state.progress.find(p => p.matchId === matchId);
-    if (m) {
-      m.court = court;
-      // サーバーが返す最終ステータスで更新
-      if (result.newStatus) m.status = result.newStatus;
-    }
-    renderProgressTable();
     closeCourtModal();
-    const finalStatus = result.newStatus || "";
-    showToast(`${matchId} → コート: ${court}` + (finalStatus ? `（${finalStatus}）` : ""));
+    showToast(`${matchId} → コート: ${court}（${result.newStatus || "更新済み"}）`);
+    // サーバーから最新データを再取得して確実に同期
+    await refreshAll();
   } catch (err) {
     showToast("エラー: " + err.message, "error");
   }
