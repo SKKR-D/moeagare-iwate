@@ -188,6 +188,25 @@ body {
   font-size: 18px; color: var(--c-text2);
 }
 
+/* 個人戦チェックボックス */
+.task-card .batch-check {
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  width: 22px; height: 22px; accent-color: var(--c-accent2);
+  cursor: pointer; z-index: 2;
+}
+.task-card.has-check { padding-left: 44px; }
+
+/* 一括受付ボタン */
+.btn-batch {
+  display: block; width: 100%; padding: 14px; border: none; border-radius: var(--r-md);
+  font-size: 15px; font-weight: 700; cursor: pointer; transition: all .15s;
+  font-family: var(--font-ja); margin-top: 12px;
+  background: var(--c-accent2); color: #fff;
+  box-shadow: 0 4px 12px rgba(9,105,178,.25);
+}
+.btn-batch:active { transform: scale(.97); }
+.btn-batch:disabled { opacity: .4; cursor: not-allowed; }
+
 .empty-state {
   text-align: center; padding: 48px 20px; color: var(--c-text2);
 }
@@ -356,6 +375,9 @@ body {
   <div class="section-group mt-12" id="pendingSection">
     <div class="section-title">🔶 受付前 <span class="count" id="pendingCount">0</span></div>
     <div id="pendingList"></div>
+    <button class="btn btn-batch" id="batchArrivalBtn" onclick="submitBatchArrival()" style="display:none;">
+      選択した個人戦を一括受付（<span id="batchCount">0</span>件）
+    </button>
   </div>
   <div class="section-group" id="doneSection">
     <div class="section-title">✅ 受付完了 <span class="count" id="doneCount">0</span></div>
@@ -562,23 +584,78 @@ const renderHome = () => {
   doneContainer.innerHTML = done.length === 0
     ? '<div class="empty-state"><p>まだ受付完了の試合はありません</p></div>'
     : done.map(task => renderTaskCard(task, state.tasks.indexOf(task), "done")).join('');
+
+  // 受付前に個人戦があれば一括ボタンを表示
+  const hasPendingIndividual = pending.some(t => t.type === "個人戦");
+  const batchBtn = document.getElementById('batchArrivalBtn');
+  batchBtn.style.display = hasPendingIndividual ? 'block' : 'none';
+  updateBatchCount();
 };
 
 const renderTaskCard = (task, globalIndex, statusType) => {
   const isIndividual = task.type === "個人戦";
   const indClass = isIndividual ? "individual" : "";
+  const hasCheck = (isIndividual && statusType === "pending") ? "has-check" : "";
   let pillClass = statusType;
   let pillText = statusType === "pending" ? "受付前" : "受付完了";
   if (task.status === "オーダー完了") { pillClass = "order-done"; pillText = "オーダー済"; }
 
+  // 個人戦の受付前にはチェックボックスを表示
+  const checkbox = (isIndividual && statusType === "pending")
+    ? `<input type="checkbox" class="batch-check" data-index="${globalIndex}" onclick="event.stopPropagation(); updateBatchCount();">`
+    : "";
+
   return `
-    <div class="task-card ${indClass} ${statusType}" onclick="onTaskSelect(${globalIndex})">
+    <div class="task-card ${indClass} ${statusType} ${hasCheck}" onclick="onTaskSelect(${globalIndex})">
+      ${checkbox}
       <div class="match-id">${task.matchId}　${isIndividual ? "個人戦" : "団体戦"}</div>
       <div class="round-label">${task.round}</div>
       <div class="matchup">${task.entityName}<span class="vs">vs</span>${task.opponent}</div>
       <span class="status-pill ${pillClass}">${pillText}</span>
       <span class="arrow-icon">›</span>
     </div>`;
+};
+
+// --- 一括選択の件数を更新 ---
+const updateBatchCount = () => {
+  const checks = document.querySelectorAll('.batch-check:checked');
+  const countEl = document.getElementById('batchCount');
+  const btn = document.getElementById('batchArrivalBtn');
+  countEl.textContent = checks.length;
+  btn.disabled = checks.length === 0;
+};
+
+// --- 個人戦の一括受付 ---
+const submitBatchArrival = async () => {
+  const checks = document.querySelectorAll('.batch-check:checked');
+  if (checks.length === 0) return;
+
+  const indices = Array.from(checks).map(cb => parseInt(cb.dataset.index));
+  const targets = indices.map(i => state.tasks[i]).filter(t => t);
+
+  showLoading(`個人戦を一括受付中...（${targets.length}件）`);
+  try {
+    // 順番に受付送信
+    for (const task of targets) {
+      await apiPost({
+        type: "SUBMIT_ARRIVAL",
+        category: task.type,
+        entityName: task.entityName
+      });
+      task.isArrived = true;
+    }
+    hideLoading();
+    showToast(`個人戦 ${targets.length}件の到着受付が完了しました。頑張ってください！`);
+
+    setTimeout(async () => {
+      showLoading("更新中...");
+      await loadHome();
+      hideLoading();
+    }, 800);
+  } catch (err) {
+    hideLoading();
+    showToast("通信エラー: " + err.message, "error");
+  }
 };
 
 // ============================================================
