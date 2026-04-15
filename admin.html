@@ -353,8 +353,9 @@ body {
     </div>
     <div class="form-group">
       <label>コート番号</label>
-      <input type="text" id="courtInput" placeholder="例: 1, A, 第3コート">
+      <input type="text" id="courtInput" placeholder="例: 1, A, 第3コート" oninput="previewCourtConflict()">
     </div>
+    <div id="courtConflictPreview" style="font-size:12px;margin-bottom:12px;min-height:20px;"></div>
     <button class="btn-submit" onclick="submitCourtChange()">割り当て</button>
   </div>
 </div>
@@ -497,8 +498,11 @@ const renderProgressTable = () => {
 const changeStatus = async (matchId, newStatus) => {
   if (!newStatus) return;
   try {
-    await apiPost({ type: "UPDATE_PROGRESS", matchId, status: newStatus });
-    // ローカル更新
+    const result = await apiPost({ type: "UPDATE_PROGRESS", matchId, status: newStatus });
+    if (result.status === "error") {
+      showToast(result.message, "error");
+      return;
+    }
     const m = state.progress.find(p => p.matchId === matchId);
     if (m) m.status = newStatus;
     renderProgressTable();
@@ -516,17 +520,53 @@ const openCourtModal = (matchId, currentCourt) => {
 };
 const closeCourtModal = () => {
   document.getElementById('courtModal').classList.remove('show');
+  document.getElementById('courtConflictPreview').innerHTML = '';
+};
+
+const previewCourtConflict = () => {
+  const court = document.getElementById('courtInput').value.trim();
+  const matchId = document.getElementById('courtMatchId').value;
+  const preview = document.getElementById('courtConflictPreview');
+  if (!court) { preview.innerHTML = ''; return; }
+
+  const sameCourt = state.progress.filter(m =>
+    m.court === court && m.matchId !== matchId &&
+    (m.status === "試合中" || m.status === "コート指定済み")
+  );
+
+  if (sameCourt.length === 0) {
+    preview.innerHTML = `<span style="color:var(--c-accent);">✅ コート「${court}」は空いています</span>`;
+  } else {
+    const lines = sameCourt.map(m => `${m.matchId}（${m.status}）`).join(', ');
+    const hasConflict = sameCourt.some(m => m.status === "コート指定済み");
+    if (hasConflict) {
+      preview.innerHTML = `<span style="color:var(--c-danger);">⚠️ コート「${court}」に「コート指定済み」の試合があります: ${lines}</span>`;
+    } else {
+      preview.innerHTML = `<span style="color:var(--c-accent2);">ℹ️ コート「${court}」の状況: ${lines}（次の試合として割当可能）</span>`;
+    }
+  }
 };
 const submitCourtChange = async () => {
   const matchId = document.getElementById('courtMatchId').value;
   const court = document.getElementById('courtInput').value.trim();
+  if (!court) { showToast("コート番号を入力してください", "error"); return; }
   try {
-    await apiPost({ type: "UPDATE_PROGRESS", matchId, court });
+    const result = await apiPost({ type: "UPDATE_PROGRESS", matchId, court });
+    if (result.status === "error") {
+      showToast(result.message, "error");
+      return;
+    }
     const m = state.progress.find(p => p.matchId === matchId);
-    if (m) m.court = court;
+    if (m) {
+      m.court = court;
+      // サーバー側で自動遷移するステータスをローカルにも反映
+      if (m.status === "コート指定待ち" || m.status === "オーダー完了") {
+        m.status = "コート指定済み";
+      }
+    }
     renderProgressTable();
     closeCourtModal();
-    showToast(`${matchId} → コート: ${court}`);
+    showToast(`${matchId} → コート: ${court}（コート指定済み）`);
   } catch (err) {
     showToast("エラー: " + err.message, "error");
   }
