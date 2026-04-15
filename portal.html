@@ -255,12 +255,14 @@ body {
 .slot-select.filled { border-color: var(--c-accent); background-color: var(--c-accent-light); }
 .slot-select:disabled { opacity: .5; background-color: var(--c-surface2); cursor: not-allowed; }
 
-.open-check-row {
-  display: flex; align-items: center; gap: 10px;
-  margin-bottom: 16px; padding: 0 2px;
+.open-toggle {
+  margin-left: auto; display: flex; align-items: center; gap: 6px;
+  cursor: pointer; font-size: 12px; font-weight: 600; color: var(--c-warn);
 }
-.open-check-row input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--c-warn); }
-.open-check-row label { font-size: 13px; color: var(--c-text2); }
+.open-toggle input[type="checkbox"] {
+  width: 16px; height: 16px; accent-color: var(--c-warn); cursor: pointer;
+}
+.open-toggle span { white-space: nowrap; }
 
 .roster-pool {
   background: var(--c-surface); border-radius: var(--r-md); border: 1px solid var(--c-border);
@@ -412,14 +414,12 @@ body {
 
   <!-- 第3マッチ -->
   <div class="match-group" id="matchGroup3">
-    <div class="match-group-title"><span class="match-num">3</span>第3マッチ</div>
+    <div class="match-group-title">
+      <span class="match-num">3</span>第3マッチ
+      <label class="open-toggle"><input type="checkbox" id="openCheck" onchange="onOpenChange()"><span>オープン</span></label>
+    </div>
     <div class="slot-row"><div class="slot-label">A</div><select class="slot-select" id="slot_4" onchange="onSlotChange()"><option value="">-- 選手を選択 --</option></select></div>
     <div class="slot-row"><div class="slot-label">B</div><select class="slot-select" id="slot_5" onchange="onSlotChange()"><option value="">-- 選手を選択 --</option></select></div>
-  </div>
-
-  <div class="open-check-row" id="openCheckRow">
-    <input type="checkbox" id="openCheck" onchange="onOpenChange()">
-    <label for="openCheck">第3マッチをオープンにする（欠員による不戦敗）</label>
   </div>
 
   <button class="btn btn-primary" id="orderSubmitBtn" onclick="submitOrder()" disabled>オーダーを送信</button>
@@ -691,7 +691,7 @@ const renderOrderScreen = (task) => {
   document.getElementById('orderSubmitBtn').disabled = true;
 };
 
-// --- 選択済み選手を他のセレクトから除外 + 欠員選択肢（3A,3Bのみ、最大2回） ---
+// --- 選択済み選手を他のセレクトから除外 ---
 const rebuildAllSelects = () => {
   const currentValues = [];
   for (let s = 0; s < 6; s++) {
@@ -700,20 +700,15 @@ const rebuildAllSelects = () => {
 
   const roster = state.currentRoster;
 
-  // 「欠員」が何回使われているか（slot_4, slot_5以外でも念のためカウント）
-  const vacancyCount = currentValues.filter(v => v === "欠員").length;
-
   for (let s = 0; s < 6; s++) {
     const sel = document.getElementById(`slot_${s}`);
     if (sel.disabled) continue;
 
     const myValue = currentValues[s];
-    // 他のスロットで選ばれている選手（欠員以外）
-    const usedByOthers = currentValues.filter((v, i) => v && v !== "欠員" && i !== s);
+    const usedByOthers = currentValues.filter((v, i) => v && i !== s);
 
     sel.innerHTML = '<option value="">-- 選手を選択 --</option>';
 
-    // 通常の選手選択肢
     roster.forEach(p => {
       const isUsed = usedByOthers.includes(p);
       if (!isUsed || p === myValue) {
@@ -725,25 +720,11 @@ const rebuildAllSelects = () => {
       }
     });
 
-    // 3A(slot_4), 3B(slot_5) には「欠員」選択肢を追加
-    // ただし、欠員は最大2回まで（自分が欠員ならカウントに含めない）
-    if (s === 4 || s === 5) {
-      const myVacancy = myValue === "欠員" ? 1 : 0;
-      const othersVacancy = vacancyCount - myVacancy;
-      if (othersVacancy < 2) {
-        const opt = document.createElement('option');
-        opt.value = "欠員";
-        opt.textContent = "🚫 欠員";
-        if (myValue === "欠員") opt.selected = true;
-        sel.appendChild(opt);
-      }
-    }
-
     sel.classList.toggle('filled', !!myValue);
   }
 
   // ロスタータグ更新
-  const allSelected = currentValues.filter(v => v && v !== "欠員");
+  const allSelected = currentValues.filter(v => v);
   document.querySelectorAll('.roster-tag').forEach(tag => {
     tag.classList.toggle('used', allSelected.includes(tag.dataset.name));
   });
