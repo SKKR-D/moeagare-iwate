@@ -499,14 +499,17 @@ const changeStatus = async (matchId, newStatus) => {
   if (!newStatus) return;
   try {
     const result = await apiPost({ type: "UPDATE_PROGRESS", matchId, status: newStatus });
-    if (result.status === "error") {
-      showToast(result.message, "error");
+    if (result.error || result.status === "error") {
+      showToast(result.error || result.message, "error");
+      await refreshAll(); // エラー時はサーバーから再取得して正しい状態に戻す
       return;
     }
+    // サーバーが返す最終ステータスで更新
+    const finalStatus = result.newStatus || newStatus;
     const m = state.progress.find(p => p.matchId === matchId);
-    if (m) m.status = newStatus;
+    if (m) m.status = finalStatus;
     renderProgressTable();
-    showToast(`${matchId} → ${newStatus}`);
+    showToast(`${matchId} → ${finalStatus}`);
   } catch (err) {
     showToast("エラー: " + err.message, "error");
   }
@@ -552,21 +555,20 @@ const submitCourtChange = async () => {
   if (!court) { showToast("コート番号を入力してください", "error"); return; }
   try {
     const result = await apiPost({ type: "UPDATE_PROGRESS", matchId, court });
-    if (result.status === "error") {
-      showToast(result.message, "error");
+    if (result.error || result.status === "error") {
+      showToast(result.error || result.message, "error");
       return;
     }
     const m = state.progress.find(p => p.matchId === matchId);
     if (m) {
       m.court = court;
-      // サーバー側で自動遷移するステータスをローカルにも反映
-      if (m.status === "コート指定待ち" || m.status === "オーダー完了") {
-        m.status = "コート指定済み";
-      }
+      // サーバーが返す最終ステータスで更新
+      if (result.newStatus) m.status = result.newStatus;
     }
     renderProgressTable();
     closeCourtModal();
-    showToast(`${matchId} → コート: ${court}（コート指定済み）`);
+    const finalStatus = result.newStatus || "";
+    showToast(`${matchId} → コート: ${court}` + (finalStatus ? `（${finalStatus}）` : ""));
   } catch (err) {
     showToast("エラー: " + err.message, "error");
   }
