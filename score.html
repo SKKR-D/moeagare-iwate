@@ -1,745 +1,397 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>中学連　審判システム</title>
-<link rel="manifest" href="manifest.json">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --green:#1a4a2e;--green-dark:#0f2e1b;--green-light:#2a6b42;
-  --gold:#c8a020;--gold-light:#e0c050;--white:#fff;--gray:#f5f5f0;
-  --text:#222;--text-light:#666;--radius:10px;
-  --red:#b33030;
-}
-html{font-size:15px;-webkit-tap-highlight-color:transparent}
-body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--text);min-height:100vh;overflow-x:hidden}
-button{font-family:inherit;cursor:pointer}
-input,select{font-family:inherit}
-
-/* HEADER */
-.header{background:linear-gradient(135deg,var(--green-dark),var(--green));color:var(--white);padding:12px 16px;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,.3);position:relative;z-index:10}
-.header h1{font-size:.95rem;font-weight:700;letter-spacing:.04em}
-.header h1 span{color:var(--gold)}
-
-/* STEPS */
-.step{display:none;padding:16px}
-.step.active{display:block}
-
-/* STEP 1: SETUP */
-.setup-card{background:var(--white);border-radius:var(--radius);padding:20px;margin-bottom:14px;box-shadow:0 1px 6px rgba(0,0,0,.06)}
-.setup-card h2{font-size:.85rem;font-weight:700;color:var(--green);margin-bottom:12px}
-.form-row{margin-bottom:12px}
-.form-row label{display:block;font-size:.78rem;font-weight:700;color:var(--text-light);margin-bottom:4px}
-.form-row input,.form-row select{width:100%;padding:10px 12px;border:2px solid #ddd;border-radius:8px;font-size:.9rem;outline:none;transition:border-color .2s}
-.form-row input:focus,.form-row select:focus{border-color:var(--green)}
-.team-setup{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:end}
-.team-setup .vs{font-size:1rem;font-weight:900;color:var(--text-light);text-align:center;padding-bottom:10px}
-.player-fields{margin-top:8px}
-.player-fields .player-row{display:flex;gap:8px;margin-bottom:6px;align-items:center}
-.player-fields .player-row span{font-size:.72rem;color:var(--text-light);width:20px;flex-shrink:0}
-.player-fields .player-row input{flex:1}
-
-.btn{display:inline-block;padding:12px 24px;border-radius:8px;font-size:.9rem;font-weight:700;border:none;cursor:pointer;text-align:center;transition:all .2s}
-.btn-green{background:var(--green);color:var(--white)}
-.btn-green:active{background:var(--green-light)}
-.btn-gold{background:var(--gold);color:var(--white)}
-.btn-red{background:var(--red);color:var(--white)}
-.btn-outline{background:var(--white);color:var(--green);border:2px solid var(--green)}
-.btn-block{display:block;width:100%}
-.btn-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:16px}
-
-/* STEP 2: SCORING */
-.scoreboard{background:var(--green);border-radius:var(--radius);padding:16px;margin-bottom:14px;color:var(--white);box-shadow:0 4px 20px rgba(0,0,0,.2)}
-.match-info{text-align:center;font-size:.72rem;color:var(--gold);margin-bottom:10px;letter-spacing:.04em}
-.game-count-row{display:flex;justify-content:center;align-items:center;gap:16px;margin-bottom:14px}
-.team-block{text-align:center;flex:1}
-.team-block .name{font-size:.82rem;font-weight:700;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.team-block .game-count{font-size:2.8rem;font-weight:900;line-height:1}
-.game-count-row .separator{font-size:1.4rem;font-weight:700;color:var(--gold)}
-
-.point-area{background:rgba(0,0,0,.2);border-radius:8px;padding:14px;margin-bottom:12px}
-.point-row{display:flex;justify-content:center;align-items:center;gap:20px}
-.point-display{font-size:2rem;font-weight:900;text-align:center;min-width:60px}
-.point-label{text-align:center;font-size:.7rem;color:rgba(255,255,255,.6);margin-bottom:4px}
-.serve-mark{display:inline-block;background:var(--gold);color:var(--green-dark);font-size:.65rem;font-weight:900;padding:2px 6px;border-radius:4px;margin-left:4px;vertical-align:middle}
-
-.game-detail{text-align:center;font-size:.78rem;color:rgba(255,255,255,.7);margin-bottom:6px}
-
-/* Score buttons */
-.score-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
-.score-btn{padding:28px 10px;border-radius:var(--radius);border:none;font-size:1rem;font-weight:700;cursor:pointer;transition:all .15s;position:relative}
-.score-btn:active{transform:scale(.96)}
-.score-btn.left{background:var(--green);color:var(--white);border:3px solid var(--green-light)}
-.score-btn.right{background:var(--green);color:var(--white);border:3px solid var(--green-light)}
-.score-btn .sub{display:block;font-size:.7rem;font-weight:500;margin-top:4px;opacity:.7}
-
-/* Action buttons */
-.action-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-.action-btn{padding:10px 16px;border-radius:8px;font-size:.78rem;font-weight:700;border:2px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:var(--white);cursor:pointer;transition:all .15s}
-.action-btn:active{background:rgba(255,255,255,.2)}
-.action-btn.fault{border-color:var(--gold);color:var(--gold)}
-.action-btn.undo{border-color:#aaa}
-.action-btn.abort{border-color:var(--red);color:#ff8888}
-
-/* Game history */
-.history-card{background:var(--white);border-radius:var(--radius);padding:16px;box-shadow:0 1px 6px rgba(0,0,0,.06)}
-.history-card h3{font-size:.82rem;font-weight:700;color:var(--green);margin-bottom:10px}
-.history-table{width:100%;border-collapse:collapse;font-size:.78rem}
-.history-table th,.history-table td{padding:6px 8px;text-align:center;border-bottom:1px solid #eee}
-.history-table th{font-weight:700;color:var(--text-light);background:#fafaf6}
-.history-table .winner{font-weight:700;color:var(--green)}
-
-/* STEP 3: RESULT */
-.result-card{background:var(--white);border-radius:var(--radius);padding:24px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.1);margin-bottom:16px}
-.result-card h2{font-size:1.1rem;font-weight:900;color:var(--green);margin-bottom:6px}
-.result-card .winner-name{font-size:1.4rem;font-weight:900;color:var(--gold);margin-bottom:10px}
-.result-card .final-score{font-size:1.8rem;font-weight:900;margin-bottom:16px}
-.result-table{width:100%;border-collapse:collapse;font-size:.82rem;margin-bottom:20px}
-.result-table th,.result-table td{padding:8px;text-align:center;border:1px solid #ddd}
-.result-table th{background:var(--green);color:var(--white);font-weight:700}
-
-/* ALERT */
-.alert-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:200;justify-content:center;align-items:center}
-.alert-overlay.show{display:flex}
-.alert-box{background:var(--white);border-radius:12px;padding:24px;text-align:center;max-width:300px;width:90%;box-shadow:0 10px 40px rgba(0,0,0,.3);animation:popIn .25s ease}
-@keyframes popIn{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
-.alert-box h3{font-size:1rem;font-weight:900;margin-bottom:8px;color:var(--green)}
-.alert-box p{font-size:.85rem;color:var(--text-light);margin-bottom:16px}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>個人戦スコアシステム</title>
+    <meta name="theme-color" content="#0284c7">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #f1f5f9; --surface: #ffffff; --surface2: #e2e8f0; --border: #94a3b8; --text: #0f172a; --text-dim: #475569; --blue: #0ea5e9; --blue-active: #0284c7; --red: #f97316; --red-active: #ea580c; --gold: #d97706; --gold-bg: #fef3c7; --green: #16a34a; --cyan: #0891b2; --app-bg: #cbd5e1; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+        body { font-family: 'Noto Sans JP', sans-serif; background: var(--app-bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100vw; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; overflow-y: auto; padding: 16px; }
+        .modal-overlay.hidden { display: none; }
+        .modal-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; width: 100%; max-width: 500px; margin-bottom: 16px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); }
+        .input-label { font-size: 0.75rem; color: var(--text-dim); margin-bottom: 4px; display: block; font-weight: bold; }
+        .name-input { width: 100%; padding: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 0.95rem; font-weight: bold; }
+        .option-group { display: flex; gap: 6px; margin-bottom: 12px; }
+        .opt-btn { flex: 1; padding: 12px 4px; background: var(--surface2); border: 2px solid var(--border); border-radius: 8px; font-weight: 700; font-size: 0.9rem; color: var(--text); cursor: pointer; transition: 0.2s; }
+        .opt-btn.sel-blue { background: var(--blue-active); border-color: var(--blue-active); color: #fff; }
+        .opt-btn.sel-gold { background: var(--gold-bg); border-color: var(--gold); color: var(--gold); }
+        .confirm-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--blue-active), #0369a1); border: none; border-radius: 10px; color: #fff; font-size: 1.1rem; font-weight: 900; margin-top: 8px; cursor: pointer; transition: 0.2s; }
+        .confirm-btn.gold { background: linear-gradient(135deg, var(--gold), #b45309); }
+        .confirm-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .back-btn-text { width: 100%; margin-top: 12px; padding: 8px; background: transparent; border: none; color: var(--text-dim); font-weight: bold; font-size: 0.85rem; cursor: pointer; text-decoration: underline; }
+        .result-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid var(--gold); padding-bottom: 8px; margin-bottom: 8px; }
+        .rh-title { font-size: 0.75rem; color: var(--text-dim); font-weight: 700; } .rh-winner { font-family: 'Orbitron', sans-serif; font-size: 1.4rem; font-weight: 900; color: var(--gold); } .rh-score { font-family: 'Orbitron', sans-serif; font-size: 1.4rem; font-weight: 900; color: var(--text); }
+        .compact-chart-wrap { height: 70px; margin-bottom: 8px; border: 1px solid var(--border); background: var(--surface2); border-radius: 6px; position: relative; } #stats-flow-chart { width: 100%; height: 100%; display: block; }
+        .compact-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; margin-bottom: 8px; } .compact-table th { background: var(--surface2); padding: 4px; border: 1px solid var(--border); color: var(--text-dim); } .compact-table td { padding: 4px; border: 1px solid var(--border); text-align: center; font-weight: 700; }
+        .app { width: 100%; max-width: 600px; height: 100vh; display: flex; flex-direction: column; background: var(--bg); position: relative; box-shadow: 0 0 20px rgba(0, 0, 0, 0.1); overflow-y: auto; overflow-x: hidden; }
+        .header { padding: 12px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; min-height: 80px; }
+        .game-score-display { font-family: 'Century Gothic', sans-serif; font-size: clamp(2.5rem, 10vw, 4.5rem); font-weight: 900; transition: 0.3s; } .gs-left { color: var(--blue-active); } .gs-right { color: var(--red-active); }
+        .score-area { flex: 1; display: flex; gap: 8px; padding: 8px; min-height: 0; transition: 0.3s; }
+        .huge-point-btn { flex: 1; container-type: inline-size; border: none; border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.1s; position: relative; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .huge-point-btn:active { transform: scale(0.97); } .btn-left { background: linear-gradient(145deg, var(--blue), var(--blue-active)); color: white; } .btn-right { background: linear-gradient(145deg, var(--red), var(--red-active)); color: white; }
+        .btn-team-name { font-size: 1rem; font-weight: 900; position: absolute; top: 12px; width: 95%; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
+        .btn-score-num { font-family: 'Helvetica World', Helvetica, sans-serif; font-size: clamp(4rem, 50cqi, 15rem); font-weight: 900; line-height: 1; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); } .btn-point-label { font-size: 1.2rem; font-weight: bold; position: absolute; bottom: 16px; opacity: 0.9; }
+        .fault-area { padding: 0 8px 8px; flex-shrink: 0; width: 100%; } .fault-btn { width: 100%; padding: 16px; background: var(--surface); border: 3px solid var(--gold); border-radius: 12px; color: var(--gold); font-weight: 900; font-family: 'Orbitron', monospace; cursor: pointer; transition: 0.2s; font-size: 1.6rem; display: flex; align-items: center; justify-content: center; } .fault-btn:active { background: var(--gold-bg); transform: scale(0.98); } .fault-btn.warn { background: var(--red-active); color: #fff; border-color: var(--red-active); }
+        .players-indicator-area { display: flex; gap: 8px; padding: 0 8px 16px; flex-shrink: 0; transition: 0.3s; } .team-players { flex: 1; display: flex; flex-direction: column; gap: 4px; } .team-players.left-team .p-row { border-color: var(--blue-active); } .team-players.right-team .p-row { border-color: var(--red-active); }
+        .p-row { display: flex; align-items: center; background: var(--surface); border: 2px solid var(--border); border-radius: 8px; padding: 8px; height: 48px; transition: 0.2s; position: relative; } .p-name { flex: 1; font-weight: 700; font-size: 0.95rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-left: 4px; }
+        .role-badge { font-size: 0.75rem; font-weight: 900; padding: 4px 8px; border-radius: 6px; display: none; color: white; flex-shrink: 0; } .role-badge.show-s { display: inline-block; background: var(--gold); } .role-badge.show-r { display: inline-block; background: var(--cyan); }
+        .active-server { background: var(--gold-bg); border-color: var(--gold) !important; } .active-receiver { background: #ecfeff; border-color: var(--cyan) !important; }
+        .header-btn { background: var(--surface); border: 1px solid var(--border); font-size:1.4rem; cursor:pointer; border-radius: 8px; padding: 6px 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); } .header-btn:active { background: var(--surface2); transform: scale(0.95); }
+        /* 送信ステータスバナー */
+        .send-status { text-align: center; font-size: 0.8rem; padding: 6px; border-radius: 6px; margin-top: 8px; display: none; }
+        .send-status.success { display: block; background: #dcfce7; color: #166534; }
+        .send-status.error { display: block; background: #fef2f2; color: #991b1b; }
+    </style>
 </head>
 <body>
-
-<header class="header">
-  <h1>🎾 <span>中学連</span>　審判システム</h1>
-</header>
-
-<!-- STEP 1: Match Setup -->
-<div class="step active" id="step1">
-  <div class="setup-card">
-    <h2>大会情報</h2>
-    <div class="form-row">
-      <label>大会名</label>
-      <input type="text" id="tournamentName" placeholder="例：岩手県中学校選手権大会">
-    </div>
-    <div class="form-row">
-      <label>コート番号</label>
-      <select id="courtNumber">
-        <option value="">選択してください</option>
-      </select>
-    </div>
-    <div class="form-row">
-      <label>回戦</label>
-      <input type="text" id="roundName" placeholder="例：1回戦、準決勝">
-    </div>
-  </div>
-
-  <div class="setup-card">
-    <h2>対戦チーム</h2>
-    <div class="team-setup">
-      <div class="form-row">
-        <label>左チーム</label>
-        <input type="text" id="teamLeft" placeholder="チーム名">
-      </div>
-      <div class="vs">VS</div>
-      <div class="form-row">
-        <label>右チーム</label>
-        <input type="text" id="teamRight" placeholder="チーム名">
-      </div>
-    </div>
-  </div>
-
-  <div class="setup-card">
-    <h2>選手名</h2>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-      <div>
-        <div style="font-size:.78rem;font-weight:700;color:var(--green);margin-bottom:6px" id="labelLeft">左チーム</div>
-        <div class="player-fields">
-          <div class="player-row"><span>前衛</span><input type="text" id="leftP1" placeholder="選手名"></div>
-          <div class="player-row"><span>後衛</span><input type="text" id="leftP2" placeholder="選手名"></div>
+    <div id="modal" class="modal-overlay">
+        <div class="modal-card">
+            <div id="step-mode">
+                <h1 style="text-align: center; font-weight: 900; color: var(--blue-active); font-size: 2rem; margin-bottom: 25px;">INDIVIDUAL MATCH</h1>
+                <p style="text-align:center; font-size:0.8rem; color:var(--text-dim); margin-bottom:15px;">個人戦スコアアプリの開始方法</p>
+                <button class="confirm-btn gold" onclick="setAppMode('auto')">📡 本部割当から読込 (推奨)</button>
+                <button class="confirm-btn" style="background:var(--blue-active);" onclick="setAppMode('manual')">⌨ 試合番号を手入力</button>
+            </div>
+            <div id="step-auto" style="display:none;">
+                <h2 style="text-align:center; margin-bottom: 20px;">担当コート選択</h2>
+                <select id="auto-c-sel" class="name-input" style="font-size:1.5rem; text-align:center; height:60px;"></select>
+                <button class="confirm-btn gold" id="btn-auto-fetch" onclick="fetchByCourt()">試合データを取得 ➔</button>
+                <button class="back-btn-text" onclick="step('mode')">← 戻る</button>
+            </div>
+            <div id="step-manual" style="display:none;">
+                <h2 style="text-align:center; margin-bottom: 15px;">試合番号入力</h2>
+                <input type="text" class="name-input" id="match-id-input" placeholder="試合番号 (例: I001)" style="text-align:center; font-size:1.5rem; text-transform:uppercase;">
+                <button class="confirm-btn gold" id="btn-manual-fetch" onclick="fetchMatchData()">選手データを読込 ➔</button>
+                <button class="back-btn-text" onclick="step('mode')">← 戻る</button>
+            </div>
+            <div id="step-setup" style="display:none;">
+                <h3 style="text-align:center; margin-bottom: 10px;">選手・ルール確認</h3>
+                <p class="input-label">📌 種目</p>
+                <div class="option-group" id="type-opts">
+                    <button class="opt-btn" onclick="selMatchType('シングルス')">シングルス</button><button class="opt-btn" onclick="selMatchType('ダブルス')">ダブルス</button>
+                </div>
+                <div style="display: flex; gap: 4px; margin-bottom:4px;">
+                    <input type="text" class="name-input" id="t1-no" placeholder="No." style="width:60px;">
+                    <input class="name-input" id="t1-name" placeholder="所属名(上段)">
+                </div>
+                <div style="display: flex; gap: 4px; margin-bottom:8px;">
+                    <input class="name-input" id="n-A" placeholder="選手A">
+                    <input class="name-input" id="n-B" placeholder="選手B">
+                </div>
+                <div style="text-align:center;font-weight:bold;margin:4px 0;color:var(--text-dim);">VS</div>
+                <div style="display: flex; gap: 4px; margin-bottom:4px;">
+                    <input type="text" class="name-input" id="t2-no" placeholder="No." style="width:60px;">
+                    <input class="name-input" id="t2-name" placeholder="所属名(下段)">
+                </div>
+                <div style="display: flex; gap: 4px; margin-bottom:15px;">
+                    <input class="name-input" id="n-C" placeholder="選手C">
+                    <input class="name-input" id="n-D" placeholder="選手D">
+                </div>
+                <p class="input-label">ゲーム数</p>
+                <div class="option-group" id="match-opts"><button class="opt-btn" onclick="selMatch(5)">5ゲーム</button><button class="opt-btn sel-gold" onclick="selMatch(7)">7ゲーム</button></div>
+                <p class="input-label">📍 会場・コート</p>
+                <div style="display: flex; gap: 5px;"><select id="v-sel" class="name-input" onchange="updateCourtSelect('v-sel','c-sel','c-inp')" style="flex: 2;"><option value="一関運動公園">一関運動公園</option><option value="和賀川グリーンパーク">和賀川GP</option><option value="日居城野公園">日居城野公園</option><option value="太田テニスコート">太田テニスコート</option><option value="その他">その他</option></select><select id="c-sel" class="name-input" style="flex: 1;"></select><input id="c-inp" class="name-input" style="flex: 1; display: none;"></div>
+                <button class="confirm-btn" onclick="confirmStep1()">次へ (陣営選択) ➔</button>
+                <button class="back-btn-text" onclick="step('mode')">← 最初に戻る</button>
+            </div>
+            <div id="step-2" style="display:none;">
+                <h2 id="pos-confirm-title" style="text-align:center; margin-bottom:15px; color:var(--blue-active); font-size:1.4rem; font-weight:900;">第1ゲーム</h2>
+                <div id="serve-team-sec">
+                    <p class="input-label" style="text-align:center;">最初のサーバー陣営</p>
+                    <div class="option-group">
+                        <button class="opt-btn" onclick="setServeTeam(0)" id="bsL">🔵 上段 S</button><button class="opt-btn" onclick="setServeTeam(1)" id="bsR">🔴 下段 S</button>
+                    </div>
+                </div>
+                <div id="pos-opts" style="display:none;">
+                    <p class="input-label">🎾 はじめのサーバー</p><div class="option-group" id="server-opts"></div>
+                    <p class="input-label">↗ 最初のレシーバー (クロス)</p><div class="option-group" id="receiver-opts"></div>
+                    <button class="confirm-btn gold" id="btn-start-game" onclick="confirmStep2()">試合開始！</button>
+                </div>
+                <button class="back-btn-text" id="btn-back-setup" onclick="step('setup')">← 戻る</button>
+            </div>
+            <div id="step-3" style="display:none;">
+                <div class="result-header"><div><div class="rh-title">WINNER</div><div class="rh-winner" id="winner-name">チーム</div></div><div class="rh-score" id="winner-score">4 - 2</div></div>
+                <div class="compact-chart-wrap"><canvas id="stats-flow-chart"></canvas></div>
+                <table class="compact-table" id="res-score-tbl"></table>
+                <div style="display:flex; flex-direction:column; gap:10px; margin-top:15px;">
+                    <button class="confirm-btn" style="background:#16a34a;" id="btn-send-integrated" onclick="sendToCloud()">☁ 本部に結果を送信</button>
+                    <div class="send-status" id="sendStatus"></div>
+                    <button class="back-btn-text" onclick="location.reload()">🔄 新しい試合を入力</button>
+                </div>
+            </div>
         </div>
-      </div>
-      <div>
-        <div style="font-size:.78rem;font-weight:700;color:var(--green);margin-bottom:6px" id="labelRight">右チーム</div>
-        <div class="player-fields">
-          <div class="player-row"><span>前衛</span><input type="text" id="rightP1" placeholder="選手名"></div>
-          <div class="player-row"><span>後衛</span><input type="text" id="rightP2" placeholder="選手名"></div>
+    </div>
+
+    <div class="app" id="main-app">
+        <div class="header">
+            <div style="display:flex; flex-direction:column; justify-content:center; flex: 1;">
+                <div style="font-size:0.75rem; font-weight:bold; color:var(--text-dim);" id="disp-court-main">会場・コート</div>
+                <div style="font-size:1.1rem; font-weight:bold; margin-top:2px;" id="game-info">1ゲーム目</div>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; flex: 1;">
+                <div style="font-size:0.7rem; font-weight:bold; color:var(--text-dim); margin-bottom: 2px;">ゲームカウント</div>
+                <div class="game-score-display" id="gs-container" style="display: flex;"><span class="gs-left" id="gs-L">0</span><span style="margin: 0 4px;">-</span><span class="gs-right" id="gs-R">0</span></div>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center; justify-content:flex-end; flex: 1;">
+                <button onclick="toggleSwap()" class="header-btn" title="コート左右入替">🔄</button>
+                <button onclick="undo()" class="header-btn" title="1つ戻る">↩️</button>
+            </div>
         </div>
-      </div>
+        <div class="score-area" id="score-area">
+            <button class="huge-point-btn btn-left" onclick="addPoint('L')"><div class="btn-team-name" id="btn-tname-L">チーム1</div><div class="btn-score-num" id="pt-L">0</div><div class="btn-point-label">+ POINT</div></button>
+            <button class="huge-point-btn btn-right" onclick="addPoint('R')"><div class="btn-team-name" id="btn-tname-R">チーム2</div><div class="btn-score-num" id="pt-R">0</div><div class="btn-point-label">+ POINT</div></button>
+        </div>
+        <div class="fault-area"><button class="fault-btn" id="fault-btn" onclick="handleFault()">FAULT</button></div>
+        <div class="players-indicator-area" id="indicator-area">
+            <div class="team-players left-team"><div class="p-row" id="row-A"><span class="role-badge" id="badge-A"></span><div class="p-name" id="disp-nm-A">選手A</div></div><div class="p-row" id="row-B"><span class="role-badge" id="badge-B"></span><div class="p-name" id="disp-nm-B">選手B</div></div></div>
+            <div class="team-players right-team"><div class="p-row" id="row-C"><span class="role-badge" id="badge-C"></span><div class="p-name" id="disp-nm-C">選手C</div></div><div class="p-row" id="row-D"><span class="role-badge" id="badge-D"></span><div class="p-name" id="disp-nm-D">選手D</div></div></div>
+        </div>
     </div>
-  </div>
 
-  <div class="setup-card">
-    <h2>試合設定</h2>
-    <div class="form-row">
-      <label>ゲーム数</label>
-      <select id="gameCount">
-        <option value="3">3ゲームマッチ</option>
-        <option value="5" selected>5ゲームマッチ</option>
-        <option value="7">7ゲームマッチ</option>
-        <option value="9">9ゲームマッチ</option>
-      </select>
-    </div>
-    <div class="form-row">
-      <label>最初のサーブ</label>
-      <select id="firstServe">
-        <option value="left">左チーム</option>
-        <option value="right">右チーム</option>
-      </select>
-    </div>
-  </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // ============================================================
+        // DXシステム連携用API URL
+        // ============================================================
+        const API = "https://script.google.com/macros/s/AKfycbyxWcuPgEZZS5zma0xxXOu-LvC0GTP4-ArSao_Y119N7zP_k_xWf6PoSGd5RIeaGLIy/exec";
+        const VENUE_CONFIG = { "一関運動公園":{max:16}, "和賀川グリーンパーク":{max:18}, "日居城野公園":{max:8}, "太田テニスコート":{max:16}, "その他":{manual:true} };
+        
+        let appMode = 'auto', S = { matchId: "", maxG: 7, winG: 4, gL: 0, gR: 0, pL: 0, pR: 0, totalP: 0, fault: 0, isFinal: false, startTeam: null, curServTeam: null, sOrder: [], rOrder: [], meta: { matchType: 'ダブルス', court: '', round: '' }, names: { A: '', B: '', C: '', D: '' }, teams: { L: '', R: '' }, teamNos: { L: '', R: '' }, hist: [], log: [], swapped: false, isFinished: false };
+        let historyStack = [];
 
-  <button class="btn btn-green btn-block" onclick="startMatch()">試合開始</button>
-</div>
+        function step(n) { document.querySelectorAll('.modal-card > div').forEach(el=>el.style.display='none'); document.getElementById('step-'+n).style.display='block'; }
+        function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+        function setAppMode(m) { appMode = m; if(m === 'auto') { initCourtSelector('auto-c-sel'); step('auto'); } else { step('manual'); } }
+        function initCourtSelector(id) { const sel = document.getElementById(id); sel.innerHTML = '<option value="">▼ コートを選択 ▼</option>'; for(let i=1; i<=18; i++) sel.innerHTML += `<option value="${i}コート">${i}コート</option>`; }
 
-<!-- STEP 2: Scoring -->
-<div class="step" id="step2">
-  <div class="scoreboard">
-    <div class="match-info" id="matchInfo"></div>
-    <div class="game-count-row">
-      <div class="team-block">
-        <div class="name" id="scrLeftName"></div>
-        <div class="game-count" id="scrLeftGames">0</div>
-      </div>
-      <div class="separator">-</div>
-      <div class="team-block">
-        <div class="name" id="scrRightName"></div>
-        <div class="game-count" id="scrRightGames">0</div>
-      </div>
-    </div>
-    <div class="game-detail" id="gameDetail"></div>
-    <div class="point-area">
-      <div class="point-label" id="pointLabel">ポイント</div>
-      <div class="point-row">
-        <div class="point-display" id="scrLeftPoint">0</div>
-        <div style="color:var(--gold);font-weight:700">-</div>
-        <div class="point-display" id="scrRightPoint">0</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="score-buttons">
-    <button class="score-btn left" id="btnLeft" onclick="scorePoint('left')">
-      <span id="btnLeftName">左チーム</span>
-      <span class="sub">得点</span>
-    </button>
-    <button class="score-btn right" id="btnRight" onclick="scorePoint('right')">
-      <span id="btnRightName">右チーム</span>
-      <span class="sub">得点</span>
-    </button>
-  </div>
-
-  <div class="action-row">
-    <button class="action-btn fault" onclick="handleFault()">FAULT</button>
-    <button class="action-btn undo" onclick="undoLast()">↩ 戻す</button>
-    <button class="action-btn abort" onclick="confirmAbort()">打ち切り</button>
-  </div>
-
-  <div class="history-card" style="margin-top:14px">
-    <h3>ゲーム経過</h3>
-    <table class="history-table" id="historyTable">
-      <thead><tr><th>G</th><th id="histLeftName">左</th><th id="histRightName">右</th></tr></thead>
-      <tbody id="historyBody"></tbody>
-    </table>
-  </div>
-</div>
-
-<!-- STEP 3: Result -->
-<div class="step" id="step3">
-  <div class="result-card">
-    <h2>試合終了</h2>
-    <div class="winner-name" id="winnerName"></div>
-    <div class="final-score" id="finalScore"></div>
-    <div id="resultTableArea"></div>
-  </div>
-  <div class="btn-row">
-    <button class="btn btn-gold" onclick="sendToSheet()">スプレッドシートに記録</button>
-    <button class="btn btn-green" onclick="newMatch()">新しい試合を入力</button>
-  </div>
-</div>
-
-<!-- Alert overlay -->
-<div class="alert-overlay" id="alertOverlay">
-  <div class="alert-box">
-    <h3 id="alertTitle"></h3>
-    <p id="alertMsg"></p>
-    <button class="btn btn-green" onclick="closeAlert()">OK</button>
-  </div>
-</div>
-
-<script>
-/* ========== CONFIG ========== */
-var GAS_URL_INTEGRATED = 'https://script.google.com/macros/s/AKfycbwMaX6mOexotFkV6n5Y79QXO9IhDgBRvT4PHuCr9c9j435683_N7G8yKkQPcIi-wXtu/exec';
-var GAS_URL_LIVE = 'https://script.google.com/macros/s/AKfycbwMaX6mOexotFkV6n5Y79QXO9IhDgBRvT4PHuCr9c9j435683_N7G8yKkQPcIi-wXtu/exec';
-
-/* ========== STATE ========== */
-var match = {
-  tournament: '',
-  court: '',
-  round: '',
-  teamLeft: '',
-  teamRight: '',
-  playersLeft: [],
-  playersRight: [],
-  maxGames: 5,
-  gamesLeft: 0,
-  gamesRight: 0,
-  pointLeft: 0,
-  pointRight: 0,
-  server: 'left',
-  currentGame: 1,
-  isFinal: false,
-  faultCount: 0,
-  history: [],
-  gameScores: [],
-  finished: false
-};
-
-var undoStack = [];
-
-/* ========== INIT ========== */
-function initCourtSelect() {
-  var sel = document.getElementById('courtNumber');
-  var i, opt;
-  for (i = 1; i <= 20; i++) {
-    opt = document.createElement('option');
-    opt.value = String(i);
-    opt.textContent = i + 'コート';
-    sel.appendChild(opt);
-  }
-}
-
-function initTeamLabels() {
-  var leftInput = document.getElementById('teamLeft');
-  var rightInput = document.getElementById('teamRight');
-  leftInput.addEventListener('input', function() {
-    document.getElementById('labelLeft').textContent = this.value || '左チーム';
-  });
-  rightInput.addEventListener('input', function() {
-    document.getElementById('labelRight').textContent = this.value || '右チーム';
-  });
-}
-
-initCourtSelect();
-initTeamLabels();
-
-/* ========== STEPS ========== */
-function showStep(n) {
-  var steps = document.querySelectorAll('.step');
-  var i;
-  for (i = 0; i < steps.length; i++) {
-    steps[i].classList.remove('active');
-  }
-  document.getElementById('step' + n).classList.add('active');
-  window.scrollTo(0, 0);
-}
-
-/* ========== START MATCH ========== */
-function startMatch() {
-  var tl = document.getElementById('teamLeft').value.trim();
-  var tr = document.getElementById('teamRight').value.trim();
-  if (!tl || !tr) {
-    showAlert('入力エラー', '両チームのチーム名を入力してください。');
-    return;
-  }
-
-  match.tournament = document.getElementById('tournamentName').value.trim();
-  match.court = document.getElementById('courtNumber').value;
-  match.round = document.getElementById('roundName').value.trim();
-  match.teamLeft = tl;
-  match.teamRight = tr;
-  match.playersLeft = [
-    document.getElementById('leftP1').value.trim(),
-    document.getElementById('leftP2').value.trim()
-  ];
-  match.playersRight = [
-    document.getElementById('rightP1').value.trim(),
-    document.getElementById('rightP2').value.trim()
-  ];
-  match.maxGames = parseInt(document.getElementById('gameCount').value);
-  match.server = document.getElementById('firstServe').value;
-  match.gamesLeft = 0;
-  match.gamesRight = 0;
-  match.pointLeft = 0;
-  match.pointRight = 0;
-  match.currentGame = 1;
-  match.isFinal = false;
-  match.faultCount = 0;
-  match.history = [];
-  match.gameScores = [];
-  match.finished = false;
-  undoStack = [];
-
-  updateScoreboard();
-  showStep(2);
-  sendLiveUpdate();
-}
-
-/* ========== POINT DISPLAY ========== */
-function getPointDisplay(pts, side) {
-  if (match.isFinal) {
-    if (pts <= 6) return String(pts);
-    if (pts === 7) {
-      // deuce at 6-6 in final
-      var otherPts = (side === 'left') ? match.pointRight : match.pointLeft;
-      if (otherPts === 7) return 'D';
-      return '7';
-    }
-    // advantage / deuce in final
-    var myPts = pts;
-    var oppPts = (side === 'left') ? match.pointRight : match.pointLeft;
-    if (myPts > 6 && oppPts > 6) {
-      if (myPts === oppPts) return 'D';
-      if (myPts > oppPts) return 'AD';
-      return 'D';
-    }
-    return String(pts);
-  }
-  var display = ['0', '1', '2', '3'];
-  if (pts < 4) return display[pts];
-  var otherPts2 = (side === 'left') ? match.pointRight : match.pointLeft;
-  if (pts >= 3 && otherPts2 >= 3) {
-    if (pts === otherPts2) return 'D';
-    if (pts > otherPts2) return 'AD';
-    return 'D';
-  }
-  return String(pts);
-}
-
-/* ========== UPDATE SCOREBOARD ========== */
-function updateScoreboard() {
-  var info = '';
-  if (match.tournament) info += match.tournament + '　';
-  if (match.court) info += match.court + 'コート　';
-  if (match.round) info += match.round;
-  document.getElementById('matchInfo').textContent = info;
-
-  var leftName = match.teamLeft;
-  var rightName = match.teamRight;
-  document.getElementById('scrLeftName').innerHTML = leftName + (match.server === 'left' ? ' <span class="serve-mark">S</span>' : '');
-  document.getElementById('scrRightName').innerHTML = rightName + (match.server === 'right' ? ' <span class="serve-mark">S</span>' : '');
-  document.getElementById('scrLeftGames').textContent = match.gamesLeft;
-  document.getElementById('scrRightGames').textContent = match.gamesRight;
-
-  var gameLabel = match.currentGame + 'ゲーム目';
-  if (match.isFinal) gameLabel = 'ファイナルゲーム';
-  document.getElementById('gameDetail').textContent = gameLabel;
-
-  document.getElementById('scrLeftPoint').textContent = getPointDisplay(match.pointLeft, 'left');
-  document.getElementById('scrRightPoint').textContent = getPointDisplay(match.pointRight, 'right');
-
-  document.getElementById('btnLeftName').textContent = leftName;
-  document.getElementById('btnRightName').textContent = rightName;
-  document.getElementById('histLeftName').textContent = leftName;
-  document.getElementById('histRightName').textContent = rightName;
-
-  updateHistory();
-}
-
-function updateHistory() {
-  var body = document.getElementById('historyBody');
-  var html = '';
-  var i, gs;
-  for (i = 0; i < match.gameScores.length; i++) {
-    gs = match.gameScores[i];
-    var leftCls = gs.winner === 'left' ? ' class="winner"' : '';
-    var rightCls = gs.winner === 'right' ? ' class="winner"' : '';
-    html += '<tr><td>' + (i + 1) + '</td><td' + leftCls + '>' + gs.leftPts + '</td><td' + rightCls + '>' + gs.rightPts + '</td></tr>';
-  }
-  body.innerHTML = html;
-}
-
-/* ========== SCORE POINT ========== */
-function scorePoint(side) {
-  if (match.finished) return;
-
-  // Save state for undo
-  undoStack.push(JSON.parse(JSON.stringify(match)));
-  if (undoStack.length > 50) undoStack.shift();
-
-  match.faultCount = 0;
-
-  if (side === 'left') {
-    match.pointLeft++;
-  } else {
-    match.pointRight++;
-  }
-
-  checkGameEnd();
-  updateScoreboard();
-  sendLiveUpdate();
-}
-
-/* ========== CHECK GAME END ========== */
-function checkGameEnd() {
-  var won = null;
-  var winGames = Math.ceil(match.maxGames / 2);
-
-  if (match.isFinal) {
-    // Final game: first to 7, deuce at 6-6
-    if (match.pointLeft >= 7 || match.pointRight >= 7) {
-      if (match.pointLeft >= 7 && match.pointRight < match.pointLeft - 0 && match.pointLeft !== match.pointRight) {
-        if (match.pointLeft > match.pointRight && (match.pointLeft >= 7 && (match.pointRight < 6 || match.pointLeft >= match.pointRight + 2))) {
-          won = 'left';
+        // ============================================================
+        // DX連携：コート自動取得（「コート指定済み」の試合を検索）
+        // ============================================================
+        async function fetchByCourt() {
+            const court = document.getElementById('auto-c-sel').value; if(!court) return alert("コートを選択");
+            const btn = document.getElementById('btn-auto-fetch'); btn.disabled = true; btn.textContent = "検索中...";
+            try {
+                const progRes = await fetch(API + "?action=getProgress").then(r => r.json());
+                // 「コート指定済み」または「試合中」の試合を検索
+                const assigned = progRes.find(m => m.court === court && (m.status === "コート指定済み" || m.status === "試合中"));
+                if(!assigned) throw new Error("このコートに割当済の試合がありません。\n本部管理画面でコートを割り当ててください。");
+                S.matchId = assigned.matchId;
+                S.meta.court = court; S.meta.round = assigned.round || ""; 
+                await loadMatchById(assigned.matchId);
+            } catch(e) { alert(e.message); } finally { btn.disabled = false; btn.textContent = "試合データを取得 ➔"; }
         }
-      }
-      if (match.pointRight >= 7 && match.pointLeft < match.pointRight && (match.pointRight >= 7 && (match.pointLeft < 6 || match.pointRight >= match.pointLeft + 2))) {
-        won = 'right';
-      }
-    }
-  } else {
-    // Normal game: first to 4
-    if (match.pointLeft >= 4 || match.pointRight >= 4) {
-      if (match.pointLeft >= 4 && match.pointRight < 3) {
-        won = 'left';
-      } else if (match.pointRight >= 4 && match.pointLeft < 3) {
-        won = 'right';
-      } else if (match.pointLeft >= 3 && match.pointRight >= 3) {
-        // Deuce: need 2 ahead (but in soft tennis, deuce point decides)
-        // In soft tennis: at 3-3, next point wins (no advantage in normal game)
-        if (match.pointLeft > match.pointRight) won = 'left';
-        if (match.pointRight > match.pointLeft) won = 'right';
-      }
-    }
-  }
+        
+        async function fetchMatchData() {
+            const id = document.getElementById('match-id-input').value.trim().toUpperCase(); if(!id) return alert("番号を入力");
+            const btn = document.getElementById('btn-manual-fetch'); btn.disabled = true;
+            try {
+                const progRes = await fetch(API + "?action=getProgress").then(r => r.json());
+                const assigned = progRes.find(m => m.matchId === id);
+                S.meta.round = assigned ? (assigned.round || "") : "";
+                S.matchId = id;
+                await loadMatchById(id);
+            } catch(e) { alert(e.message); } finally { btn.disabled = false; }
+        }
+        
+        async function loadMatchById(matchId) {
+            try {
+                const res = await fetch(API + "?action=getMatchData&matchId=" + matchId).then(r => r.json()); if(res.error) throw new Error(res.error);
+                S.matchId = res.matchId;
+                document.getElementById('t1-no').value = res.t1No || ""; document.getElementById('t2-no').value = res.t2No || "";
+                document.getElementById('t1-name').value = res.t1Name || ""; document.getElementById('t2-name').value = res.t2Name || "";
+                document.getElementById('n-A').value = res.t1[0] || ""; document.getElementById('n-B').value = res.t1[1] || "";
+                document.getElementById('n-C').value = res.t2[0] || ""; document.getElementById('n-D').value = res.t2[1] || "";
+                selMatchType(res.t1[1] ? 'ダブルス' : 'シングルス'); updateCourtSelect('v-sel','c-sel','c-inp'); step('setup');
+            } catch(e) { alert(e.message); }
+        }
 
-  if (won) {
-    match.gameScores.push({
-      leftPts: match.pointLeft,
-      rightPts: match.pointRight,
-      winner: won
-    });
+        function updateCourtSelect(vId, sId, iId) { const v = document.getElementById(vId).value, conf = VENUE_CONFIG[v]||VENUE_CONFIG["その他"], sel = document.getElementById(sId), inp = document.getElementById(iId); if(conf.manual){ sel.style.display='none'; inp.style.display='block'; } else { sel.style.display='block'; inp.style.display='none'; sel.innerHTML=''; for(let i=1;i<=conf.max;i++) sel.innerHTML+=`<option value="${i}コート">${i}コート</option>`; } }
+        function selMatchType(t) { S.meta.matchType = t; document.querySelectorAll('#type-opts .opt-btn').forEach((b,i)=>b.className='opt-btn'+(i===(t==='シングルス'?0:1)?' sel-blue':'')); document.getElementById('n-B').style.display=t==='シングルス'?'none':'block'; document.getElementById('n-D').style.display=t==='シングルス'?'none':'block'; }
+        function selMatch(n) { S.maxG = n; S.winG = n===7?4:3; document.querySelectorAll('#match-opts .opt-btn').forEach((b,i)=>b.className='opt-btn'+(i===(n===5?0:1)?' sel-gold':'')); }
 
-    if (won === 'left') match.gamesLeft++;
-    else match.gamesRight++;
+        function getDispL() { let pStr = S.names.B ? `${S.names.A}・${S.names.B}` : S.names.A; if(!pStr) return S.teams.L; return S.teamNos.L ? `${S.teamNos.L}_${pStr}(${S.teams.L})` : `${pStr}(${S.teams.L})`; }
+        function getDispR() { let pStr = S.names.D ? `${S.names.C}・${S.names.D}` : S.names.C; if(!pStr) return S.teams.R; return S.teamNos.R ? `${S.teamNos.R}_${pStr}(${S.teams.R})` : `${pStr}(${S.teams.R})`; }
 
-    // Check match end
-    if (match.gamesLeft >= winGames || match.gamesRight >= winGames) {
-      match.finished = true;
-      setTimeout(function() { showResult(); }, 500);
-      return;
-    }
+        function confirmStep1() {
+            if(appMode === 'manual') { const v = document.getElementById('v-sel').value; S.meta.court = v + " " + (VENUE_CONFIG[v].manual ? document.getElementById('c-inp').value : document.getElementById('c-sel').value); }
+            S.teamNos.L = document.getElementById('t1-no').value; S.teamNos.R = document.getElementById('t2-no').value;
+            S.teams.L = document.getElementById('t1-name').value; S.teams.R = document.getElementById('t2-name').value;
+            S.names.A = document.getElementById('n-A').value; S.names.C = document.getElementById('n-C').value;
+            if(S.meta.matchType === 'ダブルス'){ S.names.B = document.getElementById('n-B').value; S.names.D = document.getElementById('n-D').value; }
+            document.getElementById('disp-court-main').textContent = `${S.meta.round ? S.meta.round+' ' : ''}${S.meta.court}`;
+            document.getElementById('btn-tname-L').textContent = getDispL(); 
+            document.getElementById('btn-tname-R').textContent = getDispR();
+            document.getElementById('bsL').textContent = `🔵 ` + getDispL(); 
+            document.getElementById('bsR').textContent = `🔴 ` + getDispR();
+            if(S.meta.matchType === 'シングルス') { setServeTeam(0); confirmStep2(); } 
+            else { setupGameStartUI(); }
+        }
 
-    // Check if next game is final
-    if (match.gamesLeft === winGames - 1 && match.gamesRight === winGames - 1) {
-      match.isFinal = true;
-    }
+        function setupGameStartUI() {
+            const isG1 = (S.gL + S.gR === 0);
+            const gameNum = S.gL + S.gR + 1;
+            document.getElementById('pos-confirm-title').textContent = S.isFinal ? 'ファイナルゲーム' : `第${gameNum}ゲーム`;
+            if (isG1) {
+                document.getElementById('serve-team-sec').style.display = 'block';
+                document.getElementById('pos-opts').style.display = 'none';
+                document.getElementById('btn-start-game').textContent = "試合開始！";
+                document.getElementById('btn-back-setup').style.display = 'block';
+            } else {
+                document.getElementById('serve-team-sec').style.display = 'none';
+                document.getElementById('pos-opts').style.display = 'block';
+                document.getElementById('btn-start-game').textContent = `${S.isFinal ? 'ファイナル' : '第'+gameNum}ゲームを始める ➔`;
+                document.getElementById('btn-back-setup').style.display = 'none';
+                buildPosSelection(); 
+            }
+            step(2);
+            document.getElementById('modal').classList.remove('hidden');
+        }
 
-    // Change service
-    if (match.server === 'left') {
-      match.server = 'right';
-    } else {
-      match.server = 'left';
-    }
+        function setServeTeam(t) { 
+            S.startTeam = t; S.curServTeam = t; 
+            document.getElementById('bsL').className = 'opt-btn' + (t === 0 ? ' sel-gold' : ''); 
+            document.getElementById('bsR').className = 'opt-btn' + (t === 1 ? ' sel-gold' : ''); 
+            buildPosSelection(); 
+            document.getElementById('pos-opts').style.display = "block"; 
+        }
 
-    match.pointLeft = 0;
-    match.pointRight = 0;
-    match.currentGame++;
-    match.faultCount = 0;
+        function buildPosSelection() { 
+            const sSide = S.curServTeam === 0 ? ['A','B'] : ['C','D'];
+            const rSide = S.curServTeam === 0 ? ['C','D'] : ['A','B'];
+            if(!S.sOrder || S.sOrder.length !== 2 || !sSide.includes(S.sOrder[0])) { S.sOrder = [sSide[0], sSide[1]]; }
+            if(!S.rOrder || S.rOrder.length !== 2 || !rSide.includes(S.rOrder[0])) { S.rOrder = [rSide[0], rSide[1]]; }
+            const mk = (id, list, selected, isServer) => {
+                const el = document.getElementById(id); el.innerHTML = '';
+                list.forEach(p => {
+                    const b = document.createElement('button');
+                    b.className = 'opt-btn' + (p === selected ? ' sel-gold' : '');
+                    b.textContent = S.names[p] || p;
+                    b.onclick = () => { if (isServer) S.sOrder = [p, list.find(x => x !== p)]; else S.rOrder = [p, list.find(x => x !== p)]; mk(id, list, p, isServer); };
+                    el.appendChild(b);
+                });
+            };
+            mk('server-opts', sSide, S.sOrder[0], true);
+            mk('receiver-opts', rSide, S.rOrder[0], false);
+        }
+        
+        // ============================================================
+        // DX連携：試合開始時にステータスを「試合中」に更新
+        // ============================================================
+        function confirmStep2() { 
+            if (S.gL + S.gR === 0 && S.matchId) {
+                // 第1ゲーム開始時に本部にステータスを送信
+                fetch(API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({ type: "UPDATE_PROGRESS", matchId: S.matchId, status: "試合中" })
+                }).catch(e => console.log("ステータス送信エラー:", e));
+            }
+            document.getElementById('row-B').style.display = S.meta.matchType==='シングルス' ? 'none' : 'flex'; 
+            document.getElementById('row-D').style.display = S.meta.matchType==='シングルス' ? 'none' : 'flex';
+            closeModal(); update(); 
+        }
 
-    // Alert for change
-    var totalGames = match.gamesLeft + match.gamesRight;
-    if (totalGames % 2 === 1) {
-      showAlert('チェンジサイド', 'サイドを交替してください。');
-    } else {
-      showAlert('チェンジサービス', 'サービスが交替しました。');
-    }
+        function getServ() { 
+            if (S.meta.matchType === 'シングルス') { 
+                if (!S.isFinal) { return { s: S.curServTeam === 0 ? 'A' : 'C', r: S.curServTeam === 0 ? 'C' : 'A', t: S.curServTeam }; } 
+                else { const actTeam = Math.floor(S.totalP / 2) % 2 === 0 ? S.curServTeam : 1 - S.curServTeam; return { s: actTeam === 0 ? 'A' : 'C', r: actTeam === 0 ? 'C' : 'A', t: actTeam }; } 
+            } else { 
+                if (!S.isFinal) { return { s: S.sOrder[Math.floor(S.totalP / 2) % 2], r: S.rOrder[S.totalP % 2], t: S.curServTeam }; } 
+                else { const blk = Math.floor(S.totalP / 2) % 4, pb = S.totalP % 2; if (blk === 0) return { s: S.sOrder[0], r: S.rOrder[pb], t: S.curServTeam }; if (blk === 1) return { s: S.rOrder[0], r: S.sOrder[pb], t: 1 - S.curServTeam }; if (blk === 2) return { s: S.sOrder[1], r: S.rOrder[pb], t: S.curServTeam }; return { s: S.rOrder[1], r: S.sOrder[pb], t: 1 - S.curServTeam }; } 
+            } 
+        }
 
-    if (match.isFinal) {
-      showAlert('ファイナルゲーム', 'ファイナルゲームに入ります。');
-    }
-  }
-}
+        function addPoint(w) { historyStack.push(JSON.stringify(S)); const inf = getServ(); S.hist.push({ w: w, s: inf.t, f: (S.fault === 0) }); if(w==='L') S.pL++; else S.pR++; S.fault=0; S.totalP++; if(!checkEnd()){ if(S.isFinal&&S.totalP>0&&(S.totalP-2)%4===0){alert("チェンジサイズ"); S.swapped=!S.swapped;} update(); } }
+        function handleFault() { const inf = getServ(); if(S.fault===0){ S.fault=1; document.getElementById('fault-btn').textContent="2nd SRV"; document.getElementById('fault-btn').classList.add('warn'); } else { historyStack.push(JSON.stringify(S)); S.fault=0; const w = inf.t===0?'R':'L'; S.hist.push({ w: w, s: inf.t, f: false }); if(w==='L') S.pL++; else S.pR++; S.totalP++; if(!checkEnd()){ if(S.isFinal&&S.totalP>0&&(S.totalP-2)%4===0){alert("チェンジサイズ"); S.swapped=!S.swapped;} update(); } } }
+        function toggleSwap() { historyStack.push(JSON.stringify(S)); S.swapped = !S.swapped; update(); }
+        function undo() { if(historyStack.length){ S=JSON.parse(historyStack.pop()); update(); } }
 
-/* ========== FAULT ========== */
-function handleFault() {
-  if (match.finished) return;
+        function checkEnd() { 
+            const b = S.isFinal?7:4, win = S.pL>=b&&S.pL-S.pR>=2 ? 'L' : S.pR>=b&&S.pR-S.pL>=2 ? 'R' : null; 
+            if(win){ 
+                S.log.push({ n: S.gL + S.gR + 1, L: S.pL, R: S.pR, w: win, flow: [...S.hist], fin: S.isFinal }); 
+                win==='L'?S.gL++:S.gR++; update(); 
+                setTimeout(()=>{ 
+                    if(S.gL===S.winG||S.gR===S.winG) { showResult(); } 
+                    else { 
+                        S.pL=0; S.pR=0; S.totalP=0; S.hist=[]; S.curServTeam = 1 - S.curServTeam;
+                        if(S.gL+S.gR===S.maxG-1) S.isFinal=true; 
+                        alert((S.gL+S.gR)%2!==0?"チェンジサイズ":"チェンジサービス"); 
+                        if((S.gL+S.gR)%2!==0) S.swapped=!S.swapped; 
+                        if(S.meta.matchType==='ダブルス'){ setupGameStartUI(); } else { update(); } 
+                    } 
+                }, 100); 
+                return true; 
+            } 
+            return false; 
+        }
 
-  match.faultCount++;
-  if (match.faultCount >= 2) {
-    // Double fault -> point to receiver
-    match.faultCount = 0;
-    var receiver = (match.server === 'left') ? 'right' : 'left';
+        function update() { const inf=getServ(), d = ((l,r,f)=>{ const b=f?6:3; if(l<b||r<b)return{l,r}; if(l===r)return{l:'D',r:'D'}; return l>r?{l:'A',r:'D'}:{l:'D',r:'A'}; })(S.pL, S.pR, S.isFinal); document.getElementById('gs-L').textContent=S.gL; document.getElementById('gs-R').textContent=S.gR; document.getElementById('pt-L').textContent=d.l; document.getElementById('pt-R').textContent=d.r; document.getElementById('game-info').textContent=S.isFinal?'ファイナル':(S.gL+S.gR+1)+'ゲーム目'; ['A','B','C','D'].forEach(p=>{ document.getElementById('disp-nm-'+p).textContent=S.names[p]||''; const row=document.getElementById('row-'+p), b=document.getElementById('badge-'+p); if(!row)return; row.classList.remove('active-server','active-receiver'); b.className='role-badge'; b.textContent=''; if(p===inf.s){row.classList.add('active-server'); b.classList.add('show-s'); b.textContent='🎾 S';} if(p===inf.r){row.classList.add('active-receiver'); b.classList.add('show-r'); b.textContent='↗ R';} }); const rev = S.swapped?'row-reverse':'row'; document.getElementById('score-area').style.flexDirection=rev; document.getElementById('indicator-area').style.flexDirection=rev; document.getElementById('gs-container').style.flexDirection=rev; if(S.fault===0){ document.getElementById('fault-btn').textContent="FAULT"; document.getElementById('fault-btn').classList.remove('warn'); } }
+        
+        function showResult() { S.isFinished = true; document.getElementById('winner-name').textContent = S.gL>S.gR?getDispL():getDispR(); document.getElementById('winner-score').textContent = `${S.gL} - ${S.gR}`; const tbl = document.getElementById('res-score-tbl'); let h=`<tr><th></th>${S.log.map((g,i)=>`<th>G${i+1}</th>`).join('')}<th>計</th></tr>`; h+=`<tr><td class="ct-name" style="color:var(--blue-active)">${getDispL()}</td>${S.log.map(g=>`<td>${g.L}</td>`).join('')}<td>${S.gL}</td></tr>`; h+=`<tr><td class="ct-name" style="color:var(--red-active)">${getDispR()}</td>${S.log.map(g=>`<td>${g.R}</td>`).join('')}<td>${S.gR}</td></tr>`; tbl.innerHTML=h; document.getElementById('sendStatus').className='send-status'; document.getElementById('sendStatus').textContent=''; step(3); document.getElementById('modal').classList.remove('hidden'); renderChart(); }
+        function renderChart(){ const ctx = document.getElementById('stats-flow-chart').getContext('2d'); const labels=['Start']; const dataL=[0], dataR=[0]; let cL=0, cR=0; S.log.forEach((g,i)=>{ if(g.w==='L')cL++; else cR++; labels.push('G'+(i+1)); dataL.push(cL); dataR.push(cR); }); new Chart(ctx, { type:'line', data:{ labels:labels, datasets:[{label:'T1', data:dataL, borderColor:'#0284c7', tension:0, borderWidth:3},{label:'T2', data:dataR, borderColor:'#ea580c', tension:0, borderWidth:3}] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{min:0, max:S.winG, ticks:{stepSize:1}}, x:{display:true}} } }); }
 
-    undoStack.push(JSON.parse(JSON.stringify(match)));
-    if (undoStack.length > 50) undoStack.shift();
+        // ============================================================
+        // DX連携：結果送信（MATCH_RESULT + 進行管理を「終了」に）
+        // ============================================================
+        async function sendToCloud() {
+            const btn = document.getElementById('btn-send-integrated');
+            const statusEl = document.getElementById('sendStatus');
+            btn.textContent = "☁ 送信中..."; btn.disabled = true;
+            statusEl.className = 'send-status'; statusEl.textContent = '';
 
-    if (receiver === 'left') {
-      match.pointLeft++;
-    } else {
-      match.pointRight++;
-    }
-    showAlert('ダブルフォルト', 'ダブルフォルト（DF）');
-    checkGameEnd();
-    updateScoreboard();
-    sendLiveUpdate();
-  } else {
-    showAlert('フォルト', '1st フォルト');
-  }
-}
+            const payload = {
+                type: "MATCH_RESULT",
+                matchId: S.matchId,
+                meta: { matchType: S.meta.matchType, court: S.meta.court },
+                teams: S.teams,
+                teamNos: S.teamNos,
+                names: S.names,
+                maxG: S.maxG,
+                gL: S.gL,
+                gR: S.gR,
+                log: S.log
+            };
 
-/* ========== UNDO ========== */
-function undoLast() {
-  if (undoStack.length === 0) {
-    showAlert('戻せません', '履歴がありません。');
-    return;
-  }
-  var prev = undoStack.pop();
-  // Restore match state
-  match.gamesLeft = prev.gamesLeft;
-  match.gamesRight = prev.gamesRight;
-  match.pointLeft = prev.pointLeft;
-  match.pointRight = prev.pointRight;
-  match.server = prev.server;
-  match.currentGame = prev.currentGame;
-  match.isFinal = prev.isFinal;
-  match.faultCount = prev.faultCount;
-  match.gameScores = prev.gameScores;
-  match.finished = prev.finished;
-  updateScoreboard();
-  sendLiveUpdate();
-}
+            try {
+                const res = await fetch(API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await res.json();
 
-/* ========== ABORT ========== */
-function confirmAbort() {
-  if (confirm('試合を打ち切りますか？')) {
-    match.finished = true;
-    // Determine winner by games
-    if (match.gamesLeft > match.gamesRight) {
-      showResultAbort('left');
-    } else if (match.gamesRight > match.gamesLeft) {
-      showResultAbort('right');
-    } else {
-      showResultAbort('draw');
-    }
-  }
-}
-
-function showResultAbort(winner) {
-  var winnerText = '引き分け（打ち切り）';
-  if (winner === 'left') winnerText = match.teamLeft + '（打ち切り勝ち）';
-  if (winner === 'right') winnerText = match.teamRight + '（打ち切り勝ち）';
-
-  document.getElementById('winnerName').textContent = winnerText;
-  document.getElementById('finalScore').textContent = match.gamesLeft + ' - ' + match.gamesRight;
-  document.getElementById('resultTableArea').innerHTML = buildResultTable();
-  showStep(3);
-}
-
-/* ========== RESULT ========== */
-function showResult() {
-  var winner = (match.gamesLeft > match.gamesRight) ? match.teamLeft : match.teamRight;
-  document.getElementById('winnerName').textContent = winner + ' の勝利';
-  document.getElementById('finalScore').textContent = match.gamesLeft + ' - ' + match.gamesRight;
-  document.getElementById('resultTableArea').innerHTML = buildResultTable();
-  showStep(3);
-}
-
-function buildResultTable() {
-  var html = '<table class="result-table"><thead><tr><th>G</th>';
-  html += '<th>' + match.teamLeft + '</th>';
-  html += '<th>' + match.teamRight + '</th></tr></thead><tbody>';
-  var i, gs;
-  for (i = 0; i < match.gameScores.length; i++) {
-    gs = match.gameScores[i];
-    html += '<tr><td>' + (i + 1) + '</td>';
-    html += '<td' + (gs.winner === 'left' ? ' style="font-weight:900;color:var(--green)"' : '') + '>' + gs.leftPts + '</td>';
-    html += '<td' + (gs.winner === 'right' ? ' style="font-weight:900;color:var(--green)"' : '') + '>' + gs.rightPts + '</td></tr>';
-  }
-  html += '</tbody></table>';
-  return html;
-}
-
-/* ========== SEND TO SHEET ========== */
-function sendToSheet() {
-  var data = {
-    tournament: match.tournament,
-    court: match.court,
-    round: match.round,
-    teamLeft: match.teamLeft,
-    teamRight: match.teamRight,
-    playersLeft: match.playersLeft.join('・'),
-    playersRight: match.playersRight.join('・'),
-    gamesLeft: match.gamesLeft,
-    gamesRight: match.gamesRight,
-    gameScores: JSON.stringify(match.gameScores),
-    winner: (match.gamesLeft > match.gamesRight) ? match.teamLeft : match.teamRight,
-    timestamp: new Date().toISOString()
-  };
-
-  var params = [];
-  var key;
-  for (key in data) {
-    if (data.hasOwnProperty(key)) {
-      params.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));
-    }
-  }
-
-  fetch(GAS_URL_INTEGRATED + '?' + params.join('&'), { method: 'GET', mode: 'no-cors' }).then(function() {
-    showAlert('送信完了', 'スプレッドシートに記録しました。');
-  }).catch(function(err) {
-    // Save to localStorage as backup
-    try {
-      var saved = JSON.parse(localStorage.getItem('pendingResults') || '[]');
-      saved.push(data);
-      localStorage.setItem('pendingResults', JSON.stringify(saved));
-    } catch(e) {}
-    showAlert('オフライン保存', 'ネットワークに接続できませんでした。\nローカルに保存しました。');
-  });
-}
-
-/* ========== LIVE UPDATE ========== */
-function sendLiveUpdate() {
-  if (!GAS_URL_LIVE || GAS_URL_LIVE.indexOf('YOUR_') === 0) return;
-
-  var data = {
-    action: 'updateLive',
-    court: match.court || '1',
-    teamLeft: match.teamLeft,
-    teamRight: match.teamRight,
-    gamesLeft: match.gamesLeft,
-    gamesRight: match.gamesRight,
-    pointLeft: match.pointLeft,
-    pointRight: match.pointRight,
-    currentGame: match.currentGame,
-    server: match.server,
-    finished: match.finished ? 'true' : 'false',
-    winner: match.finished ? ((match.gamesLeft > match.gamesRight) ? match.teamLeft : match.teamRight) : ''
-  };
-
-  var params = [];
-  var key;
-  for (key in data) {
-    if (data.hasOwnProperty(key)) {
-      params.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));
-    }
-  }
-
-  fetch(GAS_URL_LIVE + '?' + params.join('&'), { method: 'GET', mode: 'no-cors' }).catch(function() {});
-}
-
-/* ========== NEW MATCH ========== */
-function newMatch() {
-  showStep(1);
-}
-
-/* ========== ALERT ========== */
-function showAlert(title, msg) {
-  document.getElementById('alertTitle').textContent = title;
-  document.getElementById('alertMsg').textContent = msg;
-  document.getElementById('alertOverlay').classList.add('show');
-}
-
-function closeAlert() {
-  document.getElementById('alertOverlay').classList.remove('show');
-}
-
-/* ========== SERVICE WORKER ========== */
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(function() {});
-}
-</script>
+                if (result.status === "success") {
+                    btn.textContent = "✅ 送信完了";
+                    statusEl.className = 'send-status success';
+                    statusEl.textContent = '本部への送信が完了しました。試合ステータスは「終了」に更新されました。';
+                } else {
+                    throw new Error(result.message || "送信エラー");
+                }
+            } catch(e) {
+                // no-corsフォールバック（GASリダイレクト問題対策）
+                try {
+                    await fetch(API, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'text/plain' },
+                        body: JSON.stringify(payload)
+                    });
+                    btn.textContent = "✅ 送信完了";
+                    statusEl.className = 'send-status success';
+                    statusEl.textContent = '本部への送信が完了しました。';
+                } catch(e2) {
+                    btn.textContent = "☁ 本部に結果を送信";
+                    btn.disabled = false;
+                    statusEl.className = 'send-status error';
+                    statusEl.textContent = '通信エラー: ' + e2.message;
+                }
+            }
+        }
+    </script>
 </body>
 </html>
