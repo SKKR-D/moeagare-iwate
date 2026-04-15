@@ -152,7 +152,7 @@
         function step(n) { document.querySelectorAll('.modal-card > div').forEach(el=>el.style.display='none'); document.getElementById('step-'+n).style.display='block'; }
         function closeModal() { document.getElementById('modal').classList.add('hidden'); }
         function setAppMode(m) { appMode = m; if(m === 'auto') { initCourtSelector('auto-c-sel'); step('auto'); } else { step('manual'); } }
-        function initCourtSelector(id) { const sel = document.getElementById(id); sel.innerHTML = '<option value="">▼ コートを選択 ▼</option>'; for(let i=1; i<=18; i++) sel.innerHTML += `<option value="${i}コート">${i}コート</option>`; }
+        function initCourtSelector(id) { const sel = document.getElementById(id); sel.innerHTML = '<option value="">▼ コートを選択 ▼</option>'; for(let i=1; i<=18; i++) sel.innerHTML += `<option value="${i}">${i}コート</option>`; }
 
         // ============================================================
         // DX連携：コート自動取得（「コート指定済み」の試合を検索）
