@@ -8,23 +8,27 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
-   Design Tokens
+   Design Tokens — Light Mode（屋外視認性重視）
    ============================================================ */
 :root {
-  --c-bg:       #0f1923;
-  --c-surface:  #1a2733;
-  --c-surface2: #243442;
-  --c-accent:   #00e676;
-  --c-accent2:  #00b0ff;
-  --c-danger:   #ff5252;
-  --c-warn:     #ffd740;
-  --c-text:     #e0e6ed;
-  --c-text2:    #8899a6;
-  --c-border:   #2d3f4f;
+  --c-bg:       #f0f2f5;
+  --c-surface:  #ffffff;
+  --c-surface2: #e8ecf0;
+  --c-accent:   #0d7c3e;
+  --c-accent-light: #e6f5ec;
+  --c-accent2:  #0969b2;
+  --c-accent2-light: #e4f0fb;
+  --c-danger:   #d32f2f;
+  --c-warn:     #f57c00;
+  --c-warn-light: #fff4e5;
+  --c-text:     #1a1a1a;
+  --c-text2:    #5f6b7a;
+  --c-border:   #d0d7de;
   --r-sm: 8px;
   --r-md: 14px;
   --r-lg: 20px;
-  --shadow: 0 4px 24px rgba(0,0,0,.35);
+  --shadow: 0 2px 8px rgba(0,0,0,.08);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.1);
   --font-ja: 'Noto Sans JP', sans-serif;
   --font-en: 'Inter', sans-serif;
 }
@@ -46,9 +50,9 @@ body {
    Screen System
    ============================================================ */
 .screen { display: none; padding: 20px 16px 100px; max-width: 480px; margin: 0 auto; }
-.screen.active { display: block; animation: fadeUp .35s ease-out; }
+.screen.active { display: block; animation: fadeUp .3s ease-out; }
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(16px); }
+  from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
@@ -57,7 +61,7 @@ body {
    ============================================================ */
 .top-bar {
   position: sticky; top: 0; z-index: 100;
-  background: rgba(15,25,35,.92); backdrop-filter: blur(12px);
+  background: rgba(255,255,255,.92); backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--c-border);
   padding: 12px 16px; display: flex; align-items: center; gap: 12px;
 }
@@ -66,12 +70,12 @@ body {
   background: var(--c-surface2); border: none; color: var(--c-text);
   font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
 }
-.top-bar .back-btn:active { background: var(--c-accent); color: var(--c-bg); }
+.top-bar .back-btn:active { background: var(--c-accent); color: #fff; }
 .top-bar h1 { font-size: 15px; font-weight: 700; flex: 1; }
 .top-bar .team-badge {
-  font-size: 11px; background: var(--c-accent); color: var(--c-bg);
+  font-size: 11px; background: var(--c-accent); color: #fff;
   padding: 3px 10px; border-radius: 20px; font-weight: 700;
-  max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 
 /* ============================================================
@@ -82,9 +86,9 @@ body {
 }
 .login-logo .icon {
   width: 72px; height: 72px; border-radius: var(--r-lg);
-  background: linear-gradient(135deg, var(--c-accent), var(--c-accent2));
+  background: linear-gradient(135deg, var(--c-accent), #10a050);
   margin: 0 auto 16px; display: flex; align-items: center; justify-content: center;
-  font-size: 36px; box-shadow: 0 8px 32px rgba(0,230,118,.25);
+  font-size: 36px; color: #fff; box-shadow: 0 6px 20px rgba(13,124,62,.25);
 }
 .login-logo h2 { font-size: 22px; font-weight: 900; letter-spacing: -.5px; }
 .login-logo p  { font-size: 13px; color: var(--c-text2); margin-top: 6px; }
@@ -108,20 +112,17 @@ body {
 }
 .btn:active { transform: scale(.97); }
 .btn-primary {
-  background: linear-gradient(135deg, var(--c-accent), #00c966);
-  color: var(--c-bg); box-shadow: 0 4px 20px rgba(0,230,118,.3);
+  background: var(--c-accent); color: #fff;
+  box-shadow: 0 4px 12px rgba(13,124,62,.25);
 }
 .btn-primary:disabled { opacity: .4; cursor: not-allowed; }
 .btn-secondary {
-  background: var(--c-surface2); color: var(--c-text);
+  background: var(--c-surface); color: var(--c-text);
   border: 1px solid var(--c-border);
 }
-.btn-danger {
-  background: var(--c-danger); color: #fff;
-}
 .btn-arrival {
-  background: linear-gradient(135deg, var(--c-accent2), #0091ea);
-  color: #fff; box-shadow: 0 4px 20px rgba(0,176,255,.3);
+  background: var(--c-accent2); color: #fff;
+  box-shadow: 0 4px 12px rgba(9,105,178,.25);
   font-size: 18px; padding: 20px;
 }
 
@@ -131,48 +132,59 @@ body {
 }
 
 /* ============================================================
-   Dashboard
+   受付確認画面
    ============================================================ */
-.dash-section { margin-bottom: 28px; }
-.dash-section h3 {
-  font-size: 12px; font-weight: 700; color: var(--c-text2);
-  text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;
-  padding-left: 4px;
+.section-group { margin-bottom: 28px; }
+.section-title {
+  font-size: 13px; font-weight: 700; color: var(--c-text2);
+  margin-bottom: 10px; padding-left: 4px;
+  display: flex; align-items: center; gap: 6px;
+}
+.section-title .count {
+  background: var(--c-surface2); color: var(--c-text2);
+  font-size: 11px; padding: 1px 8px; border-radius: 10px;
 }
 
 .task-card {
   background: var(--c-surface); border: 1px solid var(--c-border);
-  border-radius: var(--r-md); padding: 16px; margin-bottom: 10px;
+  border-radius: var(--r-md); padding: 14px 16px; margin-bottom: 8px;
   cursor: pointer; transition: all .15s; position: relative; overflow: hidden;
+  box-shadow: var(--shadow);
 }
 .task-card:active { background: var(--c-surface2); }
 .task-card::before {
-  content: ''; position: absolute; left: 0; top: 0; bottom: 0;
-  width: 4px; background: var(--c-accent);
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
 }
-.task-card.individual::before { background: var(--c-accent2); }
+.task-card.pending::before { background: var(--c-warn); }
+.task-card.done::before { background: var(--c-accent); }
+.task-card.individual.pending::before { background: var(--c-accent2); }
+.task-card.individual.done::before { background: var(--c-accent2); }
+
 .task-card .match-id {
   font-family: var(--font-en); font-size: 11px; font-weight: 600;
-  color: var(--c-accent); margin-bottom: 4px;
+  color: var(--c-accent); margin-bottom: 2px;
 }
 .task-card.individual .match-id { color: var(--c-accent2); }
 .task-card .round-label {
-  font-size: 12px; color: var(--c-text2); margin-bottom: 6px;
+  font-size: 12px; color: var(--c-text2); margin-bottom: 4px;
 }
 .task-card .matchup {
-  font-size: 16px; font-weight: 700; line-height: 1.4;
+  font-size: 15px; font-weight: 700; line-height: 1.4;
 }
-.task-card .matchup .vs { color: var(--c-text2); font-size: 13px; margin: 0 6px; }
-.task-card .status-badge {
-  position: absolute; top: 14px; right: 14px;
-  font-size: 10px; font-weight: 700; padding: 3px 8px;
-  border-radius: 10px; background: var(--c-surface2); color: var(--c-text2);
+.task-card .matchup .vs {
+  color: var(--c-text2); font-size: 12px; margin: 0 6px; font-weight: 500;
 }
-.task-card .status-badge.waiting { background: rgba(255,215,64,.15); color: var(--c-warn); }
-.task-card .status-badge.order-done { background: rgba(0,230,118,.15); color: var(--c-accent); }
+
+.task-card .status-pill {
+  position: absolute; top: 12px; right: 12px;
+  font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 10px;
+}
+.status-pill.pending { background: var(--c-warn-light); color: var(--c-warn); }
+.status-pill.done { background: var(--c-accent-light); color: var(--c-accent); }
+.status-pill.order-done { background: var(--c-accent-light); color: var(--c-accent); }
 
 .task-card .arrow-icon {
-  position: absolute; right: 14px; bottom: 14px;
+  position: absolute; right: 14px; bottom: 12px;
   font-size: 18px; color: var(--c-text2);
 }
 
@@ -185,16 +197,14 @@ body {
 /* ============================================================
    Arrival Screen
    ============================================================ */
-.arrival-info {
-  text-align: center; padding: 40px 0 32px;
-}
+.arrival-info { text-align: center; padding: 40px 0 28px; }
 .arrival-info .big-icon { font-size: 56px; margin-bottom: 16px; }
 .arrival-info h2 { font-size: 20px; font-weight: 900; margin-bottom: 8px; }
 .arrival-info p { font-size: 14px; color: var(--c-text2); line-height: 1.6; }
 
 .arrival-detail {
-  background: var(--c-surface); border-radius: var(--r-md);
-  padding: 16px; margin-bottom: 24px;
+  background: var(--c-surface); border-radius: var(--r-md); border: 1px solid var(--c-border);
+  padding: 16px; margin-bottom: 24px; box-shadow: var(--shadow);
 }
 .arrival-detail .row {
   display: flex; justify-content: space-between; padding: 8px 0;
@@ -208,78 +218,68 @@ body {
    Order Screen
    ============================================================ */
 .order-header {
-  background: var(--c-surface); border-radius: var(--r-md);
-  padding: 14px 16px; margin-bottom: 20px;
+  background: var(--c-surface); border-radius: var(--r-md); border: 1px solid var(--c-border);
+  padding: 14px 16px; margin-bottom: 20px; box-shadow: var(--shadow);
 }
 .order-header .match-label { font-size: 12px; color: var(--c-text2); }
 .order-header .match-title { font-size: 17px; font-weight: 700; margin-top: 4px; }
 
 .order-slots { margin-bottom: 20px; }
-.order-slots h4 {
-  font-size: 12px; color: var(--c-text2); margin-bottom: 10px;
-  font-weight: 700; letter-spacing: .5px;
-}
+.order-slots h4 { font-size: 13px; color: var(--c-text2); margin-bottom: 10px; font-weight: 700; }
 
-.slot-row {
-  display: flex; gap: 8px; margin-bottom: 8px; align-items: center;
-}
+.slot-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
 .slot-label {
   width: 36px; height: 36px; border-radius: 50%;
-  background: var(--c-surface2); display: flex; align-items: center; justify-content: center;
+  background: var(--c-accent-light); display: flex; align-items: center; justify-content: center;
   font-family: var(--font-en); font-size: 12px; font-weight: 700;
   color: var(--c-accent); flex-shrink: 0;
 }
-.slot-row.individual .slot-label { color: var(--c-accent2); }
 .slot-select {
   flex: 1; padding: 10px 12px; font-size: 14px; font-weight: 500;
   background: var(--c-surface); border: 2px solid var(--c-border);
   border-radius: var(--r-sm); color: var(--c-text); outline: none;
   font-family: var(--font-ja); appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238899a6' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%235f6b7a' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
   background-repeat: no-repeat; background-position: right 12px center;
 }
 .slot-select:focus { border-color: var(--c-accent); }
-.slot-select.filled { border-color: rgba(0,230,118,.4); }
+.slot-select.filled { border-color: var(--c-accent); background-color: var(--c-accent-light); }
+.slot-select:disabled { opacity: .5; background-color: var(--c-surface2); cursor: not-allowed; }
 
 .forfeit-row {
   display: flex; align-items: center; gap: 10px;
-  background: var(--c-surface); border-radius: var(--r-sm);
-  padding: 10px 14px; margin-top: 4px; margin-bottom: 16px;
+  background: var(--c-surface); border: 1px solid var(--c-border);
+  border-radius: var(--r-sm); padding: 10px 14px; margin-top: 4px; margin-bottom: 16px;
 }
-.forfeit-row input[type="checkbox"] {
-  width: 20px; height: 20px; accent-color: var(--c-danger);
-}
+.forfeit-row input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--c-warn); }
 .forfeit-row label { font-size: 13px; color: var(--c-text2); }
 
 .roster-pool {
-  background: var(--c-surface); border-radius: var(--r-md);
-  padding: 14px 16px; margin-bottom: 24px;
+  background: var(--c-surface); border-radius: var(--r-md); border: 1px solid var(--c-border);
+  padding: 14px 16px; margin-bottom: 20px; box-shadow: var(--shadow);
 }
-.roster-pool h4 {
-  font-size: 12px; color: var(--c-text2); margin-bottom: 10px;
-  font-weight: 700; letter-spacing: .5px;
-}
+.roster-pool h4 { font-size: 13px; color: var(--c-text2); margin-bottom: 10px; font-weight: 700; }
 .roster-tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .roster-tag {
   font-size: 13px; padding: 6px 12px; border-radius: 20px;
   background: var(--c-surface2); color: var(--c-text); font-weight: 500;
   border: 1px solid var(--c-border); transition: all .15s;
 }
-.roster-tag.used { opacity: .35; text-decoration: line-through; }
+.roster-tag.used { opacity: .35; text-decoration: line-through; background: var(--c-surface2); color: var(--c-text2); }
 
 /* ============================================================
    Loading / Toast
    ============================================================ */
 .spinner {
   display: inline-block; width: 20px; height: 20px;
-  border: 3px solid rgba(255,255,255,.2); border-top-color: #fff;
+  border: 3px solid rgba(0,0,0,.1); border-top-color: var(--c-accent);
   border-radius: 50%; animation: spin .6s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .loading-overlay {
   position: fixed; inset: 0; z-index: 9999;
-  background: rgba(15,25,35,.8); backdrop-filter: blur(4px);
+  background: rgba(240,242,245,.85); backdrop-filter: blur(4px);
   display: none; align-items: center; justify-content: center; flex-direction: column; gap: 16px;
 }
 .loading-overlay.show { display: flex; }
@@ -290,8 +290,8 @@ body {
   position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
   background: var(--c-surface); border: 1px solid var(--c-border);
   border-radius: var(--r-md); padding: 12px 20px; font-size: 14px; font-weight: 600;
-  box-shadow: var(--shadow); z-index: 9998; opacity: 0;
-  transition: all .3s ease;
+  box-shadow: var(--shadow-md); z-index: 9998; opacity: 0;
+  transition: all .3s ease; max-width: 90%;
 }
 .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 .toast.success { border-color: var(--c-accent); color: var(--c-accent); }
@@ -336,16 +336,20 @@ body {
 </div>
 
 <!-- ============================================================
-     Screen 2: Dashboard
+     Screen 2: 受付確認
      ============================================================ -->
-<div class="screen" id="screenDashboard">
+<div class="screen" id="screenHome">
   <div class="top-bar">
-    <h1>ダッシュボード</h1>
-    <span class="team-badge" id="dashTeamBadge"></span>
+    <h1>受付確認</h1>
+    <span class="team-badge" id="homeTeamBadge"></span>
   </div>
-  <div class="dash-section mt-12">
-    <h3>📋 対応が必要な試合</h3>
-    <div id="taskList"></div>
+  <div class="section-group mt-12" id="pendingSection">
+    <div class="section-title">🔶 受付前 <span class="count" id="pendingCount">0</span></div>
+    <div id="pendingList"></div>
+  </div>
+  <div class="section-group" id="doneSection">
+    <div class="section-title">✅ 受付完了 <span class="count" id="doneCount">0</span></div>
+    <div id="doneList"></div>
   </div>
   <button class="btn btn-secondary mt-20" onclick="doLogout()">ログアウト</button>
 </div>
@@ -386,30 +390,12 @@ body {
 
   <div class="order-slots" id="orderSlots">
     <h4>🎾 オーダー</h4>
-    <div class="slot-row">
-      <div class="slot-label">1A</div>
-      <select class="slot-select" id="slot_0" onchange="onSlotChange()"><option value="">-- 選手を選択 --</option></select>
-    </div>
-    <div class="slot-row">
-      <div class="slot-label">1B</div>
-      <select class="slot-select" id="slot_1" onchange="onSlotChange()"><option value="">-- 選手を選択 --</option></select>
-    </div>
-    <div class="slot-row">
-      <div class="slot-label">2A</div>
-      <select class="slot-select" id="slot_2" onchange="onSlotChange()"><option value="">-- 選手を選択 --</option></select>
-    </div>
-    <div class="slot-row">
-      <div class="slot-label">2B</div>
-      <select class="slot-select" id="slot_3" onchange="onSlotChange()"><option value="">-- 選手を選択 --</option></select>
-    </div>
-    <div class="slot-row">
-      <div class="slot-label">3A</div>
-      <select class="slot-select" id="slot_4" onchange="onSlotChange()"><option value="">-- 選手を選択 --</option></select>
-    </div>
-    <div class="slot-row">
-      <div class="slot-label">3B</div>
-      <select class="slot-select" id="slot_5" onchange="onSlotChange()"><option value="">-- 選手を選択 --</option></select>
-    </div>
+    <div class="slot-row"><div class="slot-label">1A</div><select class="slot-select" id="slot_0" onchange="onSlotChange()"><option value="">-- 選手を選択 --</option></select></div>
+    <div class="slot-row"><div class="slot-label">1B</div><select class="slot-select" id="slot_1" onchange="onSlotChange()"><option value="">-- 選手を選択 --</option></select></div>
+    <div class="slot-row"><div class="slot-label">2A</div><select class="slot-select" id="slot_2" onchange="onSlotChange()"><option value="">-- 選手を選択 --</option></select></div>
+    <div class="slot-row"><div class="slot-label">2B</div><select class="slot-select" id="slot_3" onchange="onSlotChange()"><option value="">-- 選手を選択 --</option></select></div>
+    <div class="slot-row"><div class="slot-label">3A</div><select class="slot-select" id="slot_4" onchange="onSlotChange()"><option value="">-- 選手を選択 --</option></select></div>
+    <div class="slot-row"><div class="slot-label">3B</div><select class="slot-select" id="slot_5" onchange="onSlotChange()"><option value="">-- 選手を選択 --</option></select></div>
   </div>
 
   <div class="forfeit-row" id="forfeitRow">
@@ -425,21 +411,16 @@ body {
      JavaScript
      ============================================================ -->
 <script>
-// ============================================================
-// Config - ★ここにGAS WebアプリのURLを設定
-// ============================================================
 const GAS_URL = "https://script.google.com/macros/s/AKfycbyxWcuPgEZZS5zma0xxXOu-LvC0GTP4-ArSao_Y119N7zP_k_xWf6PoSGd5RIeaGLIy/exec";
 
-// ============================================================
-// App State
-// ============================================================
 const state = {
-  teamName: "",        // ログイン後のチーム名（ベース名: "盛岡第一中"）
-  teamRosters: {},     // { "盛岡第一中A": ["選手1",...], "盛岡第一中B": [...] }
-  tasks: [],           // ダッシュボードのタスク一覧
-  currentTask: null,   // 選択中のタスク
+  teamName: "",
+  teamRosters: {},
+  tasks: [],
+  currentTask: null,
+  currentRoster: [],
   orderDeadline: "12:00",
-  screenHistory: []    // 戻るボタン用の画面履歴
+  screenHistory: []
 };
 
 // ============================================================
@@ -447,14 +428,11 @@ const state = {
 // ============================================================
 const showScreen = (id) => {
   const current = document.querySelector('.screen.active');
-  if (current && current.id !== id) {
-    state.screenHistory.push(current.id);
-  }
+  if (current && current.id !== id) state.screenHistory.push(current.id);
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   window.scrollTo(0, 0);
 };
-
 const goBack = () => {
   const prev = state.screenHistory.pop();
   if (prev) {
@@ -471,20 +449,16 @@ const showLoading = (msg = "読み込み中...") => {
   document.getElementById('loadingMsg').textContent = msg;
   document.getElementById('loadingOverlay').classList.add('show');
 };
-
-const hideLoading = () => {
-  document.getElementById('loadingOverlay').classList.remove('show');
-};
-
+const hideLoading = () => document.getElementById('loadingOverlay').classList.remove('show');
 const showToast = (msg, type = "success") => {
   const el = document.getElementById('toast');
   el.textContent = msg;
   el.className = `toast ${type} show`;
-  setTimeout(() => el.classList.remove('show'), 2500);
+  setTimeout(() => el.classList.remove('show'), 2800);
 };
 
 // ============================================================
-// API Communication
+// API
 // ============================================================
 const apiGet = async (action, params = {}) => {
   const url = new URL(GAS_URL);
@@ -494,11 +468,10 @@ const apiGet = async (action, params = {}) => {
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 };
-
 const apiPost = async (payload) => {
   const res = await fetch(GAS_URL, {
     method: "POST",
-    headers: { "Content-Type": "text/plain" }, // GAS CORS対策
+    headers: { "Content-Type": "text/plain" },
     body: JSON.stringify(payload)
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -512,33 +485,23 @@ const doLogin = async () => {
   const code = document.getElementById('loginCode').value.trim();
   const errEl = document.getElementById('loginError');
   errEl.textContent = "";
-
   if (!code) { errEl.textContent = "コードを入力してください"; return; }
 
   showLoading("認証中...");
   try {
     const data = await apiGet('login', { code });
-    if (data.error) {
-      errEl.textContent = data.error;
-      hideLoading();
-      return;
-    }
+    if (data.error) { errEl.textContent = data.error; hideLoading(); return; }
     state.teamName = data.teamName;
-
-    // 設定も取得
     const config = await apiGet('getConfig');
     if (config.orderDeadline) state.orderDeadline = config.orderDeadline;
-
-    // ダッシュボードデータ取得
-    await loadDashboard();
+    await loadHome();
     hideLoading();
-    showScreen('screenDashboard');
+    showScreen('screenHome');
   } catch (err) {
     hideLoading();
     errEl.textContent = "通信エラー: " + err.message;
   }
 };
-
 const doLogout = () => {
   state.teamName = "";
   state.teamRosters = {};
@@ -547,80 +510,80 @@ const doLogout = () => {
   document.getElementById('loginCode').value = "";
   showScreen('screenLogin');
 };
-
-// Enterキーでログイン
 document.getElementById('loginCode').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') doLogin();
 });
 
 // ============================================================
-// Dashboard
+// 受付確認画面
 // ============================================================
-const loadDashboard = async () => {
+const loadHome = async () => {
   const data = await apiGet('getDashboardData', { teamName: state.teamName });
   state.teamRosters = data.teamRosters || {};
   state.tasks = data.tasks || [];
-  renderDashboard();
+  renderHome();
 };
 
-const renderDashboard = () => {
-  document.getElementById('dashTeamBadge').textContent = state.teamName;
+const renderHome = () => {
+  document.getElementById('homeTeamBadge').textContent = state.teamName;
 
-  const container = document.getElementById('taskList');
-  if (state.tasks.length === 0) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <div class="icon">✅</div>
-        <p>現在対応が必要な試合はありません</p>
-      </div>`;
-    return;
-  }
+  const pending = state.tasks.filter(t => !t.isArrived);
+  const done = state.tasks.filter(t => t.isArrived);
 
-  container.innerHTML = state.tasks.map((task, i) => {
-    const isIndividual = task.type === "個人戦";
-    const statusClass = task.status === "オーダー完了" ? "order-done" : "waiting";
-    const statusText  = task.status || "待機中";
-    return `
-      <div class="task-card ${isIndividual ? 'individual' : ''}" onclick="onTaskSelect(${i})">
-        <div class="match-id">${task.matchId}</div>
-        <div class="round-label">${task.round}</div>
-        <div class="matchup">
-          ${task.entityName}<span class="vs">vs</span>${task.opponent}
-        </div>
-        <span class="status-badge ${statusClass}">${statusText}</span>
-        <span class="arrow-icon">›</span>
-      </div>`;
-  }).join('');
+  document.getElementById('pendingCount').textContent = pending.length;
+  document.getElementById('doneCount').textContent = done.length;
+
+  const pendingContainer = document.getElementById('pendingList');
+  const doneContainer = document.getElementById('doneList');
+
+  pendingContainer.innerHTML = pending.length === 0
+    ? '<div class="empty-state"><p>すべて受付完了です</p></div>'
+    : pending.map(task => renderTaskCard(task, state.tasks.indexOf(task), "pending")).join('');
+
+  doneContainer.innerHTML = done.length === 0
+    ? '<div class="empty-state"><p>まだ受付完了の試合はありません</p></div>'
+    : done.map(task => renderTaskCard(task, state.tasks.indexOf(task), "done")).join('');
+};
+
+const renderTaskCard = (task, globalIndex, statusType) => {
+  const isIndividual = task.type === "個人戦";
+  const indClass = isIndividual ? "individual" : "";
+  let pillClass = statusType;
+  let pillText = statusType === "pending" ? "受付前" : "受付完了";
+  if (task.status === "オーダー完了") { pillClass = "order-done"; pillText = "オーダー済"; }
+
+  return `
+    <div class="task-card ${indClass} ${statusType}" onclick="onTaskSelect(${globalIndex})">
+      <div class="match-id">${task.matchId}　${isIndividual ? "個人戦" : "団体戦"}</div>
+      <div class="round-label">${task.round}</div>
+      <div class="matchup">${task.entityName}<span class="vs">vs</span>${task.opponent}</div>
+      <span class="status-pill ${pillClass}">${pillText}</span>
+      <span class="arrow-icon">›</span>
+    </div>`;
 };
 
 // ============================================================
-// Task Selection → Arrival or Order
+// Task Selection
 // ============================================================
 const onTaskSelect = (index) => {
   const task = state.tasks[index];
   state.currentTask = task;
 
-  if (task.type === "個人戦") {
-    if (!task.isArrived) {
-      // 個人戦・到着未済 → 受付画面へ
-      renderArrivalScreen(task);
-      showScreen('screenArrival');
-    } else {
-      // 個人戦・到着済み → 受付済みメッセージ
-      showToast("受付済みです", "success");
-    }
+  if (!task.isArrived) {
+    // 到着未済 → 必ず到着受付画面へ（団体も個人も）
+    renderArrivalScreen(task);
+    showScreen('screenArrival');
     return;
   }
 
-  if (!task.isArrived) {
-    // 団体戦・到着未済 → 受付画面へ
-    renderArrivalScreen(task);
-    showScreen('screenArrival');
-  } else {
-    // 団体戦・到着済み → オーダー画面へ
-    renderOrderScreen(task);
-    showScreen('screenOrder');
+  // 到着済み
+  if (task.type === "個人戦") {
+    showToast("受付済みです", "success");
+    return;
   }
+  // 団体戦・到着済み → オーダー画面
+  renderOrderScreen(task);
+  showScreen('screenOrder');
 };
 
 // ============================================================
@@ -652,17 +615,15 @@ const submitArrival = async () => {
     hideLoading();
 
     if (task.type === "個人戦") {
-      // 個人戦 → オーダー不要、ダッシュボードに戻る
       showToast("個人戦の到着受付が完了しました。頑張ってください！");
       setTimeout(async () => {
         showLoading("更新中...");
-        await loadDashboard();
+        await loadHome();
         hideLoading();
         state.screenHistory = [];
-        showScreen('screenDashboard');
+        showScreen('screenHome');
       }, 1200);
     } else {
-      // 団体戦 → オーダー画面へ遷移
       showToast("到着受付が完了しました");
       setTimeout(() => {
         renderOrderScreen(task);
@@ -685,36 +646,64 @@ const renderOrderScreen = (task) => {
     <div class="match-title">${task.entityName} vs ${task.opponent}</div>
   `;
 
-  // 登録メンバー取得
   const roster = state.teamRosters[task.entityName] || [];
-  const tagsContainer = document.getElementById('rosterTags');
-  tagsContainer.innerHTML = roster.map(p => `<span class="roster-tag" data-name="${p}">${p}</span>`).join('');
+  state.currentRoster = roster;
 
-  // セレクトボックスに選手リストを設定
+  document.getElementById('rosterTags').innerHTML =
+    roster.map(p => `<span class="roster-tag" data-name="${p}">${p}</span>`).join('');
+
   for (let s = 0; s < 6; s++) {
     const sel = document.getElementById(`slot_${s}`);
-    sel.innerHTML = '<option value="">-- 選手を選択 --</option>';
-    roster.forEach(p => {
-      sel.innerHTML += `<option value="${p}">${p}</option>`;
-    });
     sel.value = "";
     sel.classList.remove('filled');
+    sel.disabled = false;
   }
+  rebuildAllSelects();
 
-  // 棄権チェックをリセット
   document.getElementById('forfeitCheck').checked = false;
-  document.getElementById('slot_4').disabled = false;
-  document.getElementById('slot_5').disabled = false;
-
-  // 締切メッセージ
   document.getElementById('orderDeadlineMsg').textContent = `⏰ オーダー締切: ${state.orderDeadline}`;
-
-  // 送信ボタン無効化
   document.getElementById('orderSubmitBtn').disabled = true;
 };
 
+// --- 選択済み選手を他のセレクトから除外 ---
+const rebuildAllSelects = () => {
+  const currentValues = [];
+  for (let s = 0; s < 6; s++) {
+    currentValues.push(document.getElementById(`slot_${s}`).value);
+  }
+
+  const roster = state.currentRoster;
+
+  for (let s = 0; s < 6; s++) {
+    const sel = document.getElementById(`slot_${s}`);
+    if (sel.disabled) continue;
+
+    const myValue = currentValues[s];
+    const usedByOthers = currentValues.filter((v, i) => v && i !== s);
+
+    sel.innerHTML = '<option value="">-- 選手を選択 --</option>';
+    roster.forEach(p => {
+      const isUsed = usedByOthers.includes(p);
+      if (!isUsed || p === myValue) {
+        const opt = document.createElement('option');
+        opt.value = p;
+        opt.textContent = p;
+        if (p === myValue) opt.selected = true;
+        sel.appendChild(opt);
+      }
+    });
+
+    sel.classList.toggle('filled', !!myValue);
+  }
+
+  const allSelected = currentValues.filter(v => v);
+  document.querySelectorAll('.roster-tag').forEach(tag => {
+    tag.classList.toggle('used', allSelected.includes(tag.dataset.name));
+  });
+};
+
 const onSlotChange = () => {
-  updateRosterTags();
+  rebuildAllSelects();
   validateOrder();
 };
 
@@ -728,37 +717,19 @@ const onForfeitChange = () => {
     document.getElementById('slot_4').classList.remove('filled');
     document.getElementById('slot_5').classList.remove('filled');
   }
-  updateRosterTags();
+  rebuildAllSelects();
   validateOrder();
-};
-
-const updateRosterTags = () => {
-  const selected = [];
-  for (let s = 0; s < 6; s++) {
-    const val = document.getElementById(`slot_${s}`).value;
-    if (val) selected.push(val);
-    document.getElementById(`slot_${s}`).classList.toggle('filled', !!val);
-  }
-  document.querySelectorAll('.roster-tag').forEach(tag => {
-    tag.classList.toggle('used', selected.includes(tag.dataset.name));
-  });
 };
 
 const validateOrder = () => {
   const forfeit = document.getElementById('forfeitCheck').checked;
   const required = forfeit ? 4 : 6;
-  const filled = [];
   const maxSlot = forfeit ? 4 : 6;
-
+  let filled = 0;
   for (let s = 0; s < maxSlot; s++) {
-    const val = document.getElementById(`slot_${s}`).value;
-    if (val) filled.push(val);
+    if (document.getElementById(`slot_${s}`).value) filled++;
   }
-
-  // 全スロット埋まっているか & 重複がないか
-  const unique = [...new Set(filled)];
-  const valid = (filled.length === required) && (unique.length === required);
-  document.getElementById('orderSubmitBtn').disabled = !valid;
+  document.getElementById('orderSubmitBtn').disabled = (filled !== required);
 };
 
 const submitOrder = async () => {
@@ -783,18 +754,15 @@ const submitOrder = async () => {
       entityName: task.entityName,
       order: order
     });
-
     hideLoading();
-    const msg = result.updated ? "オーダーを更新しました" : "オーダーを送信しました";
-    showToast(msg);
+    showToast(result.updated ? "オーダーを更新しました" : "オーダーを送信しました");
 
-    // ダッシュボードを更新して戻る
     setTimeout(async () => {
       showLoading("更新中...");
-      await loadDashboard();
+      await loadHome();
       hideLoading();
       state.screenHistory = [];
-      showScreen('screenDashboard');
+      showScreen('screenHome');
     }, 800);
   } catch (err) {
     hideLoading();
