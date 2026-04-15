@@ -598,7 +598,9 @@ const renderTaskCard = (task, globalIndex, statusType) => {
   const hasCheck = (isIndividual && statusType === "pending") ? "has-check" : "";
   let pillClass = statusType;
   let pillText = statusType === "pending" ? "受付前" : "受付完了";
-  if (task.status === "オーダー完了") { pillClass = "order-done"; pillText = "オーダー済"; }
+  if (task.status === "オーダー提出") { pillClass = "order-done"; pillText = "オーダー提出"; }
+  if (task.status === "オーダー完了") { pillClass = "order-done"; pillText = "オーダー完了"; }
+  if (task.status === "コート指定待ち") { pillClass = "done"; pillText = "コート指定待ち"; }
 
   // 個人戦の受付前にはチェックボックスを表示
   const checkbox = (isIndividual && statusType === "pending")
