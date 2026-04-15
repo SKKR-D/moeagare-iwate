@@ -109,10 +109,13 @@ body {
   display: inline-block; font-size: 11px; font-weight: 700;
   padding: 2px 8px; border-radius: 10px; white-space: nowrap;
 }
-.status-tag.waiting   { background: var(--c-warn-light); color: var(--c-warn); }
-.status-tag.order     { background: var(--c-accent2-light); color: var(--c-accent2); }
-.status-tag.progress  { background: #ede9fe; color: #7c3aed; }
-.status-tag.done      { background: var(--c-accent-light); color: var(--c-accent); }
+.status-tag.waiting      { background: var(--c-warn-light); color: var(--c-warn); }
+.status-tag.order-partial { background: #fff0e0; color: #e65100; }
+.status-tag.order        { background: var(--c-accent2-light); color: var(--c-accent2); }
+.status-tag.court-wait   { background: #fce4ec; color: #c62828; }
+.status-tag.court-done   { background: #e8eaf6; color: #3949ab; }
+.status-tag.progress     { background: #ede9fe; color: #7c3aed; }
+.status-tag.done         { background: var(--c-accent-light); color: var(--c-accent); }
 
 .inline-select {
   padding: 4px 8px; border: 1px solid var(--c-border); border-radius: var(--r-sm);
@@ -242,8 +245,11 @@ body {
       <select id="filterStatus" onchange="renderProgressTable()">
         <option value="">すべてのステータス</option>
         <option value="待機中">待機中</option>
+        <option value="オーダー提出">オーダー提出</option>
         <option value="オーダー完了">オーダー完了</option>
-        <option value="進行中">進行中</option>
+        <option value="コート指定待ち">コート指定待ち</option>
+        <option value="コート指定済み">コート指定済み</option>
+        <option value="試合中">試合中</option>
         <option value="終了">終了</option>
       </select>
       <select id="filterType" onchange="renderProgressTable()">
@@ -437,8 +443,11 @@ window.addEventListener('DOMContentLoaded', refreshAll);
 // ============================================================
 const getStatusClass = (status) => {
   if (status === "待機中") return "waiting";
+  if (status === "オーダー提出") return "order-partial";
   if (status === "オーダー完了") return "order";
-  if (status === "進行中" || status === "進行") return "progress";
+  if (status === "コート指定待ち") return "court-wait";
+  if (status === "コート指定済み") return "court-done";
+  if (status === "試合中") return "progress";
   if (status === "終了") return "done";
   return "waiting";
 };
@@ -463,6 +472,10 @@ const renderProgressTable = () => {
     const isTeam = m.round.indexOf("団体") !== -1;
     const typeLabel = isTeam ? "団体" : "個人";
 
+    const statusOptions = isTeam
+      ? ['待機中','オーダー提出','オーダー完了','コート指定待ち','コート指定済み','試合中','終了']
+      : ['待機中','コート指定待ち','コート指定済み','試合中','終了'];
+
     return `<tr>
       <td><strong style="font-family:var(--font-en);">${m.matchId}</strong></td>
       <td>${typeLabel}</td>
@@ -473,10 +486,7 @@ const renderProgressTable = () => {
       <td style="white-space:nowrap;">
         <select class="inline-select" onchange="changeStatus('${m.matchId}', this.value)">
           <option value="">変更▼</option>
-          <option value="待機中">待機中</option>
-          <option value="オーダー完了">オーダー完了</option>
-          <option value="進行中">進行中</option>
-          <option value="終了">終了</option>
+          ${statusOptions.map(s => `<option value="${s}">${s}</option>`).join('')}
         </select>
         <button class="action-btn" onclick="openCourtModal('${m.matchId}', '${m.court || ''}')">コート</button>
       </td>
