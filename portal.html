@@ -601,17 +601,23 @@ const onTaskSelect = (index) => {
   state.currentTask = task;
 
   if (task.type === "個人戦") {
-    // 個人戦はオーダー不要 → メッセージだけ表示
-    showToast("個人戦はオーダー提出不要です", "success");
+    if (!task.isArrived) {
+      // 個人戦・到着未済 → 受付画面へ
+      renderArrivalScreen(task);
+      showScreen('screenArrival');
+    } else {
+      // 個人戦・到着済み → 受付済みメッセージ
+      showToast("受付済みです", "success");
+    }
     return;
   }
 
   if (!task.isArrived) {
-    // 到着受付が未済 → 受付画面へ
+    // 団体戦・到着未済 → 受付画面へ
     renderArrivalScreen(task);
     showScreen('screenArrival');
   } else {
-    // 到着済み → オーダー画面へ
+    // 団体戦・到着済み → オーダー画面へ
     renderOrderScreen(task);
     showScreen('screenOrder');
   }
@@ -644,13 +650,25 @@ const submitArrival = async () => {
     });
     task.isArrived = true;
     hideLoading();
-    showToast("到着受付が完了しました");
 
-    // 受付後 → オーダー画面へ遷移
-    setTimeout(() => {
-      renderOrderScreen(task);
-      showScreen('screenOrder');
-    }, 600);
+    if (task.type === "個人戦") {
+      // 個人戦 → オーダー不要、ダッシュボードに戻る
+      showToast("個人戦の到着受付が完了しました。頑張ってください！");
+      setTimeout(async () => {
+        showLoading("更新中...");
+        await loadDashboard();
+        hideLoading();
+        state.screenHistory = [];
+        showScreen('screenDashboard');
+      }, 1200);
+    } else {
+      // 団体戦 → オーダー画面へ遷移
+      showToast("到着受付が完了しました");
+      setTimeout(() => {
+        renderOrderScreen(task);
+        showScreen('screenOrder');
+      }, 600);
+    }
   } catch (err) {
     hideLoading();
     showToast("通信エラー: " + err.message, "error");
