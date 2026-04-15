@@ -224,15 +224,24 @@ body {
 .order-header .match-label { font-size: 12px; color: var(--c-text2); }
 .order-header .match-title { font-size: 17px; font-weight: 700; margin-top: 4px; }
 
-.order-slots { margin-bottom: 20px; }
-.order-slots h4 { font-size: 13px; color: var(--c-text2); margin-bottom: 10px; font-weight: 700; }
-
-.slot-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
+.match-group {
+  background: var(--c-surface); border: 1px solid var(--c-border);
+  border-radius: var(--r-md); padding: 14px 16px; margin-bottom: 12px;
+  box-shadow: var(--shadow);
+}
+.match-group.open-match { opacity: .5; }
+.match-group-title {
+  font-size: 13px; font-weight: 700; color: var(--c-accent);
+  margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+}
+.match-group-title .match-num {
+  background: var(--c-accent); color: #fff;
+  font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px;
+}
+.slot-row { display: flex; gap: 8px; margin-bottom: 6px; align-items: center; }
 .slot-label {
-  width: 36px; height: 36px; border-radius: 50%;
-  background: var(--c-accent-light); display: flex; align-items: center; justify-content: center;
-  font-family: var(--font-en); font-size: 12px; font-weight: 700;
-  color: var(--c-accent); flex-shrink: 0;
+  width: 28px; font-size: 13px; font-weight: 700; color: var(--c-text2);
+  text-align: center; flex-shrink: 0;
 }
 .slot-select {
   flex: 1; padding: 10px 12px; font-size: 14px; font-weight: 500;
@@ -246,13 +255,12 @@ body {
 .slot-select.filled { border-color: var(--c-accent); background-color: var(--c-accent-light); }
 .slot-select:disabled { opacity: .5; background-color: var(--c-surface2); cursor: not-allowed; }
 
-.forfeit-row {
+.open-check-row {
   display: flex; align-items: center; gap: 10px;
-  background: var(--c-surface); border: 1px solid var(--c-border);
-  border-radius: var(--r-sm); padding: 10px 14px; margin-top: 4px; margin-bottom: 16px;
+  margin-bottom: 16px; padding: 0 2px;
 }
-.forfeit-row input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--c-warn); }
-.forfeit-row label { font-size: 13px; color: var(--c-text2); }
+.open-check-row input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--c-warn); }
+.open-check-row label { font-size: 13px; color: var(--c-text2); }
 
 .roster-pool {
   background: var(--c-surface); border-radius: var(--r-md); border: 1px solid var(--c-border);
@@ -388,19 +396,30 @@ body {
     <div class="roster-tags" id="rosterTags"></div>
   </div>
 
-  <div class="order-slots" id="orderSlots">
-    <h4>🎾 オーダー</h4>
-    <div class="slot-row"><div class="slot-label">1A</div><select class="slot-select" id="slot_0" onchange="onSlotChange()"><option value="">-- 選手を選択 --</option></select></div>
-    <div class="slot-row"><div class="slot-label">1B</div><select class="slot-select" id="slot_1" onchange="onSlotChange()"><option value="">-- 選手を選択 --</option></select></div>
-    <div class="slot-row"><div class="slot-label">2A</div><select class="slot-select" id="slot_2" onchange="onSlotChange()"><option value="">-- 選手を選択 --</option></select></div>
-    <div class="slot-row"><div class="slot-label">2B</div><select class="slot-select" id="slot_3" onchange="onSlotChange()"><option value="">-- 選手を選択 --</option></select></div>
-    <div class="slot-row"><div class="slot-label">3A</div><select class="slot-select" id="slot_4" onchange="onSlotChange()"><option value="">-- 選手を選択 --</option></select></div>
-    <div class="slot-row"><div class="slot-label">3B</div><select class="slot-select" id="slot_5" onchange="onSlotChange()"><option value="">-- 選手を選択 --</option></select></div>
+  <!-- 第1マッチ -->
+  <div class="match-group" id="matchGroup1">
+    <div class="match-group-title"><span class="match-num">1</span>第1マッチ</div>
+    <div class="slot-row"><div class="slot-label">A</div><select class="slot-select" id="slot_0" onchange="onSlotChange()"><option value="">-- 選手を選択 --</option></select></div>
+    <div class="slot-row"><div class="slot-label">B</div><select class="slot-select" id="slot_1" onchange="onSlotChange()"><option value="">-- 選手を選択 --</option></select></div>
   </div>
 
-  <div class="forfeit-row" id="forfeitRow">
-    <input type="checkbox" id="forfeitCheck" onchange="onForfeitChange()">
-    <label for="forfeitCheck">第3対戦をオープンにする（欠員による不戦敗）</label>
+  <!-- 第2マッチ -->
+  <div class="match-group" id="matchGroup2">
+    <div class="match-group-title"><span class="match-num">2</span>第2マッチ</div>
+    <div class="slot-row"><div class="slot-label">A</div><select class="slot-select" id="slot_2" onchange="onSlotChange()"><option value="">-- 選手を選択 --</option></select></div>
+    <div class="slot-row"><div class="slot-label">B</div><select class="slot-select" id="slot_3" onchange="onSlotChange()"><option value="">-- 選手を選択 --</option></select></div>
+  </div>
+
+  <!-- 第3マッチ -->
+  <div class="match-group" id="matchGroup3">
+    <div class="match-group-title"><span class="match-num">3</span>第3マッチ</div>
+    <div class="slot-row"><div class="slot-label">A</div><select class="slot-select" id="slot_4" onchange="onSlotChange()"><option value="">-- 選手を選択 --</option></select></div>
+    <div class="slot-row"><div class="slot-label">B</div><select class="slot-select" id="slot_5" onchange="onSlotChange()"><option value="">-- 選手を選択 --</option></select></div>
+  </div>
+
+  <div class="open-check-row" id="openCheckRow">
+    <input type="checkbox" id="openCheck" onchange="onOpenChange()">
+    <label for="openCheck">第3マッチをオープンにする（欠員による不戦敗）</label>
   </div>
 
   <button class="btn btn-primary" id="orderSubmitBtn" onclick="submitOrder()" disabled>オーダーを送信</button>
@@ -639,6 +658,8 @@ const submitArrival = async () => {
 // ============================================================
 // Order
 // ============================================================
+const SLOT_LABELS = ["1A","1B","2A","2B","3A","3B"];
+
 const renderOrderScreen = (task) => {
   document.getElementById('ordTeamBadge').textContent = task.entityName;
   document.getElementById('orderHeader').innerHTML = `
@@ -652,20 +673,25 @@ const renderOrderScreen = (task) => {
   document.getElementById('rosterTags').innerHTML =
     roster.map(p => `<span class="roster-tag" data-name="${p}">${p}</span>`).join('');
 
+  // 全セレクト初期化
   for (let s = 0; s < 6; s++) {
     const sel = document.getElementById(`slot_${s}`);
     sel.value = "";
     sel.classList.remove('filled');
     sel.disabled = false;
   }
+
+  // オープンチェック初期化
+  document.getElementById('openCheck').checked = false;
+  document.getElementById('matchGroup3').classList.remove('open-match');
+
   rebuildAllSelects();
 
-  document.getElementById('forfeitCheck').checked = false;
   document.getElementById('orderDeadlineMsg').textContent = `⏰ オーダー締切: ${state.orderDeadline}`;
   document.getElementById('orderSubmitBtn').disabled = true;
 };
 
-// --- 選択済み選手を他のセレクトから除外 ---
+// --- 選択済み選手を他のセレクトから除外 + 欠員選択肢（3A,3Bのみ、最大2回） ---
 const rebuildAllSelects = () => {
   const currentValues = [];
   for (let s = 0; s < 6; s++) {
@@ -674,14 +700,20 @@ const rebuildAllSelects = () => {
 
   const roster = state.currentRoster;
 
+  // 「欠員」が何回使われているか（slot_4, slot_5以外でも念のためカウント）
+  const vacancyCount = currentValues.filter(v => v === "欠員").length;
+
   for (let s = 0; s < 6; s++) {
     const sel = document.getElementById(`slot_${s}`);
     if (sel.disabled) continue;
 
     const myValue = currentValues[s];
-    const usedByOthers = currentValues.filter((v, i) => v && i !== s);
+    // 他のスロットで選ばれている選手（欠員以外）
+    const usedByOthers = currentValues.filter((v, i) => v && v !== "欠員" && i !== s);
 
     sel.innerHTML = '<option value="">-- 選手を選択 --</option>';
+
+    // 通常の選手選択肢
     roster.forEach(p => {
       const isUsed = usedByOthers.includes(p);
       if (!isUsed || p === myValue) {
@@ -693,10 +725,25 @@ const rebuildAllSelects = () => {
       }
     });
 
+    // 3A(slot_4), 3B(slot_5) には「欠員」選択肢を追加
+    // ただし、欠員は最大2回まで（自分が欠員ならカウントに含めない）
+    if (s === 4 || s === 5) {
+      const myVacancy = myValue === "欠員" ? 1 : 0;
+      const othersVacancy = vacancyCount - myVacancy;
+      if (othersVacancy < 2) {
+        const opt = document.createElement('option');
+        opt.value = "欠員";
+        opt.textContent = "🚫 欠員";
+        if (myValue === "欠員") opt.selected = true;
+        sel.appendChild(opt);
+      }
+    }
+
     sel.classList.toggle('filled', !!myValue);
   }
 
-  const allSelected = currentValues.filter(v => v);
+  // ロスタータグ更新
+  const allSelected = currentValues.filter(v => v && v !== "欠員");
   document.querySelectorAll('.roster-tag').forEach(tag => {
     tag.classList.toggle('used', allSelected.includes(tag.dataset.name));
   });
@@ -707,10 +754,14 @@ const onSlotChange = () => {
   validateOrder();
 };
 
-const onForfeitChange = () => {
-  const checked = document.getElementById('forfeitCheck').checked;
+const onOpenChange = () => {
+  const checked = document.getElementById('openCheck').checked;
+  const group3 = document.getElementById('matchGroup3');
+
   document.getElementById('slot_4').disabled = checked;
   document.getElementById('slot_5').disabled = checked;
+  group3.classList.toggle('open-match', checked);
+
   if (checked) {
     document.getElementById('slot_4').value = "";
     document.getElementById('slot_5').value = "";
@@ -722,24 +773,25 @@ const onForfeitChange = () => {
 };
 
 const validateOrder = () => {
-  const forfeit = document.getElementById('forfeitCheck').checked;
-  const required = forfeit ? 4 : 6;
-  const maxSlot = forfeit ? 4 : 6;
+  const isOpen = document.getElementById('openCheck').checked;
+  const maxSlot = isOpen ? 4 : 6;
   let filled = 0;
   for (let s = 0; s < maxSlot; s++) {
-    if (document.getElementById(`slot_${s}`).value) filled++;
+    const val = document.getElementById(`slot_${s}`).value;
+    if (val) filled++;
   }
-  document.getElementById('orderSubmitBtn').disabled = (filled !== required);
+  // 必要数：オープン時は4、通常は6
+  document.getElementById('orderSubmitBtn').disabled = (filled !== maxSlot);
 };
 
 const submitOrder = async () => {
   const task = state.currentTask;
   if (!task) return;
 
-  const forfeit = document.getElementById('forfeitCheck').checked;
+  const isOpen = document.getElementById('openCheck').checked;
   const order = [];
   for (let s = 0; s < 6; s++) {
-    if (forfeit && s >= 4) {
+    if (isOpen && s >= 4) {
       order.push("オープン");
     } else {
       order.push(document.getElementById(`slot_${s}`).value);
