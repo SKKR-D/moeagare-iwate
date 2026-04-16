@@ -222,7 +222,11 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--te
     </div>
 
     <div class="card">
-      <h2>選手情報</h2>
+      <h2 style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <span>選手情報</span>
+        <span style="background:#fff3cd;color:#b33030;padding:4px 12px;border-radius:6px;font-size:.8rem;font-weight:900;border:2px solid #b33030;animation:pulse 1.5s ease-in-out infinite">⚠ 強い順に入力すること</span>
+      </h2>
+      <style>@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}</style>
       <div class="player-section" id="playerArea"></div>
     </div>
 
@@ -631,7 +635,7 @@ function showConfirmModal(payload) {
   }
 
   html += '<div class="modal-section">選手情報</div>';
-  html += '<table class="modal-player-table"><tr><th>ペア</th><th>選手</th><th>氏名</th><th>学年</th><th>生年月日</th><th>日連登録番号</th></tr>';
+  html += '<table class="modal-player-table"><tr><th>ランク</th><th>選手</th><th>氏名</th><th>学年</th><th>生年月日</th><th>日連登録番号</th></tr>';
   var pi, pj, pair, pl;
   for (pi = 0; pi < payload.pairs.length; pi++) {
     pair = payload.pairs[pi];
