@@ -176,9 +176,10 @@
             const btn = document.getElementById('btn-auto-fetch'); btn.disabled = true; btn.textContent = "検索中...";
             try {
                 const progRes = await fetch(API + "?action=getProgress").then(r => r.json());
-                // 「コート指定済み」または「試合中」の試合を検索
                 const assigned = progRes.find(m => m.court === court && (m.status === "コート指定済み" || m.status === "試合中"));
                 if(!assigned) throw new Error("このコートに割当済の試合がありません。\n本部管理画面でコートを割り当ててください。");
+                // 団体戦チェック
+                if(assigned.round && assigned.round.indexOf("団体") !== -1) throw new Error("指定したコートの試合は団体戦（" + assigned.matchId + "）の予定です。\n団体戦スコアシートをご利用ください。");
                 S.matchId = assigned.matchId;
                 S.meta.court = court; S.meta.round = assigned.round || ""; 
                 await loadMatchById(assigned.matchId);
@@ -191,6 +192,7 @@
             try {
                 const progRes = await fetch(API + "?action=getProgress").then(r => r.json());
                 const assigned = progRes.find(m => m.matchId === id);
+                if(assigned && assigned.round && assigned.round.indexOf("団体") !== -1) throw new Error("指定した試合（" + id + "）は団体戦の予定です。\n団体戦スコアシートをご利用ください。");
                 S.meta.round = assigned ? (assigned.round || "") : "";
                 S.matchId = id;
                 await loadMatchById(id);
