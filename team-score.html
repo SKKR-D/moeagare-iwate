@@ -164,6 +164,8 @@
                 const progRes = await fetch(API + "?action=getProgress").then(r => r.json());
                 const assigned = progRes.find(m => m.court === court && (m.status === "コート指定済み" || m.status === "試合中"));
                 if(!assigned) throw new Error("このコートに割当済の試合がありません。\n本部管理画面でコートを割り当ててください。");
+                // 個人戦チェック
+                if(assigned.round && assigned.round.indexOf("個人") !== -1) throw new Error("指定したコートの試合は個人戦（" + assigned.matchId + "）の予定です。\n個人戦スコアシートをご利用ください。");
                 TS.meta.court = court; TS.meta.round = assigned.round || "";
                 await loadMatchById(assigned.matchId);
             } catch(e) { alert(e.message); } finally { btn.disabled = false; btn.textContent = "試合データを取得 ➔"; }
@@ -175,6 +177,7 @@
             try {
                 const progRes = await fetch(API + "?action=getProgress").then(r => r.json());
                 const assigned = progRes.find(m => m.matchId === id);
+                if(assigned && assigned.round && assigned.round.indexOf("個人") !== -1) throw new Error("指定した試合（" + id + "）は個人戦の予定です。\n個人戦スコアシートをご利用ください。");
                 TS.meta.round = assigned ? (assigned.round || "") : "";
                 await loadMatchById(id);
             } catch(e) { alert(e.message); } finally { btn.disabled = false; }
