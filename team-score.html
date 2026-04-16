@@ -184,9 +184,46 @@
         }
 
         async function loadMatchById(matchId) {
-            try { const res = await fetch(API + "?action=getMatchData&matchId=" + matchId).then(r => r.json()); if(res.error) throw new Error(res.error); TS.meta.id = res.matchId; document.getElementById('t1-no').value = res.t1No || ""; document.getElementById('t1-name').value = res.t1Name || ""; document.getElementById('t2-no').value = res.t2No || ""; document.getElementById('t2-name').value = res.t2Name || ""; document.getElementById('o1A').value = res.t1[0] || ""; document.getElementById('o1B').value = res.t1[1] || ""; document.getElementById('o1C').value = res.t2[0] || ""; document.getElementById('o1D').value = res.t2[1] || ""; document.getElementById('o2A').value = res.t1[2] || ""; document.getElementById('o2B').value = res.t1[3] || ""; document.getElementById('o2C').value = res.t2[2] || ""; document.getElementById('o2D').value = res.t2[3] || ""; document.getElementById('o3A').value = res.t1[4] || ""; document.getElementById('o3B').value = res.t1[5] || ""; document.getElementById('o3C').value = res.t2[4] || ""; document.getElementById('o3D').value = res.t2[5] || ""; updateCourtSelect('v-sel','c-sel','c-inp'); validateSetup(); validateOrder(); step('setup'); } catch(e) { alert(e.message); }
+            try {
+                const res = await fetch(API + "?action=getMatchData&matchId=" + matchId).then(r => r.json());
+                if(res.error) throw new Error(res.error);
+                TS.meta.id = res.matchId;
+                document.getElementById('t1-no').value = res.t1No || "";
+                document.getElementById('t1-name').value = res.t1Name || "";
+                document.getElementById('t2-no').value = res.t2No || "";
+                document.getElementById('t2-name').value = res.t2Name || "";
+                document.getElementById('o1A').value = res.t1[0] || "";
+                document.getElementById('o1B').value = res.t1[1] || "";
+                document.getElementById('o1C').value = res.t2[0] || "";
+                document.getElementById('o1D').value = res.t2[1] || "";
+                document.getElementById('o2A').value = res.t1[2] || "";
+                document.getElementById('o2B').value = res.t1[3] || "";
+                document.getElementById('o2C').value = res.t2[2] || "";
+                document.getElementById('o2D').value = res.t2[3] || "";
+                document.getElementById('o3A').value = res.t1[4] || "";
+                document.getElementById('o3B').value = res.t1[5] || "";
+                document.getElementById('o3C').value = res.t2[4] || "";
+                document.getElementById('o3D').value = res.t2[5] || "";
+                updateCourtSelect('v-sel','c-sel','c-inp');
+
+                // コートが既に確定済み（autoモード）ならコート選択をロック
+                if (TS.meta.court) {
+                    document.getElementById('v-sel').disabled = true;
+                    document.getElementById('c-sel').disabled = true;
+                    document.getElementById('c-inp').disabled = true;
+                    // ロック済みコートを表示
+                    const courtDisplay = document.createElement('div');
+                    courtDisplay.style.cssText = 'padding:12px; background:var(--gold-bg); border:2px solid var(--gold); border-radius:8px; font-weight:900; text-align:center; color:var(--gold); margin-top:4px;';
+                    courtDisplay.textContent = '📍 ' + TS.meta.court + 'コート（本部割当）';
+                    const courtArea = document.getElementById('v-sel').parentElement;
+                    courtArea.style.display = 'none';
+                    courtArea.parentElement.insertBefore(courtDisplay, courtArea.nextSibling);
+                }
+
+                validateSetup(); validateOrder(); step('setup');
+            } catch(e) { alert(e.message); }
         }
-        function validateSetup() { const t1 = document.getElementById('t1-name').value; const t2 = document.getElementById('t2-name').value; const v = document.getElementById('v-sel').value; const conf = VENUE_CONFIG[v] || VENUE_CONFIG["その他"]; const c = conf.manual ? document.getElementById('c-inp').value : document.getElementById('c-sel').value; document.getElementById('btn-to-order').disabled = !(t1 && t2 && c); }
+        function validateSetup() { const t1 = document.getElementById('t1-name').value; const t2 = document.getElementById('t2-name').value; if(TS.meta.court) { document.getElementById('btn-to-order').disabled = !(t1 && t2); return; } const v = document.getElementById('v-sel').value; const conf = VENUE_CONFIG[v] || VENUE_CONFIG["その他"]; const c = conf.manual ? document.getElementById('c-inp').value : document.getElementById('c-sel').value; document.getElementById('btn-to-order').disabled = !(t1 && t2 && c); }
         function validateOrder() { const fields = ["o1A","o1B","o1C","o1D","o2A","o2B","o2C","o2D","o3A","o3B","o3C","o3D"]; let allOk = true; fields.forEach(id => { const el = document.getElementById(id); let req = true; if(id.startsWith('o3')){ if((id.endsWith('A')||id.endsWith('B')) && document.getElementById('o3opL').checked) req = false; if((id.endsWith('C')||id.endsWith('D')) && document.getElementById('o3opR').checked) req = false; } if(req && el.value.trim()===""){ el.classList.add('input-error'); allOk = false; } else { el.classList.remove('input-error'); } }); document.getElementById('btn-start').disabled = !allOk; document.getElementById('order-error-hint').style.display = allOk ? 'none' : 'block'; }
         function selPlayMode(m) { TS.meta.playMode = m; document.querySelectorAll('#playmode-opts .opt-btn').forEach((b,i)=>b.className='opt-btn'+(i===(m==='first_to_2'?0:1)?' sel-gold':'')); }
         function selMatch(n) { TS.meta.maxG = n; TS.meta.winG = n===7?4:3; document.querySelectorAll('#match-opts .opt-btn').forEach((b,i)=>b.className='opt-btn'+(i===(n===5?0:1)?' sel-gold':'')); }
