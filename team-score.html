@@ -62,8 +62,9 @@
             <div id="step-mode">
                 <h1 style="text-align: center; font-weight: 900; color: var(--blue-active); font-size: 2rem; margin-bottom: 25px;">TEAM MATCH</h1>
                 <p style="text-align:center; font-size:0.8rem; color:var(--text-dim); margin-bottom:15px;">審判アプリの開始方法</p>
-                <button class="confirm-btn gold" onclick="setAppMode('auto')">📡 本部割当から読込 (推奨)</button>
-                <button class="confirm-btn" style="background:var(--blue-active);" onclick="setAppMode('manual')">⌨ 試合番号を手入力</button>
+                <button class="confirm-btn gold" onclick="setAppMode('auto')">📡 本部割当から読込（推奨）</button>
+                <button class="confirm-btn" style="background:var(--blue-active);" onclick="setAppMode('manual')">🔢 試合番号を入力して読込</button>
+                <button class="confirm-btn" style="background:#475569;" onclick="setAppMode('offline')">✏️ すべて手入力（オフライン対応）</button>
             </div>
             <div id="step-auto" style="display:none;">
                 <h2 style="text-align:center; margin-bottom: 20px;">担当コート選択</h2>
@@ -151,7 +152,7 @@
         function getInitialMatchState() { return { maxG:7, winG:4, gL:0, gR:0, pL:0, pR:0, totalP:0, fault:0, isFinal:false, startTeam:null, curServTeam:null, sOrder:[], rOrder:[], names:{A:'',B:'',C:'',D:''}, hist:[], swapped:false }; }
         function step(n) { document.querySelectorAll('.modal-card > div').forEach(el=>el.style.display='none'); document.getElementById('step-'+n).style.display='block'; }
         function closeModal() { document.getElementById('modal').classList.add('hidden'); }
-        function setAppMode(m) { appMode = m; if(m === 'auto') { initCourtSelector('auto-c-sel'); step('auto'); } else { step('manual'); } }
+        function setAppMode(m) { appMode = m; if(m === 'auto') { initCourtSelector('auto-c-sel'); step('auto'); } else if(m === 'manual') { step('manual'); } else { step('setup'); } }
         function initCourtSelector(id) { const sel = document.getElementById(id); sel.innerHTML = '<option value="">▼ コートを選択 ▼</option>'; for(let i=1; i<=18; i++) sel.innerHTML += `<option value="${i}">${i}コート</option>`; }
 
         // ============================================================
