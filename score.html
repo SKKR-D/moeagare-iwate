@@ -199,15 +199,56 @@
             } catch(e) { alert(e.message); } finally { btn.disabled = false; }
         }
         
+        // 「チーム名:選手A・選手B」形式を分割するヘルパー
+        function parseTeamEntry(raw) {
+            if (!raw) return { team: '', playerA: '', playerB: '' };
+            const colonIdx = raw.indexOf(':');
+            if (colonIdx === -1) return { team: raw, playerA: '', playerB: '' };
+            const team = raw.substring(0, colonIdx).trim();
+            const players = raw.substring(colonIdx + 1).trim();
+            const parts = players.split('・');
+            return { team: team, playerA: (parts[0] || '').trim(), playerB: (parts[1] || '').trim() };
+        }
+
         async function loadMatchById(matchId) {
             try {
                 const res = await fetch(API + "?action=getMatchData&matchId=" + matchId).then(r => r.json()); if(res.error) throw new Error(res.error);
                 S.matchId = res.matchId;
-                document.getElementById('t1-no').value = res.t1No || ""; document.getElementById('t2-no').value = res.t2No || "";
-                document.getElementById('t1-name').value = res.t1Name || ""; document.getElementById('t2-name').value = res.t2Name || "";
-                document.getElementById('n-A').value = res.t1[0] || ""; document.getElementById('n-B').value = res.t1[1] || "";
-                document.getElementById('n-C').value = res.t2[0] || ""; document.getElementById('n-D').value = res.t2[1] || "";
-                selMatchType(res.t1[1] ? 'ダブルス' : 'シングルス'); updateCourtSelect('v-sel','c-sel','c-inp'); step('setup');
+
+                // チーム名に「チーム名:選手A・選手B」形式が含まれる場合を分割
+                const t1 = parseTeamEntry(res.t1Name);
+                const t2 = parseTeamEntry(res.t2Name);
+
+                document.getElementById('t1-no').value = res.t1No || "";
+                document.getElementById('t2-no').value = res.t2No || "";
+                document.getElementById('t1-name').value = t1.team || res.t1Name || "";
+                document.getElementById('t2-name').value = t2.team || res.t2Name || "";
+
+                // 選手名：分割結果があればそちらを優先、なければオーダーデータを使う
+                document.getElementById('n-A').value = t1.playerA || res.t1[0] || "";
+                document.getElementById('n-B').value = t1.playerB || res.t1[1] || "";
+                document.getElementById('n-C').value = t2.playerA || res.t2[0] || "";
+                document.getElementById('n-D').value = t2.playerB || res.t2[1] || "";
+
+                const hasPartnerL = !!(t1.playerB || res.t1[1]);
+                const hasPartnerR = !!(t2.playerB || res.t2[1]);
+                selMatchType((hasPartnerL || hasPartnerR) ? 'ダブルス' : 'シングルス');
+                updateCourtSelect('v-sel','c-sel','c-inp');
+
+                // コートが既に確定済み（autoモード）ならコート選択をロック
+                if (S.meta.court) {
+                    document.getElementById('v-sel').disabled = true;
+                    document.getElementById('c-sel').disabled = true;
+                    document.getElementById('c-inp').disabled = true;
+                    const courtDisplay = document.createElement('div');
+                    courtDisplay.style.cssText = 'padding:12px; background:var(--gold-bg); border:2px solid var(--gold); border-radius:8px; font-weight:900; text-align:center; color:var(--gold); margin-top:4px;';
+                    courtDisplay.textContent = '📍 ' + S.meta.court + 'コート（本部割当）';
+                    const courtArea = document.getElementById('v-sel').parentElement;
+                    courtArea.style.display = 'none';
+                    courtArea.parentElement.insertBefore(courtDisplay, courtArea.nextSibling);
+                }
+
+                step('setup');
             } catch(e) { alert(e.message); }
         }
 
