@@ -116,6 +116,13 @@ body { font-family: var(--font-ja); background: var(--c-bg); color: var(--c-text
 }
 .queue-title .cnt { font-size: .7rem; background: #e5e7eb; padding: 1px 8px; border-radius: 10px; }
 .queue-note { font-size: .7rem; color: var(--c-text2); margin-top: 4px; }
+.queue-desc { font-size: .78rem; color: var(--c-text2); margin-bottom: 10px; line-height: 1.5; }
+.queue-type-label {
+  font-size: .72rem; font-weight: 800; color: var(--c-text2);
+  margin: 10px 0 6px; padding-left: 2px;
+  border-left: 3px solid var(--c-border); padding-left: 8px;
+}
+.queue-empty { font-size: .78rem; color: #999; padding: 8px 4px; }
 .queue-cards { display: flex; flex-wrap: wrap; gap: 8px; }
 .queue-card {
   padding: 8px 12px; border-radius: 6px; font-size: .75rem; font-weight: 700;
@@ -291,53 +298,76 @@ function renderQueues() {
   const orderPartial = allMatches.filter(m => m.status === "オーダー提出");
   const waiting = allMatches.filter(m => m.status === "待機中");
 
+  // 団体・個人に分けて表示
+  const splitByType = (list) => {
+    const team = list.filter(m => m.round && m.round.indexOf("団体") !== -1);
+    const ind = list.filter(m => !m.round || m.round.indexOf("団体") === -1);
+    return { team, ind };
+  };
+
   let html = '';
 
-  // オーダー完了 / コート指定待ち
-  html += renderQueue(
-    '📋 オーダー完了 — コート割り当て待ち',
-    '割り当て指定を行ったら、進行表に「コート指定済み」で反映されます。※個人戦の場合は「コート指定待ち」',
-    orderDone, 'q-order-done'
-  );
+  // ===== コート割り当て待ち =====
+  const s1 = splitByType(orderDone);
+  html += `<div class="queue-section">
+    <div class="queue-title">🏸 まもなく試合開始 — コートの空きを待っています <span class="cnt">${orderDone.length}</span></div>
+    <div class="queue-desc">コートが空き次第、上の進行表に表示されます。選手はコート周辺で待機してください。</div>`;
+  if (orderDone.length === 0) {
+    html += '<div class="queue-empty">現在、コート待ちの試合はありません</div>';
+  } else {
+    if (s1.team.length > 0) {
+      html += `<div class="queue-type-label">団体戦（オーダー提出済み・コート割り当て待ち）</div>`;
+      html += '<div class="queue-cards">' + s1.team.map(m => queueCard(m, 'q-order-done')).join('') + '</div>';
+    }
+    if (s1.ind.length > 0) {
+      html += `<div class="queue-type-label">個人戦（コート割り当て待ち）</div>`;
+      html += '<div class="queue-cards">' + s1.ind.map(m => queueCard(m, 'q-order-done')).join('') + '</div>';
+    }
+  }
+  html += '</div>';
 
-  // オーダー提出中
-  html += renderQueue(
-    '📝 オーダー提出 — 両チームのオーダーが揃うのを待っています',
-    '両チームのオーダーが揃ったら、オーダー完了に移動します。※個人戦の場合はここも「待機中」',
-    orderPartial, 'q-order-partial'
-  );
+  // ===== オーダー提出中 =====
+  const s2 = splitByType(orderPartial);
+  html += `<div class="queue-section">
+    <div class="queue-title">📝 オーダー受付中 — 両チームの提出を待っています <span class="cnt">${orderPartial.length}</span></div>
+    <div class="queue-desc">監督は監督ポータルからオーダーを提出してください。両チーム揃い次第「コート待ち」に移ります。</div>`;
+  if (orderPartial.length === 0) {
+    html += '<div class="queue-empty">現在、オーダー受付中の試合はありません</div>';
+  } else {
+    html += '<div class="queue-cards">' + orderPartial.map(m => queueCard(m, 'q-order-partial')).join('') + '</div>';
+  }
+  html += '</div>';
 
-  // 待機中
-  html += renderQueue(
-    '⏳ 待機中 — 対戦相手が決まっていない、またはオーダー未提出',
-    '対戦相手が決まったら、オーダー提出に移動します。※個人戦の場合はここが「待機中」',
-    waiting, 'q-waiting'
-  );
+  // ===== 待機中 =====
+  const s3 = splitByType(waiting);
+  html += `<div class="queue-section">
+    <div class="queue-title">⏳ この後の試合 <span class="cnt">${waiting.length}</span></div>
+    <div class="queue-desc">前の試合が終わり次第、順番に進行します。対戦相手が「○○勝者」となっている試合は、前の試合の結果で決まります。</div>`;
+  if (waiting.length === 0) {
+    html += '<div class="queue-empty">待機中の試合はありません</div>';
+  } else {
+    if (s3.team.length > 0) {
+      html += `<div class="queue-type-label">団体戦</div>`;
+      html += '<div class="queue-cards">' + s3.team.map(m => queueCard(m, 'q-waiting')).join('') + '</div>';
+    }
+    if (s3.ind.length > 0) {
+      html += `<div class="queue-type-label">個人戦</div>`;
+      html += '<div class="queue-cards">' + s3.ind.map(m => queueCard(m, 'q-waiting')).join('') + '</div>';
+    }
+  }
+  html += '</div>';
 
   document.getElementById('queueArea').innerHTML = html;
 }
 
-function renderQueue(title, note, matches, cardClass) {
-  let html = `<div class="queue-section">
-    <div class="queue-title">${title} <span class="cnt">${matches.length}</span></div>`;
-
-  if (matches.length === 0) {
-    html += '<div style="font-size:.75rem;color:#999;padding:4px;">なし</div>';
-  } else {
-    html += '<div class="queue-cards">';
-    matches.forEach(m => {
-      const t1 = shortenName(m.t1);
-      const t2 = shortenName(m.t2);
-      html += `<div class="queue-card ${cardClass}">
-        <div class="qc-id">${m.matchId}　${m.round || ''}</div>
-        <div class="qc-teams">${t1} vs ${t2}</div>
-      </div>`;
-    });
-    html += '</div>';
-  }
-
-  html += `<div class="queue-note">${note}</div></div>`;
-  return html;
+function queueCard(m, cls) {
+  const t1 = shortenName(m.t1);
+  const t2 = shortenName(m.t2);
+  return `<div class="queue-card ${cls}">
+    <div class="qc-id">${m.matchId}　${m.round || ''}</div>
+    <div class="qc-teams">${t1} vs ${t2}</div>
+  </div>`;
+}
 }
 
 // ============================================================
