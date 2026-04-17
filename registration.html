@@ -18,8 +18,9 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--te
 .header-inner{max-width:800px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
 .header-title h1{font-size:1rem;font-weight:700}
 .header-title h1 small{display:block;font-size:.7rem;font-weight:500;color:var(--gold)}
-.back-btn{background:rgba(255,255,255,.15);color:var(--white);border:none;padding:8px 14px;border-radius:6px;font-size:.8rem;cursor:pointer;font-family:inherit}
-.back-btn:disabled{opacity:0.4;cursor:not-allowed;} /* ★追加：無効化時のスタイル */
+.back-btn{background:rgba(255,255,255,.15);color:var(--white);border:none;padding:8px 14px;border-radius:6px;font-size:.8rem;cursor:pointer;font-family:inherit;text-decoration:none}
+.back-btn:disabled{opacity:0.4;cursor:not-allowed;}
+.header-actions{display:flex;gap:8px;align-items:center}
 .main{max-width:800px;margin:0 auto;padding:20px}
 .card{background:var(--white);border-radius:var(--radius);padding:20px;margin-bottom:16px;box-shadow:0 1px 6px rgba(0,0,0,.06)}
 .card h2{font-size:.9rem;font-weight:900;color:var(--main);margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid var(--main)}
@@ -34,7 +35,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--te
 .radio-group input{width:auto}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:500px){.grid-2{grid-template-columns:1fr}}
-
 .player-card{border:1.5px solid #e0e0e0;border-radius:8px;padding:12px;margin-bottom:10px}
 .player-card .p-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
 .player-card .p-num{font-weight:900;color:var(--main);font-size:.88rem}
@@ -46,25 +46,21 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--te
 .player-grid input,.player-grid select{width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:6px;font-size:.85rem;font-family:inherit}
 .add-btn{display:block;width:100%;padding:10px;border:2px dashed #ccc;border-radius:8px;background:none;font-size:.85rem;color:var(--text-light);cursor:pointer;font-family:inherit;text-align:center;margin-top:8px}
 .add-btn:hover{border-color:var(--main);color:var(--main)}
-
 .fee-box{background:var(--main-light);border-radius:var(--radius);padding:16px;text-align:center;margin:16px 0}
 .fee-box .amount{font-size:1.6rem;font-weight:900;color:var(--main)}
 .fee-box .detail{font-size:.78rem;color:var(--text-light);margin-top:4px}
-
 .btn{display:inline-block;padding:14px 28px;border-radius:8px;font-size:.92rem;font-weight:700;border:none;cursor:pointer;text-align:center;font-family:inherit;transition:all .2s;line-height:1.4}
 .btn-main{background:var(--main);color:var(--white)}
 .btn-main:hover{background:var(--main-dark)}
 .btn-main:disabled{background:#aaa;cursor:not-allowed}
 .btn-block{display:block;width:100%}
 .btn-outline{background:var(--white);color:var(--main);border:2px solid var(--main)}
-
 .status-msg{text-align:center;padding:16px;border-radius:8px;font-size:.88rem;font-weight:700;margin-top:16px;display:none}
 .status-msg.success{display:block;background:#d4edda;color:#155724}
 .status-msg.success .nav-btns{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
 .status-msg.success .nav-btns .btn{font-size:.82rem;padding:10px 20px}
 .status-msg.error{display:block;background:#f8d7da;color:#721c24}
 .status-msg.sending{display:block;background:var(--main-light);color:var(--main)}
-
 .modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:200;overflow-y:auto;padding:20px}
 .modal-overlay.show{display:flex;justify-content:center;align-items:flex-start}
 .modal-box{background:var(--white);border-radius:12px;max-width:700px;width:100%;padding:24px;margin:40px auto;box-shadow:0 10px 40px rgba(0,0,0,.3)}
@@ -75,39 +71,11 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--te
 .modal-section{font-size:.85rem;font-weight:700;color:var(--main);margin:14px 0 6px;border-bottom:1px solid var(--main);padding-bottom:4px}
 .modal-btns{display:flex;gap:10px;justify-content:center;margin-top:16px}
 .footer{text-align:center;padding:30px 20px;font-size:.7rem;color:var(--text-light)}
-
-.disabled-card {
-  position: relative;
-}
-.disabled-card > *:not(.disabled-overlay) {
-  opacity: 0.3;
-  pointer-events: none;
-  filter: grayscale(100%);
-}
-.disabled-overlay {
-  display: none;
-}
-.disabled-card .disabled-overlay {
-  display: flex;
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  z-index: 10;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius);
-}
-.disabled-msg {
-  background: #fffafb;
-  color: var(--red);
-  padding: 16px 24px;
-  border: 2px solid var(--red);
-  border-radius: 8px;
-  font-weight: 900;
-  font-size: .95rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,.15);
-  text-align: center;
-  line-height: 1.5;
-}
+.disabled-card{position:relative}
+.disabled-card > *:not(.disabled-overlay){opacity:0.3;pointer-events:none;filter:grayscale(100%)}
+.disabled-overlay{display:none}
+.disabled-card .disabled-overlay{display:flex;position:absolute;top:0;left:0;right:0;bottom:0;z-index:10;align-items:center;justify-content:center;border-radius:var(--radius)}
+.disabled-msg{background:#fffafb;color:var(--red);padding:16px 24px;border:2px solid var(--red);border-radius:8px;font-weight:900;font-size:.95rem;box-shadow:0 4px 12px rgba(0,0,0,.15);text-align:center;line-height:1.5}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
@@ -118,24 +86,20 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--te
     <div class="header-title">
       <h1><small>岩手県中学生ソフトテニス連盟</small>令和8年度 団体登録</h1>
     </div>
-    <button class="back-btn" disabled title="現在は準備中のため利用できません">← 年間予定へ</button>
+    <div class="header-actions">
+      <a class="back-btn" href="registration-add.html">＋ 選手を追加する</a>
+      <button class="back-btn" disabled title="現在は準備中のため利用できません">← 年間予定へ</button>
+    </div>
   </div>
 </header>
 
 <main class="main">
   <form id="regForm" onsubmit="return false;">
-
     <div class="card">
       <h2>団体情報</h2>
       <div class="grid-2">
-        <div class="form-row">
-          <label>団体名<span class="req">※必須</span></label>
-          <input type="text" id="teamName" required placeholder="例：○○中学校、○○ソフトテニスクラブ">
-        </div>
-        <div class="form-row">
-          <label>ふりがな<span class="req">※必須</span></label>
-          <input type="text" id="teamKana" required placeholder="例：まるまるちゅうがっこう、まるまるそふとてにすくらぶ">
-        </div>
+        <div class="form-row"><label>団体名<span class="req">※必須</span></label><input type="text" id="teamName" required placeholder="例：○○中学校、○○ソフトテニスクラブ"></div>
+        <div class="form-row"><label>ふりがな<span class="req">※必須</span></label><input type="text" id="teamKana" required placeholder="例：まるまるちゅうがっこう"></div>
       </div>
       <div class="form-row">
         <label>種別<span class="req">※必須</span></label>
@@ -157,37 +121,19 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--te
         </select>
       </div>
     </div>
-
     <div class="card">
       <h2>顧問・代表者情報</h2>
       <div class="grid-2">
-        <div class="form-row">
-          <label>氏名<span class="req">※必須</span></label>
-          <input type="text" id="repName" required>
-        </div>
-        <div class="form-row">
-          <label>ふりがな<span class="req">※必須</span></label>
-          <input type="text" id="repKana" required>
-        </div>
+        <div class="form-row"><label>氏名<span class="req">※必須</span></label><input type="text" id="repName" required></div>
+        <div class="form-row"><label>ふりがな<span class="req">※必須</span></label><input type="text" id="repKana" required></div>
       </div>
       <div class="grid-2">
-        <div class="form-row">
-          <label>連絡先（携帯番号）<span class="req">※必須</span></label>
-          <input type="tel" id="repPhone" required pattern="^0[0-9]{9,10}$" placeholder="09012345678">
-          <div class="hint">ハイフンなし</div>
-        </div>
-        <div class="form-row">
-          <label>メールアドレス<span class="req">※必須</span></label>
-          <input type="email" id="repEmail" required placeholder="example@mail.com">
-          <div class="hint">登録確認書・振込案内をこのアドレスに送信します</div>
-        </div>
+        <div class="form-row"><label>連絡先（携帯番号）<span class="req">※必須</span></label><input type="tel" id="repPhone" required pattern="^0[0-9]{9,10}$" placeholder="09012345678"><div class="hint">ハイフンなし</div></div>
+        <div class="form-row"><label>メールアドレス<span class="req">※必須</span></label><input type="email" id="repEmail" required placeholder="example@mail.com"><div class="hint">登録確認書・振込案内をこのアドレスに送信します</div></div>
       </div>
     </div>
-
     <div class="card disabled-card" id="playerCard">
-      <div class="disabled-overlay">
-        <div class="disabled-msg">⚠️ 選手登録へ進むには、<br>上部の「団体情報」と「顧問・代表者情報」の<br>すべての項目を先に入力してください。</div>
-      </div>
+      <div class="disabled-overlay"><div class="disabled-msg">⚠️ 選手登録へ進むには、<br>上部の「団体情報」と「顧問・代表者情報」の<br>すべての項目を先に入力してください。</div></div>
       <h2>選手情報</h2>
       <div style="background:#e3f2fd;border-radius:8px;padding:14px;margin-bottom:14px">
         <div style="font-size:.82rem;font-weight:700;color:#0056b3;margin-bottom:8px">📥 Excelファイルから一括読み込み（任意）</div>
@@ -198,16 +144,11 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--te
       <div id="playerArea"></div>
       <button type="button" class="add-btn" onclick="addPlayer()">＋ 選手を手動で追加</button>
     </div>
-
     <div class="card">
       <h2>登録料</h2>
-      <div class="fee-box">
-        <div class="amount" id="feeDisplay">---</div>
-        <div class="detail" id="feeDetail">種別を選択してください</div>
-      </div>
+      <div class="fee-box"><div class="amount" id="feeDisplay">---</div><div class="detail" id="feeDetail">種別を選択してください</div></div>
       <div class="hint" style="text-align:center">※ 男子：3,000円 ／ 女子：3,000円 ／ 男女：4,000円</div>
     </div>
-
     <button type="button" class="btn btn-main btn-block" id="submitBtn" onclick="showConfirm()">登録内容を確認する</button>
     <div class="status-msg" id="statusMsg"></div>
   </form>
@@ -249,23 +190,15 @@ function checkFormReady() {
   var dist = document.getElementById('district').value;
   var rName = document.getElementById('repName').value.trim();
   var rKana = document.getElementById('repKana').value.trim();
-  
   var phoneEl = document.getElementById('repPhone');
   var emailEl = document.getElementById('repEmail');
   var rPhone = phoneEl.value.trim();
   var rEmail = emailEl.value.trim();
-  
   var phoneValid = phoneEl.checkValidity();
   var emailValid = emailEl.checkValidity();
-
   var isReady = tName && tKana && cat && dist && rName && rKana && rPhone && phoneValid && rEmail && emailValid;
-
   var pCard = document.getElementById('playerCard');
-  if (isReady) {
-    pCard.classList.remove('disabled-card');
-  } else {
-    pCard.classList.add('disabled-card');
-  }
+  if (isReady) { pCard.classList.remove('disabled-card'); } else { pCard.classList.add('disabled-card'); }
 }
 
 function addPlayer() {
@@ -281,14 +214,11 @@ function addPlayer() {
   html += '<div class="player-grid">';
   html += '<div class="full"><label>氏名<span class="req">※必須</span></label><input type="text" id="plname_' + idx + '" required placeholder="氏名"></div>';
   html += '<div><label>学年<span class="req">※必須</span></label><select id="plgrade_' + idx + '" required><option value="">--</option>';
-  var g;
-  for (g = 0; g < GRADES.length; g++) html += '<option>' + GRADES[g] + '</option>';
+  var g; for (g = 0; g < GRADES.length; g++) html += '<option>' + GRADES[g] + '</option>';
   html += '</select></div>';
   html += '<div><label>性別<span class="req">※必須</span></label><select id="plgender_' + idx + '" required><option value="">--</option>';
-  var s;
-  for (s = 0; s < GENDERS.length; s++) html += '<option>' + GENDERS[s] + '</option>';
-  html += '</select></div>';
-  html += '</div>';
+  var s; for (s = 0; s < GENDERS.length; s++) html += '<option>' + GENDERS[s] + '</option>';
+  html += '</select></div></div>';
   div.innerHTML = html;
   area.appendChild(div);
   calcFee();
@@ -300,7 +230,6 @@ function importExcel(input) {
   var statusEl = document.getElementById('importStatus');
   if (!input.files || input.files.length === 0) return;
   var file = input.files[0];
-
   var reader = new FileReader();
   reader.onload = function(e) {
     try {
@@ -309,13 +238,7 @@ function importExcel(input) {
       var sheetName = workbook.SheetNames[0];
       var sheet = workbook.Sheets[sheetName];
       var rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-
-      if (rows.length < 2) {
-        statusEl.textContent = '❌ データが見つかりません（2行目以降にデータが必要です）';
-        statusEl.style.color = '#b33030';
-        return;
-      }
-
+      if (rows.length < 2) { statusEl.textContent = '❌ データが見つかりません（2行目以降にデータが必要です）'; statusEl.style.color = '#b33030'; return; }
       var header = rows[0];
       var nameCol = -1, gradeCol = -1, genderCol = -1;
       var ci;
@@ -325,196 +248,68 @@ function importExcel(input) {
         if (h.indexOf('学年') >= 0) gradeCol = ci;
         if (h.indexOf('性別') >= 0) genderCol = ci;
       }
-
-      if (nameCol === -1) {
-        statusEl.textContent = '❌ 「氏名」列が見つかりません。ヘッダー行に「氏名」を含む列が必要です。';
-        statusEl.style.color = '#b33030';
-        return;
-      }
-
+      if (nameCol === -1) { statusEl.textContent = '❌ 「氏名」列が見つかりません。ヘッダー行に「氏名」を含む列が必要です。'; statusEl.style.color = '#b33030'; return; }
       var cat = getCategory();
       if (cat === '男子' || cat === '女子') {
         for (var ri = 1; ri < rows.length; ri++) {
           var row = rows[ri];
           if (genderCol >= 0 && row[genderCol]) {
             var gVal = normalizeGender(String(row[genderCol]));
-            if (cat === '男子' && gVal === '女') {
-              statusEl.innerHTML = '<div style="font-size: 1rem; font-weight: 900; line-height: 1.5; padding: 12px; margin-top: 12px; border: 2px solid #b33030; border-radius: 8px; background-color: #fffafb; color: #b33030;">❌ 男子チームが選択されているため、女子の選手は登録できません。<br>Excelファイルの性別を確認して、再度アップロードしてください</div>';
-              input.value = ''; 
-              return;
-            }
-            if (cat === '女子' && gVal === '男') {
-              statusEl.innerHTML = '<div style="font-size: 1rem; font-weight: 900; line-height: 1.5; padding: 12px; margin-top: 12px; border: 2px solid #b33030; border-radius: 8px; background-color: #fffafb; color: #b33030;">❌ 女子チームが選択されているため、男子の選手は登録できません。<br>Excelファイルの性別を確認して、再度アップロードしてください</div>';
-              input.value = ''; 
-              return;
-            }
+            if (cat === '男子' && gVal === '女') { statusEl.innerHTML = '<div style="font-size:1rem;font-weight:900;line-height:1.5;padding:12px;margin-top:12px;border:2px solid #b33030;border-radius:8px;background-color:#fffafb;color:#b33030;">❌ 男子チームが選択されているため、女子の選手は登録できません。<br>Excelファイルの性別を確認して、再度アップロードしてください</div>'; input.value = ''; return; }
+            if (cat === '女子' && gVal === '男') { statusEl.innerHTML = '<div style="font-size:1rem;font-weight:900;line-height:1.5;padding:12px;margin-top:12px;border:2px solid #b33030;border-radius:8px;background-color:#fffafb;color:#b33030;">❌ 女子チームが選択されているため、男子の選手は登録できません。<br>Excelファイルの性別を確認して、再度アップロードしてください</div>'; input.value = ''; return; }
           }
         }
       }
-
       document.getElementById('playerArea').innerHTML = '';
       playerCount = 0;
-
       var imported = 0;
-      var ri;
-      for (ri = 1; ri < rows.length; ri++) {
+      for (var ri = 1; ri < rows.length; ri++) {
         var row = rows[ri];
         var name = row[nameCol] ? String(row[nameCol]).replace(/\s/g, '') : '';
         if (!name) continue;
-
         var idx = addPlayer();
-
         document.getElementById('plname_' + idx).value = name;
-
-        if (gradeCol >= 0 && row[gradeCol]) {
-          var gradeVal = normalizeGrade(String(row[gradeCol]));
-          if (gradeVal) document.getElementById('plgrade_' + idx).value = gradeVal;
-        }
-
-        if (genderCol >= 0 && row[genderCol]) {
-          var genderVal = normalizeGender(String(row[genderCol]));
-          if (genderVal) document.getElementById('plgender_' + idx).value = genderVal;
-        }
-
+        if (gradeCol >= 0 && row[gradeCol]) { var gradeVal = normalizeGrade(String(row[gradeCol])); if (gradeVal) document.getElementById('plgrade_' + idx).value = gradeVal; }
+        if (genderCol >= 0 && row[genderCol]) { var genderVal = normalizeGender(String(row[genderCol])); if (genderVal) document.getElementById('plgender_' + idx).value = genderVal; }
         imported++;
       }
-
       statusEl.textContent = '✅ ' + imported + '名の選手を読み込みました。内容を確認し、不足があれば手動で修正してください。';
       statusEl.style.color = '#155724';
       renumber();
-    } catch (err) {
-      statusEl.textContent = '❌ ファイルの読み込みに失敗しました：' + err.message;
-      statusEl.style.color = '#b33030';
-    }
+    } catch (err) { statusEl.textContent = '❌ ファイルの読み込みに失敗しました：' + err.message; statusEl.style.color = '#b33030'; }
   };
   reader.readAsArrayBuffer(file);
 }
 
-function normalizeGrade(val) {
-  val = val.replace(/\s/g, '');
-  if (val.indexOf('1') >= 0 || val.indexOf('１') >= 0) return '1年';
-  if (val.indexOf('2') >= 0 || val.indexOf('２') >= 0) return '2年';
-  if (val.indexOf('3') >= 0 || val.indexOf('３') >= 0) return '3年';
-  return '';
-}
+function normalizeGrade(val) { val = val.replace(/\s/g, ''); if (val.indexOf('1') >= 0 || val.indexOf('１') >= 0) return '1年'; if (val.indexOf('2') >= 0 || val.indexOf('２') >= 0) return '2年'; if (val.indexOf('3') >= 0 || val.indexOf('３') >= 0) return '3年'; return ''; }
+function normalizeGender(val) { val = val.replace(/\s/g, ''); if (val.indexOf('男') >= 0 || val === 'M' || val === 'm') return '男'; if (val.indexOf('女') >= 0 || val === 'F' || val === 'f') return '女'; return ''; }
 
-function normalizeGender(val) {
-  val = val.replace(/\s/g, '');
-  if (val.indexOf('男') >= 0 || val === 'M' || val === 'm') return '男';
-  if (val.indexOf('女') >= 0 || val === 'F' || val === 'f') return '女';
-  return '';
-}
-
-function removePlayer(idx) {
-  var el = document.getElementById('pl_' + idx);
-  if (el) el.remove();
-  renumber();
-  calcFee();
-}
-
-function renumber() {
-  var cards = document.querySelectorAll('.player-card');
-  var i;
-  for (i = 0; i < cards.length; i++) {
-    cards[i].querySelector('.p-num').textContent = '選手 ' + (i + 1);
-  }
-}
+function removePlayer(idx) { var el = document.getElementById('pl_' + idx); if (el) el.remove(); renumber(); calcFee(); }
+function renumber() { var cards = document.querySelectorAll('.player-card'); var i; for (i = 0; i < cards.length; i++) { cards[i].querySelector('.p-num').textContent = '選手 ' + (i + 1); } }
 
 function calcFee() {
   var cat = getCategory();
-  if (cat && CATEGORY_FEES[cat] !== undefined) {
-    var total = CATEGORY_FEES[cat];
-    document.getElementById('feeDisplay').textContent = total.toLocaleString() + '円';
-    document.getElementById('feeDetail').textContent = cat + '：' + total.toLocaleString() + '円';
-  } else {
-    document.getElementById('feeDisplay').textContent = '---';
-    document.getElementById('feeDetail').textContent = '種別を選択してください';
-  }
+  if (cat && CATEGORY_FEES[cat] !== undefined) { var total = CATEGORY_FEES[cat]; document.getElementById('feeDisplay').textContent = total.toLocaleString() + '円'; document.getElementById('feeDetail').textContent = cat + '：' + total.toLocaleString() + '円'; }
+  else { document.getElementById('feeDisplay').textContent = '---'; document.getElementById('feeDetail').textContent = '種別を選択してください'; }
 }
 
 function updateGenders() {
   var cat = getCategory();
   var cards = document.querySelectorAll('.player-card');
-  
   var hasConflict = false;
-  for (var i = 0; i < cards.length; i++) {
-    var id = cards[i].id.replace('pl_', '');
-    var sel = document.getElementById('plgender_' + id);
-    if (!sel) continue;
-    
-    var currentVal = sel.value;
-    if (cat === '男子' && currentVal === '女') hasConflict = true;
-    if (cat === '女子' && currentVal === '男') hasConflict = true;
-  }
-
-  if (hasConflict) {
-    alert('⚠️ 選択された「種別」と、現在入力されている選手の「性別」に矛盾が生じたため、選手リストをリセットしました。\nお手数ですが再度選手を入力してください。');
-    document.getElementById('playerArea').innerHTML = '';
-    playerCount = 0;
-    document.getElementById('importStatus').textContent = '';
-    document.getElementById('excelFile').value = '';
-    addPlayer();
-    return;
-  }
-
-  for (var i = 0; i < cards.length; i++) {
-    var id = cards[i].id.replace('pl_', '');
-    var sel = document.getElementById('plgender_' + id);
-    if (!sel) continue;
-    
-    if (cat === '男子') {
-      sel.value = '男';
-      sel.disabled = true; 
-    } else if (cat === '女子') {
-      sel.value = '女';
-      sel.disabled = true; 
-    } else {
-      sel.disabled = false; 
-    }
-  }
+  for (var i = 0; i < cards.length; i++) { var id = cards[i].id.replace('pl_', ''); var sel = document.getElementById('plgender_' + id); if (!sel) continue; var currentVal = sel.value; if (cat === '男子' && currentVal === '女') hasConflict = true; if (cat === '女子' && currentVal === '男') hasConflict = true; }
+  if (hasConflict) { alert('⚠️ 選択された「種別」と、現在入力されている選手の「性別」に矛盾が生じたため、選手リストをリセットしました。\nお手数ですが再度選手を入力してください。'); document.getElementById('playerArea').innerHTML = ''; playerCount = 0; document.getElementById('importStatus').textContent = ''; document.getElementById('excelFile').value = ''; addPlayer(); return; }
+  for (var i = 0; i < cards.length; i++) { var id = cards[i].id.replace('pl_', ''); var sel = document.getElementById('plgender_' + id); if (!sel) continue; if (cat === '男子') { sel.value = '男'; sel.disabled = true; } else if (cat === '女子') { sel.value = '女'; sel.disabled = true; } else { sel.disabled = false; } }
 }
 
-function getPlayers() {
-  var cards = document.querySelectorAll('.player-card');
-  var result = [];
-  var i, card, id;
-  for (i = 0; i < cards.length; i++) {
-    card = cards[i];
-    id = card.id.replace('pl_', '');
-    result.push({
-      name: document.getElementById('plname_' + id).value,
-      grade: document.getElementById('plgrade_' + id).value,
-      gender: document.getElementById('plgender_' + id).value
-    });
-  }
-  return result;
-}
-
-function getCategory() {
-  var els = document.getElementsByName('category');
-  var i;
-  for (i = 0; i < els.length; i++) { if (els[i].checked) return els[i].value; }
-  return '';
-}
+function getPlayers() { var cards = document.querySelectorAll('.player-card'); var result = []; var i, card, id; for (i = 0; i < cards.length; i++) { card = cards[i]; id = card.id.replace('pl_', ''); result.push({ name: document.getElementById('plname_' + id).value, grade: document.getElementById('plgrade_' + id).value, gender: document.getElementById('plgender_' + id).value }); } return result; }
+function getCategory() { var els = document.getElementsByName('category'); var i; for (i = 0; i < els.length; i++) { if (els[i].checked) return els[i].value; } return ''; }
 
 function buildPayload() {
   var players = getPlayers();
-  return {
-    action: 'registration',
-    teamName: document.getElementById('teamName').value,
-    teamKana: document.getElementById('teamKana').value,
-    category: getCategory(),
-    district: document.getElementById('district').value,
-    representative: {
-      name: document.getElementById('repName').value,
-      kana: document.getElementById('repKana').value,
-      phone: document.getElementById('repPhone').value,
-      email: document.getElementById('repEmail').value
-    },
-    players: players,
-    fee: CATEGORY_FEES[getCategory()] || 0,
-    timestamp: new Date().toISOString()
-  };
+  return { action: 'registration', teamName: document.getElementById('teamName').value, teamKana: document.getElementById('teamKana').value, category: getCategory(), district: document.getElementById('district').value,
+    representative: { name: document.getElementById('repName').value, kana: document.getElementById('repKana').value, phone: document.getElementById('repPhone').value, email: document.getElementById('repEmail').value },
+    players: players, fee: CATEGORY_FEES[getCategory()] || 0, timestamp: new Date().toISOString() };
 }
 
 function showConfirm() {
@@ -522,27 +317,15 @@ function showConfirm() {
   if (!form.checkValidity()) { form.reportValidity(); return; }
   var players = getPlayers();
   if (players.length === 0) { alert('選手を1名以上追加してください。'); return; }
-
   var payload = buildPayload();
-
   var btn = document.getElementById('submitBtn');
-  btn.disabled = true;
-  btn.textContent = '確認中...';
-
+  btn.disabled = true; btn.textContent = '確認中...';
   var checkUrl = GAS_URL + '?action=checkRegDuplicate&teamName=' + encodeURIComponent(payload.teamName) + '&category=' + encodeURIComponent(payload.category);
   fetch(checkUrl).then(function(res) { return res.json(); }).then(function(data) {
-    btn.disabled = false;
-    btn.textContent = '登録内容を確認する';
-    if (data.isDuplicate) {
-      alert('「' + payload.teamName + '（' + payload.category + '）」は既に登録済みです。\n修正が必要な場合は連盟幹事までご連絡ください。');
-      return;
-    }
+    btn.disabled = false; btn.textContent = '登録内容を確認する';
+    if (data.isDuplicate) { alert('「' + payload.teamName + '（' + payload.category + '）」は既に登録済みです。\n修正が必要な場合は連盟幹事までご連絡ください。'); return; }
     showConfirmModal(payload);
-  }).catch(function() {
-    btn.disabled = false;
-    btn.textContent = '登録内容を確認する';
-    showConfirmModal(payload);
-  });
+  }).catch(function() { btn.disabled = false; btn.textContent = '登録内容を確認する'; showConfirmModal(payload); });
 }
 
 function showConfirmModal(payload) {
@@ -557,15 +340,10 @@ function showConfirmModal(payload) {
   html += '<tr><th>メール</th><td>' + esc(payload.representative.email) + '</td></tr>';
   html += '<tr><th>登録料</th><td>' + payload.fee.toLocaleString() + '円</td></tr>';
   html += '</table>';
-
   html += '<div class="modal-section">選手一覧（' + payload.players.length + '名）</div>';
   html += '<table class="modal-table"><tr><th style="width:40px">No.</th><th>氏名</th><th style="width:50px">学年</th><th style="width:50px">性別</th></tr>';
-  var i;
-  for (i = 0; i < payload.players.length; i++) {
-    html += '<tr><td>' + (i + 1) + '</td><td>' + esc(payload.players[i].name) + '</td><td>' + esc(payload.players[i].grade) + '</td><td>' + esc(payload.players[i].gender) + '</td></tr>';
-  }
+  var i; for (i = 0; i < payload.players.length; i++) { html += '<tr><td>' + (i + 1) + '</td><td>' + esc(payload.players[i].name) + '</td><td>' + esc(payload.players[i].grade) + '</td><td>' + esc(payload.players[i].gender) + '</td></tr>'; }
   html += '</table>';
-
   document.getElementById('confirmContent').innerHTML = html;
   document.getElementById('confirmModal').classList.add('show');
 }
@@ -581,26 +359,14 @@ function doSubmit() {
   btn.disabled = true;
   msg.className = 'status-msg sending';
   msg.textContent = '送信中...登録書類の生成に少しお時間をいただきます';
-
-  fetch(GAS_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain' },
-    body: JSON.stringify(payload)
-  }).then(function(res) { return res.json(); }).then(function(data) {
+  fetch(GAS_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) }).then(function(res) { return res.json(); }).then(function(data) {
     if (data.status === 'ok') {
       msg.className = 'status-msg success';
-      // ★修正：登録完了後に表示されるボタンも無効化
       msg.innerHTML = '団体登録を受け付けました。<br>登録確認書・振込案内（PDF）をメールで送信しました。'
         + '<div class="nav-btns"><button class="btn btn-main" disabled style="opacity:0.5;cursor:not-allowed;">年間予定に戻る</button></div>';
       btn.style.display = 'none';
-    } else {
-      throw new Error(data.message || 'エラーが発生しました');
-    }
-  }).catch(function(err) {
-    msg.className = 'status-msg error';
-    msg.textContent = '送信に失敗しました：' + err.message;
-    btn.disabled = false;
-  });
+    } else { throw new Error(data.message || 'エラーが発生しました'); }
+  }).catch(function(err) { msg.className = 'status-msg error'; msg.textContent = '送信に失敗しました：' + err.message; btn.disabled = false; });
 }
 
 addPlayer();
