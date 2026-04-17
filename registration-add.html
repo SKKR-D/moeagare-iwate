@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>選手追加登録｜岩手県中学生ソフトテニス連盟</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --main:#1b3a5c;--main-dark:#0f2440;--main-light:#e8eef6;
+  --gold:#c8a020;--white:#fff;--gray:#f5f5f0;
+  --text:#222;--text-light:#666;--radius:10px;--red:#b33030;
+}
+html{font-size:15px}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--text);min-height:100vh}
+.header{background:linear-gradient(135deg,var(--main-dark),var(--main));color:var(--white);padding:16px 20px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.3)}
+.header-inner{max-width:800px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.header-title h1{font-size:1rem;font-weight:700}
+.header-title h1 small{display:block;font-size:.7rem;font-weight:500;color:var(--gold)}
+.back-btn{background:rgba(255,255,255,.15);color:var(--white);border:none;padding:8px 14px;border-radius:6px;font-size:.8rem;cursor:pointer;font-family:inherit;text-decoration:none}
+.main{max-width:800px;margin:0 auto;padding:20px}
+.card{background:var(--white);border-radius:var(--radius);padding:20px;margin-bottom:16px;box-shadow:0 1px 6px rgba(0,0,0,.06)}
+.card h2{font-size:.9rem;font-weight:900;color:var(--main);margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid var(--main)}
+.form-row{margin-bottom:12px}
+.form-row label{display:block;font-size:.78rem;font-weight:700;color:var(--text-light);margin-bottom:4px}
+.form-row label .req{color:var(--red);font-size:.7rem;margin-left:4px}
+.form-row input,.form-row select{width:100%;padding:10px 12px;border:2px solid #ddd;border-radius:8px;font-size:.88rem;font-family:inherit;outline:none}
+.form-row input:focus,.form-row select:focus{border-color:var(--main)}
+.hint{font-size:.7rem;color:var(--text-light);margin-top:2px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:500px){.grid-2{grid-template-columns:1fr}}
+
+.player-card{border:1.5px solid #e0e0e0;border-radius:8px;padding:12px;margin-bottom:10px}
+.player-card.existing{background:#f8f9fa;border-color:#ccc}
+.player-card.existing input,.player-card.existing select{background:#eee;color:#666}
+.player-card .p-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.player-card .p-num{font-weight:900;color:var(--main);font-size:.88rem}
+.player-card .p-remove{background:none;border:none;color:var(--red);font-size:.8rem;cursor:pointer;margin-left:auto;font-family:inherit}
+.player-card .p-badge{font-size:.68rem;padding:2px 8px;border-radius:10px;font-weight:700}
+.p-badge.old{background:#e0e0e0;color:#666}
+.p-badge.new{background:#d4edda;color:#155724}
+.player-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+@media(max-width:500px){.player-grid{grid-template-columns:1fr 1fr}}
+.player-grid .full{grid-column:1/-1}
+.player-grid label{font-size:.7rem;font-weight:700;color:var(--text-light);display:block;margin-bottom:2px}
+.player-grid input,.player-grid select{width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:6px;font-size:.85rem;font-family:inherit}
+.add-btn{display:block;width:100%;padding:10px;border:2px dashed #ccc;border-radius:8px;background:none;font-size:.85rem;color:var(--text-light);cursor:pointer;font-family:inherit;text-align:center;margin-top:8px}
+.add-btn:hover{border-color:var(--main);color:var(--main)}
+
+.btn{display:inline-block;padding:14px 28px;border-radius:8px;font-size:.92rem;font-weight:700;border:none;cursor:pointer;text-align:center;font-family:inherit;transition:all .2s;line-height:1.4}
+.btn-main{background:var(--main);color:var(--white)}
+.btn-main:hover{background:var(--main-dark)}
+.btn-main:disabled{background:#aaa;cursor:not-allowed}
+.btn-block{display:block;width:100%}
+.btn-outline{background:var(--white);color:var(--main);border:2px solid var(--main)}
+
+.status-msg{text-align:center;padding:16px;border-radius:8px;font-size:.88rem;font-weight:700;margin-top:16px;display:none}
+.status-msg.success{display:block;background:#d4edda;color:#155724}
+.status-msg.error{display:block;background:#f8d7da;color:#721c24}
+.status-msg.sending{display:block;background:var(--main-light);color:var(--main)}
+
+.info-banner{background:var(--main-light);border-radius:var(--radius);padding:16px;margin-bottom:16px;font-size:.85rem;color:var(--main);font-weight:500;text-align:center}
+.info-banner strong{display:block;font-size:1rem;margin-bottom:4px}
+
+.footer{text-align:center;padding:30px 20px;font-size:.7rem;color:var(--text-light)}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="header-title">
+      <h1><small>岩手県中学生ソフトテニス連盟</small>選手追加登録</h1>
+    </div>
+    <a class="back-btn" href="registration.html">← 新規登録へ</a>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- STEP 1: 本人確認 -->
+  <div id="step1">
+    <div class="info-banner">
+      <strong>登録済みの団体に選手を追加します</strong>
+      登録時に使用した「団体名」と「メールアドレス」を入力してください
+    </div>
+    <div class="card">
+      <h2>本人確認</h2>
+      <div class="form-row">
+        <label>団体名<span class="req">※必須</span></label>
+        <input type="text" id="lookupTeam" required placeholder="登録時の団体名を正確に入力">
+      </div>
+      <div class="form-row">
+        <label>メールアドレス<span class="req">※必須</span></label>
+        <input type="email" id="lookupEmail" required placeholder="登録時のメールアドレス">
+        <div class="hint">登録時に入力した顧問・代表者のメールアドレス</div>
+      </div>
+      <button type="button" class="btn btn-main btn-block" id="lookupBtn" onclick="doLookup()">登録データを検索</button>
+      <div class="status-msg" id="lookupMsg"></div>
+    </div>
+  </div>
+
+  <!-- STEP 2: 選手追加 -->
+  <div id="step2" style="display:none">
+    <div class="info-banner" id="teamBanner"></div>
+
+    <div class="card">
+      <h2>登録済みの選手</h2>
+      <div id="existingPlayers"></div>
+    </div>
+
+    <div class="card">
+      <h2>追加する選手</h2>
+      <div id="newPlayerArea"></div>
+      <button type="button" class="add-btn" onclick="addNewPlayer()">＋ 選手を追加</button>
+    </div>
+
+    <button type="button" class="btn btn-main btn-block" id="submitBtn" onclick="doSubmitAdd()">追加選手を登録する</button>
+    <div class="status-msg" id="submitMsg"></div>
+  </div>
+
+</main>
+
+<footer class="footer">&copy; 岩手県中学生ソフトテニス連盟</footer>
+
+<script>
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbwMaX6mOexotFkV6n5Y79QXO9IhDgBRvT4PHuCr9c9j435683_N7G8yKkQPcIi-wXtu/exec';
+var GRADES = ['1年', '2年', '3年'];
+var GENDERS = ['男', '女'];
+var newPlayerCount = 0;
+var currentReg = null;
+var existingPlayers = [];
+
+function doLookup() {
+  var teamName = document.getElementById('lookupTeam').value.trim();
+  var email = document.getElementById('lookupEmail').value.trim();
+  var msg = document.getElementById('lookupMsg');
+  var btn = document.getElementById('lookupBtn');
+
+  if (!teamName || !email) {
+    msg.className = 'status-msg error';
+    msg.textContent = '団体名とメールアドレスを入力してください';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '検索中...';
+  msg.className = 'status-msg sending';
+  msg.textContent = '検索中...';
+
+  var url = GAS_URL + '?action=lookupRegistration&teamName=' + encodeURIComponent(teamName) + '&email=' + encodeURIComponent(email);
+
+  fetch(url, { redirect: 'follow' }).then(function(res) {
+    return res.text();
+  }).then(function(text) {
+    var data = JSON.parse(text);
+    btn.disabled = false;
+    btn.textContent = '登録データを検索';
+
+    if (data.status === 'ok') {
+      msg.style.display = 'none';
+      currentReg = data;
+      existingPlayers = JSON.parse(data.playersJson || '[]');
+      showStep2();
+    } else {
+      msg.className = 'status-msg error';
+      msg.textContent = data.message || '登録データが見つかりません';
+    }
+  }).catch(function(err) {
+    btn.disabled = false;
+    btn.textContent = '登録データを検索';
+    msg.className = 'status-msg error';
+    msg.textContent = '通信エラー：' + err.message;
+  });
+}
+
+function showStep2() {
+  document.getElementById('step1').style.display = 'none';
+  document.getElementById('step2').style.display = '';
+
+  var banner = document.getElementById('teamBanner');
+  banner.innerHTML = '<strong>' + esc(currentReg.teamName) + '（' + esc(currentReg.category) + '）</strong>'
+    + esc(currentReg.district) + '　代表者：' + esc(currentReg.repName)
+    + '　現在 ' + existingPlayers.length + '名登録済み';
+
+  renderExistingPlayers();
+  addNewPlayer();
+}
+
+function renderExistingPlayers() {
+  var area = document.getElementById('existingPlayers');
+  var html = '';
+  var i, p;
+  for (i = 0; i < existingPlayers.length; i++) {
+    p = existingPlayers[i];
+    html += '<div class="player-card existing">';
+    html += '<div class="p-top"><span class="p-num">選手 ' + (i + 1) + '</span><span class="p-badge old">登録済み</span></div>';
+    html += '<div class="player-grid">';
+    html += '<div class="full"><label>氏名</label><input type="text" value="' + esc(p.name || '') + '" disabled></div>';
+    html += '<div><label>学年</label><input type="text" value="' + esc(p.grade || '') + '" disabled></div>';
+    html += '<div><label>性別</label><input type="text" value="' + esc(p.gender || '') + '" disabled></div>';
+    html += '</div></div>';
+  }
+  if (existingPlayers.length === 0) {
+    html = '<div style="text-align:center;color:#999;padding:12px">登録済みの選手はいません</div>';
+  }
+  area.innerHTML = html;
+}
+
+function addNewPlayer() {
+  var area = document.getElementById('newPlayerArea');
+  var idx = newPlayerCount;
+  newPlayerCount++;
+  var totalNum = existingPlayers.length + document.querySelectorAll('#newPlayerArea .player-card').length + 1;
+
+  var div = document.createElement('div');
+  div.className = 'player-card';
+  div.id = 'np_' + idx;
+
+  var html = '';
+  html += '<div class="p-top"><span class="p-num">選手 ' + totalNum + '</span><span class="p-badge new">新規追加</span>';
+  html += '<button type="button" class="p-remove" onclick="removeNewPlayer(' + idx + ')">✕ 削除</button></div>';
+  html += '<div class="player-grid">';
+  html += '<div class="full"><label>氏名<span class="req">※必須</span></label><input type="text" id="npname_' + idx + '" required placeholder="氏名"></div>';
+  html += '<div><label>学年<span class="req">※必須</span></label><select id="npgrade_' + idx + '" required><option value="">--</option>';
+  var g;
+  for (g = 0; g < GRADES.length; g++) html += '<option>' + GRADES[g] + '</option>';
+  html += '</select></div>';
+  html += '<div><label>性別<span class="req">※必須</span></label><select id="npgender_' + idx + '" required><option value="">--</option>';
+  var s;
+  for (s = 0; s < GENDERS.length; s++) html += '<option>' + GENDERS[s] + '</option>';
+  html += '</select></div>';
+  html += '</div>';
+
+  div.innerHTML = html;
+  area.appendChild(div);
+
+  // 種別に応じて性別を自動設定
+  if (currentReg) {
+    var sel = document.getElementById('npgender_' + idx);
+    if (currentReg.category === '男子') {
+      sel.value = '男';
+      sel.disabled = true;
+    } else if (currentReg.category === '女子') {
+      sel.value = '女';
+      sel.disabled = true;
+    }
+  }
+
+  renumberAll();
+}
+
+function removeNewPlayer(idx) {
+  var el = document.getElementById('np_' + idx);
+  if (el) el.remove();
+  renumberAll();
+}
+
+function renumberAll() {
+  var existCards = document.querySelectorAll('#existingPlayers .player-card');
+  var newCards = document.querySelectorAll('#newPlayerArea .player-card');
+  var num = existCards.length;
+  var i;
+  for (i = 0; i < newCards.length; i++) {
+    num++;
+    newCards[i].querySelector('.p-num').textContent = '選手 ' + num;
+  }
+}
+
+function getNewPlayers() {
+  var cards = document.querySelectorAll('#newPlayerArea .player-card');
+  var result = [];
+  var i, card, id;
+  for (i = 0; i < cards.length; i++) {
+    card = cards[i];
+    id = card.id.replace('np_', '');
+    var name = document.getElementById('npname_' + id).value.trim();
+    if (!name) continue;
+    result.push({
+      name: name,
+      grade: document.getElementById('npgrade_' + id).value,
+      gender: document.getElementById('npgender_' + id).value
+    });
+  }
+  return result;
+}
+
+function doSubmitAdd() {
+  var newPlayers = getNewPlayers();
+  if (newPlayers.length === 0) {
+    alert('追加する選手を1名以上入力してください');
+    return;
+  }
+
+  // バリデーション
+  var i;
+  for (i = 0; i < newPlayers.length; i++) {
+    if (!newPlayers[i].name || !newPlayers[i].grade || !newPlayers[i].gender) {
+      alert('追加選手 ' + (i + 1) + ' の入力が不完全です。氏名・学年・性別をすべて入力してください。');
+      return;
+    }
+  }
+
+  var allPlayers = existingPlayers.concat(newPlayers);
+
+  var ok = confirm(currentReg.teamName + ' に ' + newPlayers.length + '名の選手を追加します。よろしいですか？\n\n'
+    + '追加前：' + existingPlayers.length + '名\n'
+    + '追加後：' + allPlayers.length + '名');
+  if (!ok) return;
+
+  var btn = document.getElementById('submitBtn');
+  var msg = document.getElementById('submitMsg');
+  btn.disabled = true;
+  msg.className = 'status-msg sending';
+  msg.textContent = '送信中...';
+
+  var payload = {
+    action: 'updatePlayers',
+    sheetRow: currentReg.sheetRow,
+    players: allPlayers
+  };
+
+  fetch(GAS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify(payload)
+  }).then(function(res) {
+    return res.text();
+  }).then(function(text) {
+    var data = JSON.parse(text);
+    if (data.status === 'ok') {
+      msg.className = 'status-msg success';
+      msg.textContent = newPlayers.length + '名の選手を追加しました。（合計 ' + allPlayers.length + '名）';
+      btn.style.display = 'none';
+      existingPlayers = allPlayers;
+      renderExistingPlayers();
+      document.getElementById('newPlayerArea').innerHTML = '';
+      renumberAll();
+    } else {
+      throw new Error(data.message || 'エラーが発生しました');
+    }
+  }).catch(function(err) {
+    msg.className = 'status-msg error';
+    msg.textContent = '送信に失敗しました：' + err.message;
+    btn.disabled = false;
+  });
+}
+
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+</script>
+</body>
+</html>
