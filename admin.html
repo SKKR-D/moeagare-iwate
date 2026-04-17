@@ -497,19 +497,53 @@ const renderProgressTable = () => {
 
 const changeStatus = async (matchId, newStatus) => {
   if (!newStatus) return;
+
+  let winner = null;
+
+  // 「終了」に変更する場合、勝者を選択させる
+  if (newStatus === "終了") {
+    const match = allProgress.find(m => m.matchId === matchId);
+    if (match) {
+      const t1Short = shortenForPrompt(match.t1);
+      const t2Short = shortenForPrompt(match.t2);
+      const choice = prompt(
+        `【${matchId}】勝者を選んでください\n\n` +
+        `1: ${t1Short}\n` +
+        `2: ${t2Short}\n` +
+        `0: 勝者なし（スキップ）\n\n` +
+        `番号を入力:`
+      );
+      if (choice === null) { await refreshAll(); return; } // キャンセル
+      if (choice === '1') winner = match.t1;
+      else if (choice === '2') winner = match.t2;
+      // 0 or その他はwinner=null → 勝者反映なし
+    }
+  }
+
   try {
-    const result = await apiPost({ type: "UPDATE_PROGRESS", matchId, status: newStatus });
+    const payload = { type: "UPDATE_PROGRESS", matchId, status: newStatus };
+    if (winner) payload.winner = winner;
+    const result = await apiPost(payload);
     if (result.error || result.status === "error") {
       showToast(result.error || result.message, "error");
       await refreshAll();
       return;
     }
     const finalStatus = result.newStatus || newStatus;
-    showToast(`${matchId} → ${finalStatus}`);
+    showToast(`${matchId} → ${finalStatus}` + (winner ? ` (勝者: ${shortenForPrompt(winner)})` : ''));
     await refreshAll();
   } catch (err) {
     showToast("エラー: " + err.message, "error");
   }
+};
+
+// 長いチーム名を短縮（プロンプト表示用）
+const shortenForPrompt = (name) => {
+  if (!name) return '?';
+  const colon = name.indexOf(':');
+  if (colon !== -1) return name.substring(0, colon);
+  if (name.length > 15) return name.substring(0, 12) + '…';
+  return name;
 };
 
 // --- Court Modal ---
