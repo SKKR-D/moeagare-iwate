@@ -3,340 +3,521 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>トーナメント表｜盛岡市民スポーツ大会</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<title>進行状況｜ソフトテニス大会DX</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Inter:wght@600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f7f8f0;--surface:#fff;--text:#1a1a1a;--text2:#666;--green:#1a4a2e;--green-light:#e6f0ea;--gold:#b8860b;--live:#dc2626;}
-*{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
-.header{background:linear-gradient(135deg,#1a3a28,#2a6b42);color:#fff;padding:14px 20px;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,.15);}
-.header h1{font-size:1rem;font-weight:700;} .header .sub{font-size:.75rem;opacity:.7;margin-top:2px;}
-.header .live-bar{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:6px;font-size:.7rem;}
-.live-dot{width:8px;height:8px;background:#ef4444;border-radius:50%;animation:pulse 1.5s infinite;}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.tabs{display:flex;justify-content:center;gap:4px;padding:12px 12px 0;flex-wrap:wrap;}
-.tab-btn{padding:8px 18px;border:2px solid #ccc;border-bottom:none;border-radius:8px 8px 0 0;background:var(--surface);font-size:.85rem;font-weight:700;cursor:pointer;color:var(--text2);}
-.tab-btn:hover{background:var(--green-light);} .tab-btn.active{background:var(--green);color:#fff;border-color:var(--green);}
-.wrap{background:var(--surface);border:1px solid #ccc;margin:0 12px 12px;border-radius:0 0 12px 12px;padding:20px;overflow-x:auto;}
-.wrap-title{text-align:center;font-size:1.1rem;font-weight:900;color:var(--green);margin-bottom:16px;}
-.info-bar{display:flex;justify-content:center;gap:12px;padding:8px 12px;font-size:.8rem;color:var(--text2);}
-.info-chip{padding:4px 12px;border-radius:16px;font-weight:700;background:#fdf6e3;border:1px solid var(--gold);color:var(--gold);}
-.footer{text-align:center;padding:16px;font-size:.7rem;color:var(--text2);}
+:root {
+  --c-bg: #f0f2f5;
+  --c-surface: #ffffff;
+  --c-border: #d0d7de;
+  --c-text: #1a1a1a;
+  --c-text2: #5f6b7a;
+  --c-accent: #0d7c3e;
+  --c-accent-light: #e6f5ec;
+  --c-accent2: #0969b2;
+  --c-accent2-light: #e4f0fb;
+  --c-warn: #f57c00;
+  --c-warn-light: #fff4e5;
+  --c-purple: #3949ab;
+  --c-purple-light: #e8eaf6;
+  --c-live: #dc2626;
+  --c-live-light: #fef2f2;
+  --c-done: #374151;
+  --c-done-light: #f3f4f6;
+  --c-order-partial: #e65100;
+  --c-order-partial-light: #fff0e0;
+  --c-court-wait: #c62828;
+  --c-court-wait-light: #fce4ec;
+  --font-ja: 'Noto Sans JP', sans-serif;
+  --font-en: 'Inter', sans-serif;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: var(--font-ja); background: var(--c-bg); color: var(--c-text); font-size: 13px; }
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, #1e3a5f, var(--c-accent));
+  color: #fff; padding: 14px 20px; position: sticky; top: 0; z-index: 50;
+  display: flex; align-items: center; gap: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+}
+.header h1 { font-size: 1.1rem; font-weight: 900; flex: 1; }
+.header .live-dot { display: inline-block; width: 8px; height: 8px; background: #ef4444; border-radius: 50%; margin-right: 6px; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.3; } }
+.header .update-text { font-size: .7rem; opacity: .8; }
+.refresh-btn {
+  padding: 6px 14px; border: 1px solid rgba(255,255,255,.3); border-radius: 6px;
+  background: rgba(255,255,255,.1); color: #fff; font-size: .8rem; font-weight: 700;
+  cursor: pointer; font-family: var(--font-ja);
+}
+.refresh-btn:hover { background: rgba(255,255,255,.2); }
+
+/* Main */
+.main { max-width: 100%; padding: 16px; overflow-x: auto; }
+
+/* Court Matrix Table */
+.matrix-wrap { overflow-x: auto; margin-bottom: 24px; }
+.matrix {
+  border-collapse: collapse; width: auto;
+  background: var(--c-surface); border: 1px solid var(--c-border);
+}
+.matrix th, .matrix td {
+  border: 1px solid var(--c-border); padding: 0; text-align: center; vertical-align: top;
+}
+.matrix th {
+  background: #374151; color: #fff; font-size: .8rem; font-weight: 700;
+  padding: 10px 8px; position: sticky; top: 0; z-index: 10;
+}
+.matrix th.row-header {
+  background: #4b5563; width: 44px; min-width: 44px; position: sticky; left: 0; z-index: 11;
+}
+.matrix td.row-header {
+  background: #f9fafb; font-weight: 900; font-size: .9rem; color: var(--c-text2);
+  width: 44px; min-width: 44px; position: sticky; left: 0; z-index: 5;
+  border-right: 2px solid var(--c-border); text-align: center; vertical-align: middle;
+}
+.matrix td { height: 90px; min-width: 120px; }
+
+/* Match Cell */
+.cell-empty { background: var(--c-surface); }
+.match-cell {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 6px; height: 100%; font-size: .7rem; line-height: 1.4; gap: 2px;
+  cursor: default; transition: all .15s;
+}
+.match-cell .cell-round { font-weight: 700; color: var(--c-text2); font-size: .7rem; }
+.match-cell .cell-teams { font-weight: 900; font-size: .78rem; }
+.match-cell .cell-score { font-family: var(--font-en); font-weight: 700; }
+.match-cell .cell-status { font-weight: 800; font-size: .65rem; padding: 2px 6px; border-radius: 4px; margin-top: 2px; }
+
+/* Status colors for cells */
+.cell-playing {
+  background: var(--c-live-light); animation: cellPulse 2s infinite;
+}
+.cell-playing .cell-status { background: var(--c-live); color: #fff; }
+@keyframes cellPulse { 0%,100% { background: #fef2f2; } 50% { background: #fee2e2; } }
+
+.cell-court-done { background: var(--c-purple-light); }
+.cell-court-done .cell-status { background: var(--c-purple); color: #fff; }
+
+.cell-done { background: var(--c-done-light); }
+.cell-done .cell-status { background: var(--c-done); color: #fff; }
+
+/* Queue sections */
+.queue-area { max-width: 1200px; margin: 0 auto; }
+.queue-section {
+  background: var(--c-surface); border: 1px solid var(--c-border);
+  border-radius: 8px; padding: 12px 16px; margin-bottom: 12px;
+}
+.queue-title {
+  font-size: .8rem; font-weight: 800; color: var(--c-text2);
+  margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--c-border);
+  display: flex; align-items: center; gap: 6px;
+}
+.queue-title .cnt { font-size: .7rem; background: #e5e7eb; padding: 1px 8px; border-radius: 10px; }
+.queue-note { font-size: .7rem; color: var(--c-text2); margin-top: 4px; }
+.queue-desc { font-size: .78rem; color: var(--c-text2); margin-bottom: 10px; line-height: 1.5; }
+.queue-type-label {
+  font-size: .72rem; font-weight: 800; color: var(--c-text2);
+  margin: 10px 0 6px; padding-left: 2px;
+  border-left: 3px solid var(--c-border); padding-left: 8px;
+}
+.queue-empty { font-size: .78rem; color: #999; padding: 8px 4px; }
+.queue-cards { display: flex; flex-wrap: wrap; gap: 8px; }
+.queue-card {
+  padding: 8px 12px; border-radius: 6px; font-size: .75rem; font-weight: 700;
+  border: 1px solid var(--c-border); min-width: 140px;
+}
+.queue-card .qc-id { font-family: var(--font-en); font-size: .65rem; color: var(--c-text2); }
+.queue-card .qc-teams { margin-top: 2px; }
+
+.q-order-done { background: var(--c-accent2-light); border-color: var(--c-accent2); }
+.q-order-partial { background: var(--c-order-partial-light); border-color: var(--c-order-partial); }
+.q-court-wait { background: var(--c-court-wait-light); border-color: var(--c-court-wait); }
+.q-waiting { background: var(--c-warn-light); border-color: var(--c-warn); }
+
+/* Mode switcher */
+.mode-switcher { display: flex; gap: 4px; }
+.mode-btn {
+  padding: 6px 14px; border: 1.5px solid rgba(255,255,255,.3); border-radius: 20px;
+  background: rgba(255,255,255,.1); color: rgba(255,255,255,.8);
+  font-size: .78rem; font-weight: 700; cursor: pointer; font-family: var(--font-ja);
+  transition: all .15s;
+}
+.mode-btn:hover { background: rgba(255,255,255,.2); }
+.mode-btn.active { background: #fff; color: var(--c-text); border-color: #fff; }
+.mode-label { font-size: .85rem; font-weight: 700; color: rgba(255,255,255,.9); padding: 4px 14px; border: 1.5px solid rgba(255,255,255,.4); border-radius: 20px; }
+.court-count-wrap { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+
+.footer { text-align: center; padding: 20px; font-size: .7rem; color: var(--c-text2); }
 </style>
 </head>
 <body>
+
 <header class="header">
-  <h1>第78回 盛岡市民スポーツ大会 ソフトテニス競技</h1>
-  <div class="sub">令和8年4月25日（土）｜盛岡市立太田テニスコート</div>
-  <div class="live-bar"><span class="live-dot"></span><span>LIVE — <span id="updateInfo">読み込み中...</span></span></div>
+  <h1><span class="live-dot"></span>🎾 大会進行状況</h1>
+  <div class="mode-switcher" id="modeSwitcher" style="display:none;">
+    <button class="mode-btn active" data-mode="all" onclick="setMode('all')">全種目</button>
+    <button class="mode-btn" data-mode="team" onclick="setMode('team')">団体戦</button>
+    <button class="mode-btn" data-mode="individual" onclick="setMode('individual')">個人戦</button>
+  </div>
+  <div class="mode-label" id="modeLabel" style="display:none;"></div>
+  <div class="court-count-wrap" id="courtCountWrap" style="display:none;">
+    <label style="font-size:.7rem;opacity:.7;">コート面数</label>
+    <select id="courtCountSel" onchange="onCourtCountChange()" style="padding:4px 8px;border-radius:6px;border:1px solid rgba(255,255,255,.3);background:#fff;color:#1a1a1a;font-size:.85rem;font-weight:700;font-family:inherit;">
+      <option value="4">4面</option>
+      <option value="8">8面</option>
+      <option value="10">10面</option>
+      <option value="16" selected>16面</option>
+      <option value="18">18面</option>
+    </select>
+  </div>
+  <div>
+    <div class="update-text" id="updateInfo">読み込み中...</div>
+  </div>
+  <button class="refresh-btn" onclick="fetchData()">🔄 更新</button>
 </header>
-<div class="tabs">
-  <button class="tab-btn active" onclick="switchTab('男子A')">男子A</button>
-  <button class="tab-btn" onclick="switchTab('男子B')">男子B</button>
-  <button class="tab-btn" onclick="switchTab('女子A')">女子A</button>
-  <button class="tab-btn" onclick="switchTab('女子B')">女子B</button>
+
+<div class="main">
+  <div class="matrix-wrap">
+    <table class="matrix" id="matrixTable">
+      <thead id="matrixHead"></thead>
+      <tbody id="matrixBody"></tbody>
+    </table>
+  </div>
+
+  <div class="queue-area" id="queueArea"></div>
 </div>
-<div class="wrap">
-  <div class="wrap-title" id="wrapTitle">男子Aトーナメント</div>
-  <div id="bracketArea"></div>
-</div>
-<div class="info-bar" id="infoBar"></div>
-<footer class="footer">岩手県中学生ソフトテニス連盟 大会DXシステム ｜ 30秒ごとに自動更新</footer>
+
+<footer class="footer">
+  岩手県中学生ソフトテニス連盟 大会DXシステム ｜ 30秒ごとに自動更新
+</footer>
 
 <script>
-var API = "https://script.google.com/macros/s/AKfycbyUQbnMbcFLFRObMbUQ1sKGrhq11GL99io2pGBTAT4X5IBsSpdQPPasOVKxt0HtdFk/exec";
-var progressData = [];
-var currentTab = '男子A';
+const API = "https://script.google.com/macros/s/AKfycbyUQbnMbcFLFRObMbUQ1sKGrhq11GL99io2pGBTAT4X5IBsSpdQPPasOVKxt0HtdFk/exec";
+const REFRESH = 30000;
+
+let allMatches = [];
+let displayMode = 'all'; // 'all' | 'team' | 'individual'
+let courtCount = 16;      // コート面数（デフォルト16）
+let refreshTimer = null;
 
 // ============================================================
-// Bracket data: left teams, right teams, match tree
-// tree node: { id, left:node|null, right:node|null, leftSeed, rightSeed }
+// Mode Switch
 // ============================================================
-var BRACKETS = {
-  "男子A": {
-    title: "男子Aトーナメント",
-    left: ["下小路中","大宮中","仙北中","飯岡中","厨川中","I.Kクラブ","北陵中","河南中"],
-    right: ["岩大附属中","土淵スポ少","黒石野中","上田中","みたけクラブ","見前中","乙部中","下橋中"],
-    leftNums: [1,2,3,4,5,6,7,8],
-    rightNums: [9,10,11,12,13,14,15,16],
-    // Match tree from leaves to root (left side)
-    // R1: 4 matches, R2: 2, Semi: 1
-    leftMatches: [
-      ["MA01","MA02","MA03","MA04"],  // R1
-      ["MA09","MA10"],                 // R2
-      ["MA13"]                         // Semi
-    ],
-    rightMatches: [
-      ["MA05","MA06","MA07","MA08"],
-      ["MA11","MA12"],
-      ["MA14"]
-    ],
-    finalId: "MA15"
-  },
-  "男子B": {
-    title: "男子Bトーナメント",
-    left: ["下小路中","大宮中","見前中"],
-    right: ["河南中","下橋中","上田中"],
-    leftNums: [1,2,3],
-    rightNums: [4,5,6],
-    leftMatches: [
-      ["MB01",null],   // R1: 1vs2, 3=bye
-      ["MB03"]          // Semi: MB01勝者 vs 3
-    ],
-    rightMatches: [
-      ["MB02",null],
-      ["MB04"]
-    ],
-    finalId: "MB05"
-  },
-  "女子A": {
-    title: "女子Aトーナメント",
-    left: ["仙北中","上田中","見前中","大宮中","松園中","岩大附属中","城東中","飯岡中","土淵中"],
-    right: ["乙部中","河南中","見前南中","下橋中","下小路中","城西中","厨川中","北陵中","黒石野中"],
-    leftNums: [1,2,3,4,5,6,7,8,9],
-    rightNums: [10,11,12,13,14,15,16,17,18],
-    // 9 teams: 1 bye + 1 R1 match, then 4 R2, 2 QF, 1 Semi
-    leftMatches: [
-      ["FA01",null,null,"FA02"],  // 位置: 2v3, bye, bye, 8v9
-      ["FA09","FA03","FA04","FA05"], // 1vsFA01勝,4v5,6v7,FA02勝vs?
-      ["FA11","FA12"],
-      ["FA15"]
-    ],
-    rightMatches: [
-      [null,"FA06",null,"FA10"],
-      [null,"FA07","FA08",null],
-      ["FA13","FA14"],
-      ["FA16"]
-    ],
-    finalId: "FA17"
-  },
-  "女子B": {
-    title: "女子Bトーナメント",
-    left: ["飯岡中","乙部中","黒石野中","土淵中","見前中","下小路中"],
-    right: ["厨川中","仙北中","大宮中","河南中","上田中","北陵中"],
-    leftNums: [1,2,3,4,5,6],
-    rightNums: [7,8,9,10,11,12],
-    leftMatches: [
-      ["FB01","FB02",null],  // 1v2, 3v4, bye5, bye6
-      ["FB05","FB06"],
-      ["FB09"]
-    ],
-    rightMatches: [
-      ["FB03","FB04",null],
-      ["FB07","FB08"],
-      ["FB10"]
-    ],
-    finalId: "FB11"
-  }
-};
-
-// ============================================================
-// SVG drawing
-// ============================================================
-function render() {
-  var b = BRACKETS[currentTab];
-  if (!b) return;
-
-  var leftN = b.left.length;
-  var rightN = b.right.length;
-  var maxN = Math.max(leftN, rightN);
-
-  var RH = 32;    // row height per team
-  var NW = 105;   // name column width
-  var RW = 80;    // round column width
-  var CG = 50;    // center gap for final
-  var MG = 8;
-
-  var leftR = b.leftMatches.length;
-  var rightR = b.rightMatches.length;
-  var maxR = Math.max(leftR, rightR);
-
-  var H = maxN * RH * 2 + MG * 2 + 20;
-  var halfW = NW + (maxR + 0.5) * RW;
-  var W = halfW * 2 + CG;
-
-  var s = '<svg viewBox="0 0 '+W+' '+H+'" width="100%" style="max-width:'+Math.min(W,950)+'px;display:block;margin:0 auto;" xmlns="http://www.w3.org/2000/svg">';
-  s += '<rect width="'+W+'" height="'+H+'" fill="white" rx="4"/>';
-
-  // Compute Y positions for teams
-  function teamYs(n) {
-    var ys = [];
-    var totalH = maxN * RH * 2;
-    var gap = totalH / n;
-    for (var i = 0; i < n; i++) {
-      ys.push(MG + 16 + gap * i + gap / 2);
-    }
-    return ys;
-  }
-
-  var lys = teamYs(leftN);
-  var rys = teamYs(rightN);
-
-  // Draw left team names
-  for (var i = 0; i < leftN; i++) {
-    s += '<text x="'+(MG+4)+'" y="'+lys[i]+'" font-size="11" font-weight="700" fill="#1a1a1a">'+b.leftNums[i]+' '+esc(b.left[i])+'</text>';
-    s += ln(MG, lys[i]+5, MG+NW, lys[i]+5, '#aaa', 1);
-  }
-
-  // Draw right team names
-  for (var i = 0; i < rightN; i++) {
-    var rx = W - MG;
-    s += '<text x="'+(rx-4)+'" y="'+rys[i]+'" font-size="11" font-weight="700" fill="#1a1a1a" text-anchor="end">'+esc(b.right[i])+' '+b.rightNums[i]+'</text>';
-    s += ln(rx-NW, rys[i]+5, rx, rys[i]+5, '#aaa', 1);
-  }
-
-  // Draw bracket rounds - left side
-  var lFinalY = drawRounds(s, lys, b.leftMatches, MG+NW, RW, 'L');
-  s = lFinalY.svg;
-  var lLastY = lFinalY.lastY;
-  var lLastX = MG + NW + leftR * RW;
-
-  // Draw bracket rounds - right side
-  var rFinalY = drawRounds(s, rys, b.rightMatches, W-MG-NW, RW, 'R');
-  s = rFinalY.svg;
-  var rLastY = rFinalY.lastY;
-  var rLastX = W - MG - NW - rightR * RW;
-
-  // Final
-  var centerX = W / 2;
-  var fProg = getProg(b.finalId);
-  var fCol = stCol(fProg.status);
-  var fSw = fProg.status === '待機中' ? 1 : 2;
-
-  s += ln(lLastX, lLastY, centerX, lLastY, fCol, fSw);
-  s += ln(rLastX, rLastY, centerX, rLastY, fCol, fSw);
-  if (Math.abs(lLastY - rLastY) > 1) {
-    s += ln(centerX, lLastY, centerX, rLastY, fCol, fSw);
-  }
-
-  var fMidY = (lLastY + rLastY) / 2;
-  s += '<text x="'+centerX+'" y="'+(fMidY)+'" text-anchor="middle" font-size="12" font-weight="900" fill="#b8860b">'+circled(b.finalId)+'</text>';
-
-  if (fProg.status === '終了') {
-    s += '<text x="'+centerX+'" y="'+(fMidY+16)+'" text-anchor="middle" font-size="12" font-weight="900" fill="#1a4a2e">栄冠</text>';
-  } else if (fProg.status === '試合中') {
-    s += '<text x="'+centerX+'" y="'+(fMidY+16)+'" text-anchor="middle" font-size="10" font-weight="900" fill="#dc2626">●LIVE</text>';
-  }
-
-  s += '</svg>';
-  document.getElementById('bracketArea').innerHTML = s;
-  renderInfo();
-}
-
-function drawRounds(svg, teamYs, matchRounds, startX, rw, side) {
-  var s = svg;
-  var curYs = [];
-  for (var i = 0; i < teamYs.length; i++) curYs.push(teamYs[i] + 5);
-
-  var isL = (side === 'L');
-
-  for (var r = 0; r < matchRounds.length; r++) {
-    var matches = matchRounds[r];
-    var nextYs = [];
-    var x1 = isL ? startX + r * rw : startX - r * rw;
-    var x2 = isL ? x1 + rw : x1 - rw;
-    var mi = 0;
-
-    var i = 0;
-    while (i < curYs.length) {
-      var matchId = matches[mi] || null;
-      mi++;
-
-      if (i + 1 >= curYs.length) {
-        // Odd team - bye, carry forward
-        nextYs.push(curYs[i]);
-        s += ln(x1, curYs[i], x2, curYs[i], '#aaa', 1);
-        i++;
-        continue;
-      }
-
-      if (matchId === null) {
-        // This pair is a bye - both carry through
-        // Actually this means no match, just a line through
-        nextYs.push(curYs[i]);
-        s += ln(x1, curYs[i], x2, curYs[i], '#aaa', 1);
-        nextYs.push(curYs[i+1]);
-        s += ln(x1, curYs[i+1], x2, curYs[i+1], '#aaa', 1);
-        i += 2;
-        continue;
-      }
-
-      var y1 = curYs[i];
-      var y2 = curYs[i+1];
-      var mid = (y1 + y2) / 2;
-      nextYs.push(mid);
-
-      var prog = getProg(matchId);
-      var col = stCol(prog.status);
-      var sw = prog.status === '待機中' ? 1 : 2;
-
-      // Two horizontal lines
-      s += ln(x1, y1, x2, y1, col, sw);
-      s += ln(x1, y2, x2, y2, col, sw);
-      // Vertical connector
-      s += ln(x2, y1, x2, y2, col, sw);
-
-      // Match number
-      var mnX = isL ? x2 - 4 : x2 + 4;
-      var mnAnc = isL ? 'end' : 'start';
-      s += '<text x="'+mnX+'" y="'+(mid+4)+'" text-anchor="'+mnAnc+'" font-size="11" font-weight="900" fill="#b8860b">'+circled(matchId)+'</text>';
-
-      if (prog.status === '試合中') {
-        var lvX = (x1 + x2) / 2;
-        s += '<text x="'+lvX+'" y="'+(mid-6)+'" text-anchor="middle" font-size="8" font-weight="900" fill="#dc2626">●LIVE</text>';
-      }
-
-      i += 2;
-    }
-
-    curYs = nextYs;
-  }
-
-  var lastY = curYs.length > 0 ? curYs[0] : 0;
-  return { svg: s, lastY: lastY };
-}
-
-// ============================================================
-// Helpers
-// ============================================================
-var CIRCLES = ['','①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩','⑪','⑫','⑬','⑭','⑮','⑯','⑰'];
-function circled(id) { var n = parseInt(id.substring(2))||0; return CIRCLES[n]||String(n); }
-function getProg(id) { for(var i=0;i<progressData.length;i++){if(progressData[i].matchId===id)return progressData[i];} return {matchId:id,status:'待機中'}; }
-function stCol(st) { return st==='試合中'?'#dc2626':st==='終了'?'#1a4a2e':'#aaa'; }
-function ln(x1,y1,x2,y2,c,w) { return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'"/>'; }
-function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-function switchTab(t) {
-  currentTab = t;
-  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('active',b.textContent===t);});
-  document.getElementById('wrapTitle').textContent = BRACKETS[t]?.title || t;
+function setMode(mode) {
+  displayMode = mode;
+  document.querySelectorAll('.mode-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.mode === mode);
+  });
   render();
 }
 
-function renderInfo() {
-  var b = BRACKETS[currentTab]; if(!b) return;
-  var all = [], done = 0;
-  function collect(arr){if(!arr)return;for(var r=0;r<arr.length;r++){for(var m=0;m<arr[r].length;m++){if(arr[r][m]){all.push(arr[r][m]);if(getProg(arr[r][m]).status==='終了')done++;}}}}
-  collect(b.leftMatches); collect(b.rightMatches);
-  if(b.finalId){all.push(b.finalId);if(getProg(b.finalId).status==='終了')done++;}
-  document.getElementById('infoBar').innerHTML = '<span class="info-chip">進行: '+done+' / '+all.length+'試合完了</span>';
+function onCourtCountChange() {
+  courtCount = parseInt(document.getElementById('courtCountSel').value) || 16;
+  render();
 }
 
-function fetchData() {
-  fetch(API+"?action=getProgress").then(function(r){return r.json();}).then(function(d){
-    progressData = d||[];
-    var now = new Date();
-    document.getElementById('updateInfo').textContent = now.getHours()+':'+String(now.getMinutes()).padStart(2,'0')+':'+String(now.getSeconds()).padStart(2,'0')+' 更新';
+function filterByMode(matches) {
+  if (displayMode === 'team') return matches.filter(m => m.round && m.round.indexOf("団体") !== -1);
+  if (displayMode === 'individual') return matches.filter(m => m.round && m.round.indexOf("個人") !== -1);
+  return matches;
+}
+
+// ============================================================
+// Fetch
+// ============================================================
+async function fetchData() {
+  try {
+    const res = await fetch(API + "?action=getProgress");
+    const data = await res.json();
+    allMatches = data || [];
     render();
-  }).catch(function(){document.getElementById('updateInfo').textContent='⚠ 通信エラー';});
+    const now = new Date();
+    document.getElementById('updateInfo').textContent =
+      `最終更新: ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+  } catch (e) {
+    document.getElementById('updateInfo').textContent = '⚠ 通信エラー';
+  }
 }
 
-var refreshTimer = null;
-document.addEventListener('visibilitychange',function(){
-  if(document.hidden)clearInterval(refreshTimer);
-  else{fetchData();refreshTimer=setInterval(fetchData,30000);}
+// ============================================================
+// Render
+// ============================================================
+function render() {
+  renderMatrix();
+  renderQueues();
+}
+
+function renderMatrix() {
+  // モードフィルタ適用後、コートが割り当てられている試合を抽出
+  const filtered = filterByMode(allMatches);
+  const courtMatches = filtered.filter(m =>
+    m.court && (m.status === "コート指定済み" || m.status === "試合中" || m.status === "終了")
+  );
+
+  // 固定コート列を1〜courtCountで生成
+  const courts = [];
+  for (let i = 1; i <= courtCount; i++) courts.push(String(i));
+
+  // コート文字列を解析：「1-2」→ [1,2]、「1」→ [1]
+  function parseCourtRange(courtStr) {
+    const s = String(courtStr).trim();
+    if (s.indexOf('-') !== -1) {
+      const parts = s.split('-');
+      const start = parseInt(parts[0]) || 0;
+      const end = parseInt(parts[1]) || 0;
+      const result = [];
+      for (let i = start; i <= end; i++) result.push(String(i));
+      return result;
+    }
+    return [s];
+  }
+
+  // 各試合がどのコートを使うかマッピング
+  // courtSlots[row][courtIdx] = match or null or 'span'(結合の続き)
+  // まず各試合をコートの最初の番号でグループ化
+  const courtFirstMap = {}; // firstCourt → [match, match, ...]
+  courtMatches.forEach(m => {
+    const range = parseCourtRange(m.court);
+    const first = range[0];
+    if (!courtFirstMap[first]) courtFirstMap[first] = [];
+    courtFirstMap[first].push({ ...m, _courtRange: range });
+  });
+
+  // 行数計算
+  let maxRows = 0;
+  courts.forEach(c => {
+    if (courtFirstMap[c]) maxRows = Math.max(maxRows, courtFirstMap[c].length);
+  });
+  const totalRows = Math.max(maxRows, 6);
+
+  // 各コートの試合をソート
+  courts.forEach(c => {
+    if (courtFirstMap[c]) {
+      courtFirstMap[c] = sortByStatus(courtFirstMap[c]);
+    }
+  });
+
+  // ヘッダー
+  let headHtml = '<tr><th class="row-header"></th>';
+  courts.forEach(c => {
+    headHtml += `<th>${c}コート</th>`;
+  });
+  headHtml += '</tr>';
+  document.getElementById('matrixHead').innerHTML = headHtml;
+
+  // ボディ：行ごとに構築。結合済みセルはスキップ
+  let bodyHtml = '';
+  for (let r = 0; r < totalRows; r++) {
+    bodyHtml += `<tr><td class="row-header">${r + 1}</td>`;
+
+    // この行で結合済みのコートを追跡
+    const spannedCourts = new Set();
+
+    for (let ci = 0; ci < courts.length; ci++) {
+      const c = courts[ci];
+
+      // 既に結合セルの一部ならスキップ
+      if (spannedCourts.has(c)) continue;
+
+      // このコートのr番目の試合を取得
+      const matchList = courtFirstMap[c];
+      const m = matchList ? matchList[r] : null;
+
+      if (m && m._courtRange.length > 1) {
+        // 複数コート使用 → colspan
+        const range = m._courtRange;
+        const colspan = range.length;
+        // 結合対象のコートをスキップリストに追加
+        range.forEach(rc => spannedCourts.add(rc));
+        bodyHtml += `<td colspan="${colspan}" style="border:2px solid var(--c-accent);background:var(--c-surface);">${renderCell(m)}</td>`;
+      } else if (m) {
+        // 1面のみ
+        bodyHtml += `<td>${renderCell(m)}</td>`;
+      } else {
+        bodyHtml += '<td class="cell-empty"></td>';
+      }
+    }
+    bodyHtml += '</tr>';
+  }
+  document.getElementById('matrixBody').innerHTML = bodyHtml;
+}
+
+function sortByStatus(matches) {
+  const order = { "終了": 0, "試合中": 1, "コート指定済み": 2 };
+  return [...matches].sort((a, b) => (order[a.status] ?? 9) - (order[b.status] ?? 9));
+}
+
+function renderCell(m) {
+  const isTeam = m.round && m.round.indexOf("団体") !== -1;
+  let cls = '';
+  let statusText = '';
+
+  if (m.status === "試合中") { cls = 'cell-playing'; statusText = '試合中'; }
+  else if (m.status === "コート指定済み") { cls = 'cell-court-done'; statusText = 'コート指定済み'; }
+  else if (m.status === "終了") { cls = 'cell-done'; statusText = '終了'; }
+
+  // 短い回戦表示
+  let roundShort = m.round || '';
+  roundShort = roundShort.replace('男子団体 ', '').replace('男子個人 ', '').replace('女子団体 ', '').replace('女子個人 ', '');
+
+  // チーム名を短縮
+  const t1 = shortenName(m.t1);
+  const t2 = shortenName(m.t2);
+
+  return `<div class="match-cell ${cls}">
+    <div class="cell-round">${roundShort}</div>
+    <div class="cell-teams">${t1}vs${t2}</div>
+    <div class="cell-status">${statusText}</div>
+  </div>`;
+}
+
+function shortenName(name) {
+  if (!name) return '?';
+  // 「チーム名:選手・選手」形式の場合、チーム名だけ取る
+  const colon = name.indexOf(':');
+  if (colon !== -1) name = name.substring(0, colon);
+  // 長すぎる場合は切り詰め
+  if (name.length > 6) name = name.substring(0, 5) + '…';
+  return name;
+}
+
+// ============================================================
+// Queue（下部のキュー表示）
+// ============================================================
+function renderQueues() {
+  const filtered = filterByMode(allMatches);
+  const orderDone = filtered.filter(m => m.status === "オーダー完了" || m.status === "コート指定待ち");
+  const orderPartial = filtered.filter(m => m.status === "オーダー提出");
+  const waiting = filtered.filter(m => m.status === "待機中");
+
+  const isTeamOnly = displayMode === 'team';
+  const isIndOnly = displayMode === 'individual';
+
+  // 団体・個人に分けて表示
+  const splitByType = (list) => {
+    const team = list.filter(m => m.round && m.round.indexOf("団体") !== -1);
+    const ind = list.filter(m => !m.round || m.round.indexOf("団体") === -1);
+    return { team, ind };
+  };
+
+  let html = '';
+
+  // ===== コート割り当て待ち =====
+  const s1 = splitByType(orderDone);
+  html += `<div class="queue-section">
+    <div class="queue-title">🏸 まもなく試合開始 — コートの空きを待っています <span class="cnt">${orderDone.length}</span></div>
+    <div class="queue-desc">コートが空き次第、上の進行表に表示されます。選手はコート周辺で待機してください。</div>`;
+  if (orderDone.length === 0) {
+    html += '<div class="queue-empty">現在、コート待ちの試合はありません</div>';
+  } else {
+    if (s1.team.length > 0) {
+      if (!isIndOnly) html += `<div class="queue-type-label">${isTeamOnly ? '' : '団体戦 — '}オーダー提出済み・コート割り当て待ち</div>`;
+      html += '<div class="queue-cards">' + s1.team.map(m => queueCard(m, 'q-order-done')).join('') + '</div>';
+    }
+    if (s1.ind.length > 0) {
+      if (!isTeamOnly) html += `<div class="queue-type-label">${isIndOnly ? '' : '個人戦 — '}コート割り当て待ち</div>`;
+      html += '<div class="queue-cards">' + s1.ind.map(m => queueCard(m, 'q-order-done')).join('') + '</div>';
+    }
+  }
+  html += '</div>';
+
+  // ===== オーダー受付中（団体戦のみ。個人戦モードでは非表示） =====
+  if (!isIndOnly) {
+    html += `<div class="queue-section">
+      <div class="queue-title">📝 オーダー受付中 — 両チームの提出を待っています <span class="cnt">${orderPartial.length}</span></div>
+      <div class="queue-desc">監督は監督ポータルからオーダーを提出してください。両チーム揃い次第「コート待ち」に移ります。</div>`;
+    if (orderPartial.length === 0) {
+      html += '<div class="queue-empty">現在、オーダー受付中の試合はありません</div>';
+    } else {
+      html += '<div class="queue-cards">' + orderPartial.map(m => queueCard(m, 'q-order-partial')).join('') + '</div>';
+    }
+    html += '</div>';
+  }
+
+  // ===== この後の試合 =====
+  const s3 = splitByType(waiting);
+  const waitDesc = isIndOnly
+    ? '前の試合が終わり次第、コートが割り当てられます。対戦相手が「○○勝者」の試合は、前の試合結果で決まります。'
+    : isTeamOnly
+      ? '前の試合が終わり次第、オーダー受付が始まります。対戦相手が「○○勝者」の試合は、前の試合結果で決まります。'
+      : '前の試合が終わり次第、順番に進行します。対戦相手が「○○勝者」となっている試合は、前の試合の結果で決まります。';
+  html += `<div class="queue-section">
+    <div class="queue-title">⏳ この後の試合 <span class="cnt">${waiting.length}</span></div>
+    <div class="queue-desc">${waitDesc}</div>`;
+  if (waiting.length === 0) {
+    html += '<div class="queue-empty">待機中の試合はありません</div>';
+  } else {
+    if (s3.team.length > 0 && !isIndOnly) {
+      if (!isTeamOnly) html += `<div class="queue-type-label">団体戦</div>`;
+      html += '<div class="queue-cards">' + s3.team.map(m => queueCard(m, 'q-waiting')).join('') + '</div>';
+    }
+    if (s3.ind.length > 0 && !isTeamOnly) {
+      if (!isIndOnly) html += `<div class="queue-type-label">個人戦</div>`;
+      html += '<div class="queue-cards">' + s3.ind.map(m => queueCard(m, 'q-waiting')).join('') + '</div>';
+    }
+  }
+  html += '</div>';
+
+  document.getElementById('queueArea').innerHTML = html;
+}
+
+function queueCard(m, cls) {
+  const t1 = shortenName(m.t1);
+  const t2 = shortenName(m.t2);
+  return `<div class="queue-card ${cls}">
+    <div class="qc-id">${m.matchId}　${m.round || ''}</div>
+    <div class="qc-teams">${t1} vs ${t2}</div>
+  </div>`;
+}
+
+// ============================================================
+// Auto Refresh
+// ============================================================
+function startAutoRefresh() {
+  fetchData();
+  refreshTimer = setInterval(fetchData, REFRESH);
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    clearInterval(refreshTimer);
+  } else {
+    fetchData();
+    refreshTimer = setInterval(fetchData, REFRESH);
+  }
 });
-window.addEventListener('DOMContentLoaded',function(){fetchData();refreshTimer=setInterval(fetchData,30000);});
+
+window.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const urlMode = params.get('mode');
+  const urlCourts = params.get('courts');
+
+  // コート面数の設定
+  if (urlCourts) {
+    courtCount = parseInt(urlCourts) || 16;
+  }
+  document.getElementById('courtCountSel').value = String(courtCount);
+
+  if (urlMode && ['all', 'team', 'individual'].includes(urlMode)) {
+    // 観客用：モード固定、ボタン非表示、ラベル表示、コート数セレクタ非表示
+    displayMode = urlMode;
+    document.getElementById('modeSwitcher').style.display = 'none';
+    document.getElementById('courtCountWrap').style.display = 'none';
+    const label = document.getElementById('modeLabel');
+    const names = { all: '全種目', team: '団体戦', individual: '個人戦' };
+    label.textContent = names[urlMode];
+    label.style.display = 'block';
+  } else {
+    // 運営用：切り替えボタン＋コート数セレクタ表示
+    document.getElementById('modeSwitcher').style.display = 'flex';
+    document.getElementById('courtCountWrap').style.display = 'flex';
+    document.getElementById('modeLabel').style.display = 'none';
+  }
+
+  startAutoRefresh();
+});
 </script>
 </body>
 </html>
