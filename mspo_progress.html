@@ -260,15 +260,44 @@ function renderMatrix() {
   const courts = [];
   for (let i = 1; i <= courtCount; i++) courts.push(String(i));
 
-  // 各コートの試合をグループ化
-  const courtRounds = {};
-  courts.forEach(c => {
-    courtRounds[c] = courtMatches.filter(m => String(m.court) === c);
+  // コート文字列を解析：「1-2」→ [1,2]、「1」→ [1]
+  function parseCourtRange(courtStr) {
+    const s = String(courtStr).trim();
+    if (s.indexOf('-') !== -1) {
+      const parts = s.split('-');
+      const start = parseInt(parts[0]) || 0;
+      const end = parseInt(parts[1]) || 0;
+      const result = [];
+      for (let i = start; i <= end; i++) result.push(String(i));
+      return result;
+    }
+    return [s];
+  }
+
+  // 各試合がどのコートを使うかマッピング
+  // courtSlots[row][courtIdx] = match or null or 'span'(結合の続き)
+  // まず各試合をコートの最初の番号でグループ化
+  const courtFirstMap = {}; // firstCourt → [match, match, ...]
+  courtMatches.forEach(m => {
+    const range = parseCourtRange(m.court);
+    const first = range[0];
+    if (!courtFirstMap[first]) courtFirstMap[first] = [];
+    courtFirstMap[first].push({ ...m, _courtRange: range });
   });
 
-  // 行数は最大ラウンド数（最低6行）
-  const maxRounds = Math.max(...courts.map(c => courtRounds[c].length), 1);
-  const totalRows = Math.max(maxRounds, 6);
+  // 行数計算
+  let maxRows = 0;
+  courts.forEach(c => {
+    if (courtFirstMap[c]) maxRows = Math.max(maxRows, courtFirstMap[c].length);
+  });
+  const totalRows = Math.max(maxRows, 6);
+
+  // 各コートの試合をソート
+  courts.forEach(c => {
+    if (courtFirstMap[c]) {
+      courtFirstMap[c] = sortByStatus(courtFirstMap[c]);
+    }
+  });
 
   // ヘッダー
   let headHtml = '<tr><th class="row-header"></th>';
@@ -278,20 +307,38 @@ function renderMatrix() {
   headHtml += '</tr>';
   document.getElementById('matrixHead').innerHTML = headHtml;
 
-  // ボディ
+  // ボディ：行ごとに構築。結合済みセルはスキップ
   let bodyHtml = '';
   for (let r = 0; r < totalRows; r++) {
     bodyHtml += `<tr><td class="row-header">${r + 1}</td>`;
-    courts.forEach(c => {
-      const matches = courtRounds[c];
-      const sorted = sortByStatus(matches);
-      const m = sorted[r];
-      if (m) {
+
+    // この行で結合済みのコートを追跡
+    const spannedCourts = new Set();
+
+    for (let ci = 0; ci < courts.length; ci++) {
+      const c = courts[ci];
+
+      // 既に結合セルの一部ならスキップ
+      if (spannedCourts.has(c)) continue;
+
+      // このコートのr番目の試合を取得
+      const matchList = courtFirstMap[c];
+      const m = matchList ? matchList[r] : null;
+
+      if (m && m._courtRange.length > 1) {
+        // 複数コート使用 → colspan
+        const range = m._courtRange;
+        const colspan = range.length;
+        // 結合対象のコートをスキップリストに追加
+        range.forEach(rc => spannedCourts.add(rc));
+        bodyHtml += `<td colspan="${colspan}" style="border:2px solid var(--c-accent);background:var(--c-surface);">${renderCell(m)}</td>`;
+      } else if (m) {
+        // 1面のみ
         bodyHtml += `<td>${renderCell(m)}</td>`;
       } else {
         bodyHtml += '<td class="cell-empty"></td>';
       }
-    });
+    }
     bodyHtml += '</tr>';
   }
   document.getElementById('matrixBody').innerHTML = bodyHtml;
