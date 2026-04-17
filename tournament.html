@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>トーナメント表｜盛岡市民スポーツ大会</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=M+PLUS+1p:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f7f8f0;
+  --surface: #ffffff;
+  --border: #c8cbb8;
+  --text: #1a1a1a;
+  --text2: #5f6b7a;
+  --green: #1a4a2e;
+  --green-light: #e6f0ea;
+  --gold: #b8860b;
+  --gold-light: #fdf6e3;
+  --live: #dc2626;
+  --done: #374151;
+  --font: 'Noto Sans JP', 'M PLUS 1p', sans-serif;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, #1a3a28, #2a6b42);
+  color: #fff; padding: 14px 20px; text-align: center;
+  box-shadow: 0 2px 12px rgba(0,0,0,.15);
+}
+.header h1 { font-size: 1rem; font-weight: 700; letter-spacing: .5px; }
+.header .sub { font-size: .75rem; opacity: .7; margin-top: 2px; }
+.header .live-bar { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 6px; font-size: .7rem; }
+.live-dot { width: 8px; height: 8px; background: #ef4444; border-radius: 50%; animation: pulse 1.5s infinite; }
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* Tabs */
+.tabs { display: flex; justify-content: center; gap: 4px; padding: 12px 12px 0; flex-wrap: wrap; }
+.tab-btn {
+  padding: 8px 18px; border: 2px solid var(--border); border-bottom: none;
+  border-radius: 8px 8px 0 0; background: var(--surface); font-size: .85rem;
+  font-weight: 700; cursor: pointer; color: var(--text2); transition: all .15s;
+}
+.tab-btn:hover { background: var(--green-light); }
+.tab-btn.active { background: var(--green); color: #fff; border-color: var(--green); }
+
+/* Tournament area */
+.tournament-wrap {
+  background: var(--surface); border: 1px solid var(--border);
+  margin: 0 12px 12px; border-radius: 0 0 12px 12px; padding: 16px;
+  overflow-x: auto; min-height: 400px;
+}
+.tournament-title {
+  text-align: center; font-size: 1.1rem; font-weight: 900; color: var(--green);
+  margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid var(--green-light);
+}
+
+/* SVG tournament bracket */
+.bracket-svg { display: block; margin: 0 auto; }
+.bracket-svg text { font-family: 'Noto Sans JP', sans-serif; }
+.team-text { font-size: 12px; font-weight: 700; fill: var(--text); }
+.team-text.winner { fill: var(--green); font-weight: 900; }
+.team-text.loser { fill: #999; }
+.score-text { font-size: 11px; font-weight: 700; fill: var(--gold); }
+.match-id-text { font-size: 9px; fill: var(--text2); }
+.round-label { font-size: 11px; font-weight: 700; fill: var(--text2); text-anchor: middle; }
+.line { stroke: var(--border); stroke-width: 1.5; fill: none; }
+.line.active { stroke: var(--live); stroke-width: 2; }
+.line.done { stroke: var(--green); stroke-width: 2; }
+
+/* Results section */
+.results-bar {
+  display: flex; justify-content: center; gap: 12px; padding: 8px 12px;
+  font-size: .8rem; color: var(--text2); flex-wrap: wrap;
+}
+.result-chip {
+  padding: 4px 12px; border-radius: 16px; font-weight: 700;
+  background: var(--gold-light); border: 1px solid var(--gold); color: var(--gold);
+}
+
+.footer { text-align: center; padding: 16px; font-size: .7rem; color: var(--text2); }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <h1>第78回 盛岡市民スポーツ大会 ソフトテニス競技</h1>
+  <div class="sub">令和8年4月25日（土）｜盛岡市立太田テニスコート</div>
+  <div class="live-bar">
+    <span class="live-dot"></span>
+    <span>LIVE — <span id="updateInfo">読み込み中...</span></span>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('男子A')">男子A</button>
+  <button class="tab-btn" onclick="switchTab('男子B')">男子B</button>
+  <button class="tab-btn" onclick="switchTab('女子A')">女子A</button>
+  <button class="tab-btn" onclick="switchTab('女子B')">女子B</button>
+</div>
+
+<div class="tournament-wrap">
+  <div class="tournament-title" id="tournamentTitle">男子Aトーナメント</div>
+  <div id="bracketArea"></div>
+</div>
+
+<div class="results-bar" id="resultsBar"></div>
+
+<footer class="footer">
+  岩手県中学生ソフトテニス連盟 大会DXシステム ｜ 30秒ごとに自動更新
+</footer>
+
+<script>
+// ============================================================
+// Tournament Data (embedded from Excel)
+// ============================================================
+const TOURNAMENTS = {
+  "男子A": {
+    teams: {1:"下小路中",2:"大宮中",3:"仙北中",4:"飯岡中",5:"厨川中",6:"I.Kクラブ",7:"北陵中",8:"河南中",9:"岩大附属中",10:"土淵スポ少",11:"黒石野中",12:"上田中",13:"みたけクラブ",14:"見前中",15:"乙部中",16:"下橋中"},
+    matches: [
+      {id:"MA01",t1:1,t2:2,round:"1回戦"},{id:"MA02",t1:3,t2:4,round:"1回戦"},{id:"MA03",t1:5,t2:6,round:"1回戦"},{id:"MA04",t1:7,t2:8,round:"1回戦"},
+      {id:"MA05",t1:9,t2:10,round:"1回戦"},{id:"MA06",t1:11,t2:12,round:"1回戦"},{id:"MA07",t1:13,t2:14,round:"1回戦"},{id:"MA08",t1:15,t2:16,round:"1回戦"},
+      {id:"MA09",t1:"MA01勝者",t2:"MA02勝者",round:"2回戦"},{id:"MA10",t1:"MA03勝者",t2:"MA04勝者",round:"2回戦"},
+      {id:"MA11",t1:"MA05勝者",t2:"MA06勝者",round:"2回戦"},{id:"MA12",t1:"MA07勝者",t2:"MA08勝者",round:"2回戦"},
+      {id:"MA13",t1:"MA09勝者",t2:"MA10勝者",round:"準決勝"},{id:"MA14",t1:"MA11勝者",t2:"MA12勝者",round:"準決勝"},
+      {id:"MA15",t1:"MA13勝者",t2:"MA14勝者",round:"決勝"}
+    ]
+  },
+  "男子B": {
+    teams: {1:"下小路中",2:"大宮中",3:"見前中",4:"河南中",5:"下橋中",6:"上田中"},
+    matches: [
+      {id:"MB01",t1:1,t2:2,round:"1回戦"},{id:"MB02",t1:4,t2:5,round:"1回戦"},
+      {id:"MB03",t1:"MB01勝者",t2:3,round:"準決勝"},{id:"MB04",t1:"MB02勝者",t2:6,round:"準決勝"},
+      {id:"MB05",t1:"MB03勝者",t2:"MB04勝者",round:"決勝"}
+    ]
+  },
+  "女子A": {
+    teams: {1:"仙北中",2:"上田中",3:"見前中",4:"大宮中",5:"松園中",6:"岩大附属中",7:"城東中",8:"飯岡中",9:"土淵中",10:"乙部中",11:"河南中",12:"見前南中",13:"下橋中",14:"下小路中",15:"城西中",16:"厨川中",17:"北陵中",18:"黒石野中"},
+    matches: [
+      {id:"FA01",t1:2,t2:3,round:"1回戦"},{id:"FA02",t1:8,t2:9,round:"1回戦"},
+      {id:"FA03",t1:4,t2:5,round:"2回戦"},{id:"FA04",t1:6,t2:7,round:"2回戦"},
+      {id:"FA05",t1:"FA02勝者",t2:10,round:"2回戦"},{id:"FA06",t1:11,t2:12,round:"2回戦"},
+      {id:"FA07",t1:13,t2:14,round:"2回戦"},{id:"FA08",t1:15,t2:16,round:"2回戦"},
+      {id:"FA09",t1:1,t2:"FA01勝者",round:"2回戦"},{id:"FA10",t1:17,t2:18,round:"2回戦"},
+      {id:"FA11",t1:"FA09勝者",t2:"FA03勝者",round:"準々決勝"},{id:"FA12",t1:"FA04勝者",t2:"FA05勝者",round:"準々決勝"},
+      {id:"FA13",t1:"FA06勝者",t2:"FA07勝者",round:"準々決勝"},{id:"FA14",t1:"FA08勝者",t2:"FA10勝者",round:"準々決勝"},
+      {id:"FA15",t1:"FA11勝者",t2:"FA12勝者",round:"準決勝"},{id:"FA16",t1:"FA13勝者",t2:"FA14勝者",round:"準決勝"},
+      {id:"FA17",t1:"FA15勝者",t2:"FA16勝者",round:"決勝"}
+    ]
+  },
+  "女子B": {
+    teams: {1:"飯岡中",2:"乙部中",3:"黒石野中",4:"土淵中",5:"見前中",6:"下小路中",7:"厨川中",8:"仙北中",9:"大宮中",10:"河南中",11:"上田中",12:"北陵中"},
+    matches: [
+      {id:"FB01",t1:1,t2:2,round:"1回戦"},{id:"FB02",t1:3,t2:4,round:"1回戦"},{id:"FB03",t1:7,t2:8,round:"1回戦"},{id:"FB04",t1:9,t2:10,round:"1回戦"},
+      {id:"FB05",t1:"FB01勝者",t2:5,round:"2回戦"},{id:"FB06",t1:"FB02勝者",t2:6,round:"2回戦"},
+      {id:"FB07",t1:"FB03勝者",t2:11,round:"2回戦"},{id:"FB08",t1:"FB04勝者",t2:12,round:"2回戦"},
+      {id:"FB09",t1:"FB05勝者",t2:"FB06勝者",round:"準決勝"},{id:"FB10",t1:"FB07勝者",t2:"FB08勝者",round:"準決勝"},
+      {id:"FB11",t1:"FB09勝者",t2:"FB10勝者",round:"決勝"}
+    ]
+  }
+};
+
+const API = "https://script.google.com/macros/s/AKfycbyxWcuPgEZZS5zma0xxXOu-LvC0GTP4-ArSao_Y119N7zP_k_xWf6PoSGd5RIeaGLIy/exec";
+let progressData = [];
+let currentTab = '男子A';
+
+// ============================================================
+// Data Fetch
+// ============================================================
+async function fetchData() {
+  try {
+    const res = await fetch(API + "?action=getProgress");
+    progressData = await res.json();
+    const now = new Date();
+    document.getElementById('updateInfo').textContent =
+      `${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} 更新`;
+    renderBracket();
+  } catch(e) {
+    document.getElementById('updateInfo').textContent = '⚠ 通信エラー';
+  }
+}
+
+// ============================================================
+// Tab Switch
+// ============================================================
+function switchTab(cat) {
+  currentTab = cat;
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent === cat);
+  });
+  const titles = {'男子A':'男子Aトーナメント','男子B':'男子Bトーナメント','女子A':'女子Aトーナメント','女子B':'女子Bトーナメント'};
+  document.getElementById('tournamentTitle').textContent = titles[cat];
+  renderBracket();
+}
+
+// ============================================================
+// Resolve team names with progress data
+// ============================================================
+function getMatchStatus(matchId) {
+  const m = progressData.find(p => p.matchId === matchId);
+  return m ? m.status : '待機中';
+}
+
+function getMatchWinner(matchId) {
+  const m = progressData.find(p => p.matchId === matchId);
+  if (!m || m.status !== '終了') return null;
+  // 勝者は団体戦管理/試合管理から取得するのではなく、
+  // 次の試合のチーム欄が更新されているかで判定
+  return null; // renderで進行管理のt1/t2を直接使う
+}
+
+function resolveTeamName(t, teams) {
+  if (typeof t === 'number') return teams[t];
+  // "MA01勝者" → 進行管理から実際のチーム名を取得
+  if (typeof t === 'string' && t.indexOf('勝者') !== -1) {
+    const matchId = t.replace('勝者', '');
+    // 進行管理データで、このmatchIdを含む次の試合のチーム欄を確認
+    const sourceMatch = progressData.find(p => p.matchId === matchId);
+    if (sourceMatch && sourceMatch.status === '終了') {
+      // 次の試合で既に勝者名が反映されていればそれを使う
+      // 反映されていなければ元の「○○勝者」表示
+      // → 勝者反映はGAS側で自動的にされるので、
+      //    progressData自体に反映済みの名前が入っている
+    }
+    return t; // まだ未確定
+  }
+  return t;
+}
+
+// ============================================================
+// SVG Bracket Renderer
+// ============================================================
+function renderBracket() {
+  const cat = TOURNAMENTS[currentTab];
+  if (!cat) return;
+
+  const matches = cat.matches;
+  const teams = cat.teams;
+
+  // 進行管理から実際のチーム名を取得（勝者反映済み）
+  const liveMatches = {};
+  matches.forEach(m => {
+    const prog = progressData.find(p => p.matchId === m.id);
+    liveMatches[m.id] = prog || { matchId: m.id, status: '待機中', t1: '', t2: '', court: '' };
+  });
+
+  // トーナメントの構造を解析してラウンドごとにグループ化
+  const rounds = [];
+  const roundNames = [...new Set(matches.map(m => m.round))];
+  roundNames.forEach(rn => {
+    rounds.push(matches.filter(m => m.round === rn));
+  });
+
+  // SVGサイズ計算
+  const SLOT_H = 40;      // 1チームスロットの高さ
+  const MATCH_GAP = 8;    // マッチ間の隙間
+  const ROUND_W = 160;    // ラウンド列の幅
+  const MARGIN = 20;
+
+  // 最初のラウンドの試合数から全体の高さを計算
+  const firstRoundCount = rounds[0].length;
+  const totalSlots = firstRoundCount * 2; // チーム数
+  const svgH = totalSlots * SLOT_H + MARGIN * 2;
+  const svgW = rounds.length * ROUND_W + MARGIN * 2 + 100;
+
+  let svg = `<svg class="bracket-svg" viewBox="0 0 ${svgW} ${svgH}" width="100%" style="max-width:${svgW}px;" xmlns="http://www.w3.org/2000/svg">`;
+
+  // ラウンドラベル
+  rounds.forEach((rd, ri) => {
+    const x = MARGIN + ri * ROUND_W + ROUND_W / 2;
+    svg += `<text x="${x}" y="${MARGIN - 4}" class="round-label">${roundNames[ri]}</text>`;
+  });
+
+  // 各ラウンドの試合位置を計算
+  const matchPositions = {}; // matchId → {x, y1, y2, midY}
+
+  rounds.forEach((rd, ri) => {
+    const x = MARGIN + ri * ROUND_W;
+
+    rd.forEach((m, mi) => {
+      let y1, y2;
+      if (ri === 0) {
+        // 最初のラウンド：均等配置
+        const blockH = svgH - MARGIN * 2;
+        const slotH = blockH / firstRoundCount;
+        y1 = MARGIN + mi * slotH + slotH * 0.3;
+        y2 = MARGIN + mi * slotH + slotH * 0.7;
+      } else {
+        // 前のラウンドの対応する2試合の中間
+        const prevRound = rounds[ri - 1];
+
+        // この試合のt1, t2がどの前の試合から来ているか
+        const sourceIds = [m.t1, m.t2].map(t => {
+          if (typeof t === 'string' && t.indexOf('勝者') !== -1) {
+            return t.replace('勝者', '');
+          }
+          return null;
+        });
+
+        const positions = sourceIds.map(sid => {
+          if (sid && matchPositions[sid]) return matchPositions[sid].midY;
+          return null;
+        });
+
+        // ソースがない場合（シード）は前ラウンドの位置から推定
+        if (positions[0] !== null && positions[1] !== null) {
+          y1 = positions[0];
+          y2 = positions[1];
+        } else if (positions[0] !== null) {
+          // t2がシード → t1の位置の少し下
+          y1 = positions[0];
+          y2 = positions[0] + SLOT_H;
+        } else if (positions[1] !== null) {
+          y1 = positions[1] - SLOT_H;
+          y2 = positions[1];
+        } else {
+          const blockH = svgH - MARGIN * 2;
+          const slotH = blockH / rd.length;
+          y1 = MARGIN + mi * slotH + slotH * 0.3;
+          y2 = MARGIN + mi * slotH + slotH * 0.7;
+        }
+      }
+
+      const midY = (y1 + y2) / 2;
+      matchPositions[m.id] = { x, y1, y2, midY };
+
+      // 進行管理からデータ取得
+      const prog = liveMatches[m.id];
+      const status = prog.status;
+
+      // チーム名を解決
+      const t1Name = prog.t1 || (typeof m.t1 === 'number' ? teams[m.t1] : m.t1) || '';
+      const t2Name = prog.t2 || (typeof m.t2 === 'number' ? teams[m.t2] : m.t2) || '';
+
+      const isLive = status === '試合中';
+      const isDone = status === '終了';
+
+      // 背景ハイライト
+      if (isLive) {
+        svg += `<rect x="${x}" y="${y1 - 14}" width="${ROUND_W - 20}" height="${y2 - y1 + 28}" rx="4" fill="#fef2f2" stroke="#fca5a5" stroke-width="1"/>`;
+      }
+
+      // チーム名テキスト
+      const t1Class = 'team-text' + (isDone && prog.t1 === t1Name ? '' : '');
+      const t2Class = 'team-text' + (isDone && prog.t2 === t2Name ? '' : '');
+      svg += `<text x="${x + 4}" y="${y1}" class="${t1Class}">${escapeXml(shorten(t1Name))}</text>`;
+      svg += `<text x="${x + 4}" y="${y2}" class="${t2Class}">${escapeXml(shorten(t2Name))}</text>`;
+
+      // 対戦線
+      const lineClass = isLive ? 'line active' : isDone ? 'line done' : 'line';
+      svg += `<line x1="${x}" y1="${y1 + 4}" x2="${x + ROUND_W - 20}" y2="${y1 + 4}" class="${lineClass}"/>`;
+      svg += `<line x1="${x}" y1="${y2 + 4}" x2="${x + ROUND_W - 20}" y2="${y2 + 4}" class="${lineClass}"/>`;
+
+      // 縦線（次のラウンドへ）
+      if (ri < rounds.length - 1) {
+        svg += `<line x1="${x + ROUND_W - 20}" y1="${y1 + 4}" x2="${x + ROUND_W - 20}" y2="${y2 + 4}" class="${lineClass}"/>`;
+        svg += `<line x1="${x + ROUND_W - 20}" y1="${midY + 4}" x2="${x + ROUND_W}" y2="${midY + 4}" class="${lineClass}"/>`;
+      }
+
+      // ステータスバッジ
+      if (isLive) {
+        svg += `<text x="${x + ROUND_W - 24}" y="${midY - 2}" font-size="9" font-weight="900" fill="#dc2626" text-anchor="end">LIVE</text>`;
+      }
+    });
+  });
+
+  // 優勝表示
+  const finalMatch = matches[matches.length - 1];
+  const finalProg = liveMatches[finalMatch.id];
+  if (finalProg && finalProg.status === '終了') {
+    const fp = matchPositions[finalMatch.id];
+    const winX = fp.x + ROUND_W + 10;
+    const winY = fp.midY;
+    svg += `<text x="${winX}" y="${winY - 4}" font-size="10" font-weight="700" fill="${'var(--gold)'}">🏆 優勝</text>`;
+    // 勝者名は次の試合のt1/t2から取れないので、進行管理のデータから推定
+    // （決勝の勝者は団体戦管理シートにある）
+  }
+
+  svg += '</svg>';
+  document.getElementById('bracketArea').innerHTML = svg;
+
+  // 結果バー更新
+  renderResultsBar();
+}
+
+function shorten(name) {
+  if (!name) return '';
+  const c = name.indexOf(':');
+  if (c !== -1) name = name.substring(0, c);
+  name = name.replace('勝者', '勝');
+  if (name.length > 8) name = name.substring(0, 7) + '…';
+  return name;
+}
+
+function escapeXml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderResultsBar() {
+  const cat = TOURNAMENTS[currentTab];
+  if (!cat) return;
+  const bar = document.getElementById('resultsBar');
+
+  const doneMatches = cat.matches.filter(m => {
+    const prog = progressData.find(p => p.matchId === m.id);
+    return prog && prog.status === '終了';
+  });
+  const total = cat.matches.length;
+
+  bar.innerHTML = `<span class="result-chip">進行: ${doneMatches.length} / ${total}試合完了</span>`;
+}
+
+// ============================================================
+// Auto Refresh
+// ============================================================
+let refreshTimer = null;
+function startAutoRefresh() {
+  fetchData();
+  refreshTimer = setInterval(fetchData, 30000);
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { clearInterval(refreshTimer); }
+  else { fetchData(); refreshTimer = setInterval(fetchData, 30000); }
+});
+
+window.addEventListener('DOMContentLoaded', startAutoRefresh);
+</script>
+</body>
+</html>
