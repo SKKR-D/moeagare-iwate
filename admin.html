@@ -203,7 +203,17 @@ body {
   width: 60px; padding: 8px; text-align: center; border: 1px solid var(--c-border);
   border-radius: var(--r-sm); font-size: 16px; font-weight: 700; font-family: var(--font-en);
 }
+.game-input-row input[type="number"]:disabled {
+  background: #f3f4f6; color: #999; cursor: not-allowed;
+}
 .game-input-row .dash { font-size: 18px; color: var(--c-text2); }
+.op-check-row {
+  display: flex; gap: 20px; margin: 4px 0 12px 80px; font-size: .8rem;
+}
+.op-check-row label { display: flex; align-items: center; gap: 4px; cursor: pointer; font-weight: 600; color: var(--c-text2); }
+.score-match-divider {
+  border: none; border-top: 1px dashed var(--c-border); margin: 12px 0 8px;
+}
 
 /* ============================================================
    Toast / Loading
@@ -328,14 +338,34 @@ body {
 
     <div id="scoreFormArea" style="display:none;">
       <div class="score-header" id="scoreHeader"></div>
-      <div id="scoreGameRows"></div>
-      <div class="form-group" style="margin-top:12px;">
-        <label>最大ゲーム数</label>
-        <select id="scoreMaxGames">
+
+      <!-- ゲーム数（団体・個人共通） -->
+      <div class="form-group" style="margin-top:8px;">
+        <label>ゲーム数</label>
+        <select id="scoreMaxGames" style="width:200px;">
           <option value="5">5ゲームマッチ</option>
           <option value="7" selected>7ゲームマッチ</option>
         </select>
       </div>
+
+      <!-- 団体戦専用：方式選択 -->
+      <div id="scoreTeamOptions" style="display:none;">
+        <div class="form-group">
+          <label>方式</label>
+          <div style="display:flex; gap:8px;">
+            <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-weight:600;font-size:.85rem;">
+              <input type="radio" name="scorePlayMode" value="first_to_2" checked> 2点先取終了
+            </label>
+            <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-weight:600;font-size:.85rem;">
+              <input type="radio" name="scorePlayMode" value="all"> 全3試合行う
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- スコア入力行 -->
+      <div id="scoreGameRows"></div>
+
       <button class="btn-submit" id="scoreSubmitBtn" onclick="submitScore()" disabled>スコアを送信</button>
     </div>
   </div>
@@ -768,30 +798,78 @@ const onScoreMatchChange = () => {
 
   const match = state.progress.find(m => m.matchId === matchId);
   state.selectedScoreMatch = match;
+  const isTeam = match.round.indexOf("団体") !== -1;
+
+  // チーム名を短縮表示（個人戦の「チーム名:選手A・選手B」対応）
+  const shortName = (name) => {
+    if (!name) return '?';
+    const c = name.indexOf(':');
+    return c !== -1 ? name.substring(0, c) : name;
+  };
 
   document.getElementById('scoreHeader').innerHTML = `
-    <span class="team-name">${match.t1}</span>
+    <span class="team-name" style="color:var(--c-accent2);">${shortName(match.t1)}</span>
     <span class="vs">vs</span>
-    <span class="team-name">${match.t2}</span>
+    <span class="team-name" style="color:#ea580c;">${shortName(match.t2)}</span>
   `;
 
-  // 団体戦なら3対戦分、個人戦なら1試合分のスコア行を生成
-  const isTeam = match.round.indexOf("団体") !== -1;
-  const rows = isTeam ? 3 : 1;
+  // 団体戦オプション表示/非表示
+  document.getElementById('scoreTeamOptions').style.display = isTeam ? 'block' : 'none';
 
+  // スコア行を生成
+  renderScoreRows(match, isTeam);
+  document.getElementById('scoreSubmitBtn').disabled = true;
+};
+
+const renderScoreRows = (match, isTeam) => {
   const container = document.getElementById('scoreGameRows');
   container.innerHTML = '';
-  for (let i = 0; i < rows; i++) {
-    const label = isTeam ? `第${i + 1}マッチ` : "スコア";
-    container.innerHTML += `
-      <div class="game-input-row">
-        <span class="game-label">${label}</span>
-        <input type="number" id="scoreL_${i}" min="0" max="9" value="" placeholder="0" oninput="validateScore()">
+
+  if (isTeam) {
+    for (let i = 0; i < 3; i++) {
+      let html = `<hr class="score-match-divider">
+        <div class="game-input-row">
+          <span class="game-label">第${i + 1}マッチ</span>
+          <input type="number" id="scoreL_${i}" min="0" max="9" value="" placeholder="0" oninput="validateScore()">
+          <span class="dash">-</span>
+          <input type="number" id="scoreR_${i}" min="0" max="9" value="" placeholder="0" oninput="validateScore()">
+        </div>`;
+
+      // 第3マッチのみオープンチェック
+      if (i === 2) {
+        html += `<div class="op-check-row">
+          <label><input type="checkbox" id="scoreOP_L" onchange="onOPChange()"> ${match.t1.indexOf(':')!==-1?match.t1.substring(0,match.t1.indexOf(':')):match.t1} OP(不戦敗)</label>
+          <label><input type="checkbox" id="scoreOP_R" onchange="onOPChange()"> ${match.t2.indexOf(':')!==-1?match.t2.substring(0,match.t2.indexOf(':')):match.t2} OP(不戦敗)</label>
+        </div>`;
+      }
+      container.innerHTML += html;
+    }
+  } else {
+    // 個人戦：1試合分
+    container.innerHTML = `
+      <div class="game-input-row" style="margin-top:8px;">
+        <span class="game-label">スコア</span>
+        <input type="number" id="scoreL_0" min="0" max="9" value="" placeholder="0" oninput="validateScore()">
         <span class="dash">-</span>
-        <input type="number" id="scoreR_${i}" min="0" max="9" value="" placeholder="0" oninput="validateScore()">
+        <input type="number" id="scoreR_0" min="0" max="9" value="" placeholder="0" oninput="validateScore()">
       </div>`;
   }
-  document.getElementById('scoreSubmitBtn').disabled = true;
+};
+
+const onOPChange = () => {
+  const opL = document.getElementById('scoreOP_L')?.checked || false;
+  const opR = document.getElementById('scoreOP_R')?.checked || false;
+  const sL = document.getElementById('scoreL_2');
+  const sR = document.getElementById('scoreR_2');
+
+  if (opL || opR) {
+    // OPが入ったらスコア入力を無効化
+    sL.disabled = true; sR.disabled = true;
+    sL.value = ''; sR.value = '';
+  } else {
+    sL.disabled = false; sR.disabled = false;
+  }
+  validateScore();
 };
 
 const validateScore = () => {
@@ -800,10 +878,19 @@ const validateScore = () => {
   const isTeam = match.round.indexOf("団体") !== -1;
   const rows = isTeam ? 3 : 1;
   let valid = true;
+
   for (let i = 0; i < rows; i++) {
-    const l = document.getElementById(`scoreL_${i}`).value;
-    const r = document.getElementById(`scoreR_${i}`).value;
-    if (l === "" || r === "") { valid = false; break; }
+    const el_L = document.getElementById(`scoreL_${i}`);
+    const el_R = document.getElementById(`scoreR_${i}`);
+
+    // 第3マッチでOP入りなら入力不要
+    if (isTeam && i === 2) {
+      const opL = document.getElementById('scoreOP_L')?.checked || false;
+      const opR = document.getElementById('scoreOP_R')?.checked || false;
+      if (opL || opR) continue;
+    }
+
+    if (el_L.value === "" || el_R.value === "") { valid = false; break; }
   }
   document.getElementById('scoreSubmitBtn').disabled = !valid;
 };
@@ -813,18 +900,66 @@ const submitScore = async () => {
   if (!match) return;
 
   const isTeam = match.round.indexOf("団体") !== -1;
-  const rows = isTeam ? 3 : 1;
   const maxG = parseInt(document.getElementById('scoreMaxGames').value) || 7;
+  const winG = maxG === 7 ? 4 : 3;
 
   if (isTeam) {
     // 団体戦 → TEAM_FINAL_SUMMARY
+    const playMode = document.querySelector('input[name="scorePlayMode"]:checked')?.value || 'first_to_2';
+    const opL = document.getElementById('scoreOP_L')?.checked || false;
+    const opR = document.getElementById('scoreOP_R')?.checked || false;
+    const circles = ['⓪','①','②','③','④','⑤','⑥','⑦'];
+    const winChar = circles[winG] || '④';
+
     const matchResults = [];
     let winsL = 0, winsR = 0;
-    for (let i = 0; i < rows; i++) {
+
+    for (let i = 0; i < 3; i++) {
+      // 第3マッチのOP処理
+      if (i === 2 && (opL || opR)) {
+        if (opL && !opR) {
+          winsR++;
+          matchResults.push({
+            A:'(OP)', B:'(OP)', C:'', D:'',
+            gL:0, gR:winG, winner:'R',
+            displayScore:`R - ${winChar}`,
+            uiScoreHtml:`R - ${winChar}`
+          });
+        } else if (opR && !opL) {
+          winsL++;
+          matchResults.push({
+            A:'', B:'', C:'(OP)', D:'(OP)',
+            gL:winG, gR:0, winner:'L',
+            displayScore:`${winChar} - R`,
+            uiScoreHtml:`${winChar} - R`
+          });
+        } else {
+          // 両方OP
+          matchResults.push({
+            A:'(OP)', B:'(OP)', C:'(OP)', D:'(OP)',
+            gL:0, gR:0, winner:'D',
+            displayScore:'R - R',
+            uiScoreHtml:'R - R'
+          });
+        }
+        continue;
+      }
+
       const gL = parseInt(document.getElementById(`scoreL_${i}`).value) || 0;
       const gR = parseInt(document.getElementById(`scoreR_${i}`).value) || 0;
-      if (gL > gR) winsL++; else if (gR > gL) winsR++;
-      matchResults.push({ displayScore: `${gL}-${gR}` });
+      const winner = gL > gR ? 'L' : gR > gL ? 'R' : 'D';
+      if (winner === 'L') winsL++;
+      else if (winner === 'R') winsR++;
+
+      const gL_str = winner === 'L' ? (circles[gL] || gL) : gL;
+      const gR_str = winner === 'R' ? (circles[gR] || gR) : gR;
+
+      matchResults.push({
+        A:'', B:'', C:'', D:'',
+        gL, gR, winner,
+        displayScore: `${gL_str}-${gR_str}`,
+        uiScoreHtml: `${gL_str} - ${gR_str}`
+      });
     }
 
     try {
@@ -837,7 +972,7 @@ const submitScore = async () => {
         winsL, winsR,
         matchResults
       });
-      showToast(`${match.matchId} のスコアを送信しました`);
+      showToast(`${match.matchId} のスコアを送信しました（${winsL}-${winsR}）`);
       await refreshAll();
     } catch (err) {
       showToast("エラー: " + err.message, "error");
@@ -846,18 +981,31 @@ const submitScore = async () => {
     // 個人戦 → MATCH_RESULT
     const gL = parseInt(document.getElementById('scoreL_0').value) || 0;
     const gR = parseInt(document.getElementById('scoreR_0').value) || 0;
+
+    // 個人戦のチーム名分割
+    const parseEntry = (raw) => {
+      if (!raw) return { team: '', pA: '', pB: '' };
+      const c = raw.indexOf(':');
+      if (c === -1) return { team: raw, pA: '', pB: '' };
+      const team = raw.substring(0, c).trim();
+      const ps = raw.substring(c + 1).trim().split('・');
+      return { team, pA: (ps[0]||'').trim(), pB: (ps[1]||'').trim() };
+    };
+    const e1 = parseEntry(match.t1);
+    const e2 = parseEntry(match.t2);
+
     try {
       await apiPost({
         type: "MATCH_RESULT",
         matchId: match.matchId,
-        meta: { matchType: "ダブルス", court: match.court || "" },
-        teams: { L: match.t1, R: match.t2 },
+        meta: { matchType: e1.pB ? "ダブルス" : "シングルス", court: match.court || "" },
+        teams: { L: e1.team || match.t1, R: e2.team || match.t2 },
         teamNos: { L: "", R: "" },
-        names: { A: "", B: "", C: "", D: "" },
+        names: { A: e1.pA, B: e1.pB, C: e2.pA, D: e2.pB },
         maxG, gL, gR,
         log: []
       });
-      showToast(`${match.matchId} のスコアを送信しました`);
+      showToast(`${match.matchId} のスコアを送信しました（${gL}-${gR}）`);
       await refreshAll();
     } catch (err) {
       showToast("エラー: " + err.message, "error");
