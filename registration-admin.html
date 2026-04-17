@@ -123,11 +123,12 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--te
           <th>選手数</th>
           <th>登録料</th>
           <th>入金確認</th>
+          <th>確認日</th>
           <th>登録日</th>
         </tr>
       </thead>
       <tbody id="regBody">
-        <tr><td colspan="10" class="loading">読み込み中...</td></tr>
+        <tr><td colspan="11" class="loading">読み込み中...</td></tr>
       </tbody>
     </table>
   </div>
@@ -169,7 +170,7 @@ function checkPw() {
 
 /* ========== LOAD DATA ========== */
 function loadData() {
-  document.getElementById('regBody').innerHTML = '<tr><td colspan="10" class="loading">読み込み中...</td></tr>';
+  document.getElementById('regBody').innerHTML = '<tr><td colspan="11" class="loading">読み込み中...</td></tr>';
 
   fetch(GAS_URL + '?action=getRegistrations', { redirect: 'follow' }).then(function(res) {
     return res.text();
@@ -185,7 +186,7 @@ function loadData() {
     renderSummary();
   }).catch(function(err) {
     console.error('loadData error:', err);
-    document.getElementById('regBody').innerHTML = '<tr><td colspan="10" class="loading">データの読み込みに失敗しました<br><span style="font-size:.7rem;color:#999">' + (err.message || err) + '</span></td></tr>';
+    document.getElementById('regBody').innerHTML = '<tr><td colspan="11" class="loading">データの読み込みに失敗しました<br><span style="font-size:.7rem;color:#999">' + (err.message || err) + '</span></td></tr>';
   });
 }
 
@@ -193,7 +194,7 @@ function loadData() {
 function renderTable() {
   var body = document.getElementById('regBody');
   if (allRegistrations.length === 0) {
-    body.innerHTML = '<tr><td colspan="10" class="loading">登録データがありません</td></tr>';
+    body.innerHTML = '<tr><td colspan="11" class="loading">登録データがありません</td></tr>';
     return;
   }
 
@@ -226,6 +227,7 @@ function renderTable() {
     html += '<td>' + playerCount + '名</td>';
     html += '<td>' + (r.fee || 0).toLocaleString() + '円</td>';
     html += '<td><input type="checkbox" class="paid-check" ' + (r.paid ? 'checked' : '') + ' onchange="togglePaid(' + i + ', this.checked)"> <span class="paid-label ' + paidClass + '">' + paidText + '</span></td>';
+    html += '<td style="font-size:.72rem">' + esc(r.paidDate || '') + '</td>';
     html += '<td>' + dateStr + '</td>';
     html += '</tr>';
   }
@@ -325,6 +327,7 @@ function showDetail(idx) {
   html += '<tr><th>メール</th><td>' + esc(r.repEmail) + '</td></tr>';
   html += '<tr><th>登録料</th><td>' + (r.fee || 0).toLocaleString() + '円</td></tr>';
   html += '<tr><th>入金状況</th><td>' + (r.paid ? '✅ 入金済み' : '❌ 未入金') + '</td></tr>';
+  if (r.paidDate) html += '<tr><th>入金確認日</th><td>' + esc(r.paidDate) + '</td></tr>';
   html += '</table>';
 
   html += '<div class="modal-section">選手一覧（' + players.length + '名）</div>';
@@ -369,7 +372,7 @@ function exportListPdf() {
   win.document.write('<h1>岩手県中学生ソフトテニス連盟　令和8年度 団体登録一覧</h1>');
   var now = new Date();
   win.document.write('<p class="sub">' + now.getFullYear() + '年' + (now.getMonth()+1) + '月' + now.getDate() + '日時点　登録' + allRegistrations.length + '団体</p>');
-  win.document.write('<table><tr><th>No.</th><th>振込照合名</th><th>団体名</th><th>種別</th><th>地区</th><th>代表者</th><th>選手数</th><th>登録料</th><th>入金</th></tr>');
+  win.document.write('<table><tr><th>No.</th><th>振込照合名</th><th>団体名</th><th>種別</th><th>地区</th><th>代表者</th><th>選手数</th><th>登録料</th><th>入金</th><th>確認日</th></tr>');
 
   var i, r, pc;
   for (i = 0; i < allRegistrations.length; i++) {
@@ -377,7 +380,7 @@ function exportListPdf() {
     pc = 0;
     try { pc = JSON.parse(r.playersJson || '[]').length; } catch(e) {}
     var paidStr = r.paid ? '<span class="paid">済</span>' : '<span class="unpaid">未</span>';
-    win.document.write('<tr><td>' + r._regNo + '</td><td class="mono">' + esc(r._transferName) + '</td><td>' + esc(r.teamName) + '</td><td>' + esc(r.category) + '</td><td>' + esc(r.district) + '</td><td>' + esc(r.repName) + '</td><td>' + pc + '</td><td>' + (r.fee||0).toLocaleString() + '</td><td>' + paidStr + '</td></tr>');
+    win.document.write('<tr><td>' + r._regNo + '</td><td class="mono">' + esc(r._transferName) + '</td><td>' + esc(r.teamName) + '</td><td>' + esc(r.category) + '</td><td>' + esc(r.district) + '</td><td>' + esc(r.repName) + '</td><td>' + pc + '</td><td>' + (r.fee||0).toLocaleString() + '</td><td>' + paidStr + '</td><td style="font-size:8px">' + esc(r.paidDate || '') + '</td></tr>');
   }
   win.document.write('</table>');
   win.document.write('<p class="footer">岩手県中学生ソフトテニス連盟　団体登録管理</p>');
