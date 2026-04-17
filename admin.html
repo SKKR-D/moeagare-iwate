@@ -342,7 +342,7 @@ body {
       <!-- ゲーム数（団体・個人共通） -->
       <div class="form-group" style="margin-top:8px;">
         <label>ゲーム数</label>
-        <select id="scoreMaxGames" style="width:200px;">
+        <select id="scoreMaxGames" style="width:200px;" onchange="onGameCountChange()">
           <option value="5">5ゲームマッチ</option>
           <option value="7" selected>7ゲームマッチ</option>
         </select>
@@ -354,10 +354,10 @@ body {
           <label>方式</label>
           <div style="display:flex; gap:8px;">
             <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-weight:600;font-size:.85rem;">
-              <input type="radio" name="scorePlayMode" value="first_to_2" checked> 2点先取終了
+              <input type="radio" name="scorePlayMode" value="first_to_2" checked onchange="validateScore()"> 2点先取終了
             </label>
             <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-weight:600;font-size:.85rem;">
-              <input type="radio" name="scorePlayMode" value="all"> 全3試合行う
+              <input type="radio" name="scorePlayMode" value="all" onchange="validateScore()"> 全3試合行う
             </label>
           </div>
         </div>
@@ -824,15 +824,17 @@ const onScoreMatchChange = () => {
 const renderScoreRows = (match, isTeam) => {
   const container = document.getElementById('scoreGameRows');
   container.innerHTML = '';
+  const maxG = parseInt(document.getElementById('scoreMaxGames').value) || 7;
+  const maxScore = maxG === 7 ? 4 : 3;
 
   if (isTeam) {
     for (let i = 0; i < 3; i++) {
       let html = `<hr class="score-match-divider">
         <div class="game-input-row">
           <span class="game-label">第${i + 1}マッチ</span>
-          <input type="number" id="scoreL_${i}" min="0" max="9" value="" placeholder="0" oninput="validateScore()">
+          <input type="number" id="scoreL_${i}" min="0" max="${maxScore}" value="" placeholder="0" oninput="clampAndValidate(this, ${maxScore})">
           <span class="dash">-</span>
-          <input type="number" id="scoreR_${i}" min="0" max="9" value="" placeholder="0" oninput="validateScore()">
+          <input type="number" id="scoreR_${i}" min="0" max="${maxScore}" value="" placeholder="0" oninput="clampAndValidate(this, ${maxScore})">
         </div>`;
 
       // 第3マッチのみオープンチェック
@@ -849,11 +851,27 @@ const renderScoreRows = (match, isTeam) => {
     container.innerHTML = `
       <div class="game-input-row" style="margin-top:8px;">
         <span class="game-label">スコア</span>
-        <input type="number" id="scoreL_0" min="0" max="9" value="" placeholder="0" oninput="validateScore()">
+        <input type="number" id="scoreL_0" min="0" max="${maxScore}" value="" placeholder="0" oninput="clampAndValidate(this, ${maxScore})">
         <span class="dash">-</span>
-        <input type="number" id="scoreR_0" min="0" max="9" value="" placeholder="0" oninput="validateScore()">
+        <input type="number" id="scoreR_0" min="0" max="${maxScore}" value="" placeholder="0" oninput="clampAndValidate(this, ${maxScore})">
       </div>`;
   }
+};
+
+// 入力値をmax以下にクランプしてからバリデーション
+const clampAndValidate = (el, maxVal) => {
+  if (el.value !== '' && parseInt(el.value) > maxVal) el.value = maxVal;
+  if (el.value !== '' && parseInt(el.value) < 0) el.value = 0;
+  validateScore();
+};
+
+// ゲーム数変更時にスコア行を再生成
+const onGameCountChange = () => {
+  const match = state.selectedScoreMatch;
+  if (!match) return;
+  const isTeam = match.round.indexOf("団体") !== -1;
+  renderScoreRows(match, isTeam);
+  document.getElementById('scoreSubmitBtn').disabled = true;
 };
 
 const onOPChange = () => {
@@ -863,7 +881,6 @@ const onOPChange = () => {
   const sR = document.getElementById('scoreR_2');
 
   if (opL || opR) {
-    // OPが入ったらスコア入力を無効化
     sL.disabled = true; sR.disabled = true;
     sL.value = ''; sR.value = '';
   } else {
@@ -876,22 +893,64 @@ const validateScore = () => {
   const match = state.selectedScoreMatch;
   if (!match) return;
   const isTeam = match.round.indexOf("団体") !== -1;
-  const rows = isTeam ? 3 : 1;
-  let valid = true;
 
-  for (let i = 0; i < rows; i++) {
-    const el_L = document.getElementById(`scoreL_${i}`);
-    const el_R = document.getElementById(`scoreR_${i}`);
-
-    // 第3マッチでOP入りなら入力不要
-    if (isTeam && i === 2) {
-      const opL = document.getElementById('scoreOP_L')?.checked || false;
-      const opR = document.getElementById('scoreOP_R')?.checked || false;
-      if (opL || opR) continue;
-    }
-
-    if (el_L.value === "" || el_R.value === "") { valid = false; break; }
+  if (!isTeam) {
+    // 個人戦：1試合分が入力されていればOK
+    const l = document.getElementById('scoreL_0').value;
+    const r = document.getElementById('scoreR_0').value;
+    document.getElementById('scoreSubmitBtn').disabled = (l === '' || r === '');
+    return;
   }
+
+  // 団体戦：方式に応じたバリデーション
+  const playMode = document.querySelector('input[name="scorePlayMode"]:checked')?.value || 'first_to_2';
+
+  // 第1・第2マッチの入力チェック
+  let winsL = 0, winsR = 0;
+  let m1m2Valid = true;
+  for (let i = 0; i < 2; i++) {
+    const l = document.getElementById(`scoreL_${i}`).value;
+    const r = document.getElementById(`scoreR_${i}`).value;
+    if (l === '' || r === '') { m1m2Valid = false; continue; }
+    const gL = parseInt(l), gR = parseInt(r);
+    if (gL > gR) winsL++;
+    else if (gR > gL) winsR++;
+  }
+
+  // 2点先取で勝敗確定したか判定
+  const decided = playMode === 'first_to_2' && (winsL >= 2 || winsR >= 2);
+
+  // 第3マッチの入力欄の有効/無効を制御
+  const sL3 = document.getElementById('scoreL_2');
+  const sR3 = document.getElementById('scoreR_2');
+  const opL = document.getElementById('scoreOP_L');
+  const opR = document.getElementById('scoreOP_R');
+
+  if (decided) {
+    // 勝敗確定 → 第3マッチを無効化・クリア
+    sL3.disabled = true; sR3.disabled = true;
+    sL3.value = ''; sR3.value = '';
+    if (opL) { opL.disabled = true; opL.checked = false; }
+    if (opR) { opR.disabled = true; opR.checked = false; }
+  } else {
+    // 未確定 → OPチェック状態に応じて制御
+    if (opL) opL.disabled = false;
+    if (opR) opR.disabled = false;
+    const isOP = (opL?.checked || false) || (opR?.checked || false);
+    sL3.disabled = isOP;
+    sR3.disabled = isOP;
+  }
+
+  // バリデーション結果
+  let valid = m1m2Valid;
+  if (!decided) {
+    // 第3マッチも必要
+    const isOP = (opL?.checked || false) || (opR?.checked || false);
+    if (!isOP) {
+      if (sL3.value === '' || sR3.value === '') valid = false;
+    }
+  }
+
   document.getElementById('scoreSubmitBtn').disabled = !valid;
 };
 
@@ -915,6 +974,11 @@ const submitScore = async () => {
     let winsL = 0, winsR = 0;
 
     for (let i = 0; i < 3; i++) {
+      // 2点先取で勝敗確定済みなら第3マッチをスキップ
+      if (i === 2 && playMode === 'first_to_2' && (winsL >= 2 || winsR >= 2)) {
+        break;
+      }
+
       // 第3マッチのOP処理
       if (i === 2 && (opL || opR)) {
         if (opL && !opR) {
