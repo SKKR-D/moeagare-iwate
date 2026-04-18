@@ -49,6 +49,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 <script>
 var API = "https://script.google.com/macros/s/AKfycbyUQbnMbcFLFRObMbUQ1sKGrhq11GL99io2pGBTAT4X5IBsSpdQPPasOVKxt0HtdFk/exec";
 var progressData = [];
+var resultsData = {};
 var currentTab = '男子A';
 
 // ============================================================
@@ -72,6 +73,7 @@ function MN(x,y,id,anchor,circleNum){
   var c=['','①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩','⑪','⑫','⑬','⑭','⑮','⑯','⑰'];
   return '<text x="'+x+'" y="'+y+'" text-anchor="'+(anchor||'middle')+'" font-size="14" font-weight="900" fill="#b8860b">'+(c[n]||n)+'</text>';
 }
+function gR(id){return resultsData[id]||null;}
 function gP(id){for(var i=0;i<progressData.length;i++){if(progressData[i].matchId===id)return progressData[i];}return{status:'待機中'};}
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
@@ -82,9 +84,27 @@ function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace
 function drawMatch(x1,y1,x2,y2,xConn,id,cn){
   var mid=(y1+y2)/2;
   var s='';
-  s+=L(x1,y1,x2,y1,id);
-  s+=L(x1,y2,x2,y2,id);
-  s+=L(xConn,y1,xConn,y2,id);
+  var p=gP(id), r=gR(id);
+  if(p.status==='終了' && r){
+    // 勝者側の線を赤、敗者側をグレー
+    var wTop=(r.winsL>r.winsR); // t1(top)が勝者か
+    s+=drawLine(x1,y1,x2,y1,wTop?'#dc2626':'#aaa',wTop?2.5:1);
+    s+=drawLine(x1,y2,x2,y2,wTop?'#aaa':'#dc2626',wTop?1:2.5);
+    s+=drawLine(xConn,y1,xConn,y2,'#aaa',1);
+    // 勝者側の縦線（勝ち上がり）
+    if(wTop) s+=drawLine(xConn,y1,xConn,mid,'#dc2626',2.5);
+    else s+=drawLine(xConn,mid,xConn,y2,'#dc2626',2.5);
+    // スコア表示
+    var cL='①②③④⑤⑥⑦⑧⑨'.split('');
+    var sL=r.winsL>=2?(cL[r.winsL-1]||r.winsL):String(r.winsL);
+    var sR=r.winsR>=2?(cL[r.winsR-1]||r.winsR):String(r.winsR);
+    s+='<text x="'+(xConn+4)+'" y="'+(y1-2)+'" font-size="11" font-weight="900" fill="'+(wTop?'#dc2626':'#666')+'">'+(wTop?sL:sL)+'</text>';
+    s+='<text x="'+(xConn+4)+'" y="'+(y2+14)+'" font-size="11" font-weight="900" fill="'+(wTop?'#666':'#dc2626')+'">'+(wTop?sR:sR)+'</text>';
+  } else {
+    s+=L(x1,y1,x2,y1,id);
+    s+=L(x1,y2,x2,y2,id);
+    s+=L(xConn,y1,xConn,y2,id);
+  }
   s+=MN(xConn,mid+5,id,undefined,cn);
   s+=LIVE((x1+x2)/2,mid-8,id);
   return s;
@@ -93,12 +113,32 @@ function drawMatch(x1,y1,x2,y2,xConn,id,cn){
 function drawMatchR(x1,y1,x2,y2,xConn,id,cn){
   var mid=(y1+y2)/2;
   var s='';
-  s+=L(x1,y1,x2,y1,id);
-  s+=L(x1,y2,x2,y2,id);
-  s+=L(xConn,y1,xConn,y2,id);
+  var p=gP(id), r=gR(id);
+  if(p.status==='終了' && r){
+    var wTop=(r.winsL>r.winsR);
+    s+=drawLine(x1,y1,x2,y1,wTop?'#dc2626':'#aaa',wTop?2.5:1);
+    s+=drawLine(x1,y2,x2,y2,wTop?'#aaa':'#dc2626',wTop?1:2.5);
+    s+=drawLine(xConn,y1,xConn,y2,'#aaa',1);
+    if(wTop) s+=drawLine(xConn,y1,xConn,mid,'#dc2626',2.5);
+    else s+=drawLine(xConn,mid,xConn,y2,'#dc2626',2.5);
+    var cL='①②③④⑤⑥⑦⑧⑨'.split('');
+    var sL=r.winsL>=2?(cL[r.winsL-1]||r.winsL):String(r.winsL);
+    var sR=r.winsR>=2?(cL[r.winsR-1]||r.winsR):String(r.winsR);
+    s+='<text x="'+(xConn-4)+'" y="'+(y1-2)+'" text-anchor="end" font-size="11" font-weight="900" fill="'+(wTop?'#dc2626':'#666')+'">'+(wTop?sL:sL)+'</text>';
+    s+='<text x="'+(xConn-4)+'" y="'+(y2+14)+'" text-anchor="end" font-size="11" font-weight="900" fill="'+(wTop?'#666':'#dc2626')+'">'+(wTop?sR:sR)+'</text>';
+  } else {
+    s+=L(x1,y1,x2,y1,id);
+    s+=L(x1,y2,x2,y2,id);
+    s+=L(xConn,y1,xConn,y2,id);
+  }
   s+=MN(xConn,mid+5,id,undefined,cn);
   s+=LIVE((x1+x2)/2,mid-8,id);
   return s;
+}
+
+// 色指定付きのライン描画
+function drawLine(x1,y1,x2,y2,color,width){
+  return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+(color||'#aaa')+'" stroke-width="'+(width||1)+'"/>';
 }
 
 // ============================================================
@@ -657,8 +697,12 @@ function renderInfo(){
 }
 
 function fetchData(){
-  fetch(API+"?action=getProgress").then(function(r){return r.json();}).then(function(d){
-    progressData=d||[];
+  Promise.all([
+    fetch(API+"?action=getProgress").then(function(r){return r.json();}),
+    fetch(API+"?action=getResults").then(function(r){return r.json();})
+  ]).then(function(arr){
+    progressData=arr[0]||[];
+    resultsData=arr[1]||{};
     var now=new Date();
     document.getElementById('updateInfo').textContent=now.getHours()+':'+String(now.getMinutes()).padStart(2,'0')+':'+String(now.getSeconds()).padStart(2,'0')+' 更新';
     render();
