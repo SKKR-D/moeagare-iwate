@@ -263,11 +263,12 @@ function draw_MB(){
   s+=MN(r2e,r2mid+5,"MB04");
   s+=LIVE((r2x+r2e)/2,r2mid-8,"MB04");
 
-  // Final ⑤
-  s+=L(l2e,l2mid,cx,l2mid,"MB05");
-  s+=L(r2e,r2mid,cx,r2mid,"MB05");
-  if(Math.abs(l2mid-r2mid)>1) s+=L(cx,l2mid,cx,r2mid,"MB05");
+  // Final ⑤ — ③⑤④を水平直線で結ぶ
   var fMid=(l2mid+r2mid)/2;
+  s+=L(l2e,l2mid,l2e,fMid,"MB03");
+  s+=L(r2e,r2mid,r2e,fMid,"MB04");
+  s+=L(l2e,fMid,cx,fMid,"MB05");
+  s+=L(r2e,fMid,cx,fMid,"MB05");
   s+=MN(cx,fMid-2,"MB05");
   var fp=gP("MB05");
   if(fp.status==='終了') s+=T(cx,fMid+16,'栄冠','middle',14,'#1a4a2e',900);
