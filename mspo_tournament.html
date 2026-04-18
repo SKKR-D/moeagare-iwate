@@ -67,8 +67,8 @@ function LIVE(x,y,id){
   if(p.status==='試合中') return '<text x="'+x+'" y="'+y+'" text-anchor="middle" font-size="10" font-weight="900" fill="#dc2626">●LIVE</text>';
   return '';
 }
-function MN(x,y,id,anchor){
-  var n=parseInt(id.substring(2))||0;
+function MN(x,y,id,anchor,circleNum){
+  var n=circleNum||parseInt(id.substring(2))||0;
   var c=['','①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩','⑪','⑫','⑬','⑭','⑮','⑯','⑰'];
   return '<text x="'+x+'" y="'+y+'" text-anchor="'+(anchor||'middle')+'" font-size="14" font-weight="900" fill="#b8860b">'+(c[n]||n)+'</text>';
 }
@@ -79,28 +79,24 @@ function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace
 // Draw a standard 2-team match bracket segment
 // Returns SVG string for: two horizontal lines + vertical connector + match number
 // ============================================================
-function drawMatch(x1,y1,x2,y2,xConn,id){
-  // y1=top team line Y, y2=bottom team line Y
-  // x1=start X, x2=end X (horizontal lines go from x1 to x2)
-  // xConn=X position of vertical connector (usually x2)
+function drawMatch(x1,y1,x2,y2,xConn,id,cn){
   var mid=(y1+y2)/2;
   var s='';
   s+=L(x1,y1,x2,y1,id);
   s+=L(x1,y2,x2,y2,id);
   s+=L(xConn,y1,xConn,y2,id);
-  s+=MN(xConn,mid+5,id);
+  s+=MN(xConn,mid+5,id,undefined,cn);
   s+=LIVE((x1+x2)/2,mid-8,id);
   return s;
 }
 
-// Same but mirrored (right side, lines go right to left)
-function drawMatchR(x1,y1,x2,y2,xConn,id){
+function drawMatchR(x1,y1,x2,y2,xConn,id,cn){
   var mid=(y1+y2)/2;
   var s='';
   s+=L(x1,y1,x2,y1,id);
   s+=L(x1,y2,x2,y2,id);
   s+=L(xConn,y1,xConn,y2,id);
-  s+=MN(xConn,mid+5,id);
+  s+=MN(xConn,mid+5,id,undefined,cn);
   s+=LIVE((x1+x2)/2,mid-8,id);
   return s;
 }
@@ -487,7 +483,7 @@ function draw_FA_clean(){
   s+=drawMatch(x1,yL(5),x2,yL(6),x2,"FA04"); var m04=(yL(5)+yL(6))/2;
   // ⑤ FA02: 8飯岡 vs 9土淵 (2回戦) — 名前から直接2回戦へ
   s+=L(x0,yL(7),x1,yL(7)); s+=L(x0,yL(8),x1,yL(8)); // 名前からの延長線
-  s+=drawMatch(x1,yL(7),x2,yL(8),x2,"FA02"); var m02=(yL(7)+yL(8))/2;
+  s+=drawMatch(x1,yL(7),x2,yL(8),x2,"FA02",5); var m02=(yL(7)+yL(8))/2;
   // ⑫ FA12: ④勝 vs ⑤勝 (3回戦QF)
   s+=L(x2,m04,x3,m04,"FA12"); s+=L(x2,m02,x3,m02,"FA12"); s+=L(x3,m04,x3,m02,"FA12");
   var m12=(m04+m02)/2; s+=MN(x3,m12+5,"FA12"); s+=LIVE((x2+x3)/2,m12-8,"FA12");
@@ -515,7 +511,7 @@ function draw_FA_clean(){
   s+=L(rx0,yL(4),rx1,yL(4)); s+=L(rx0,yL(5),rx1,yL(5)); // 名前延長
   s+=drawMatchR(rx1,yL(4),rx2,yL(5),rx2,"FA08"); var m08=(yL(4)+yL(5))/2;
   // ② FA05: 16厨川 vs 17北陵 (1回戦)
-  s+=drawMatchR(rx0,yL(6),rx1,yL(7),rx1,"FA05"); var mR02=(yL(6)+yL(7))/2;
+  s+=drawMatchR(rx0,yL(6),rx1,yL(7),rx1,"FA05",2); var mR02=(yL(6)+yL(7))/2;
   // ⑩ FA10: ②勝者(上) vs 18黒石野(seed下) (2回戦) — rx2で⑥⑦⑧と揃える
   s+=L(rx1,mR02,rx2,mR02,"FA10");
   s+=L(rx0,yL(8),rx2,yL(8),"FA10");
@@ -534,10 +530,12 @@ function draw_FA_clean(){
   var m16=(m13+m14)/2; s+=MN(rx4,m16+5,"FA16"); s+=LIVE((rx3+rx4)/2,m16-8,"FA16");
 
   // ========= 決勝 ⑰ FA17 =========
-  // ⑮⑯⑰は同じ高さで直線で結ぶ
+  // ⑮⑯⑰は同じ高さで水平直線で結ぶ
   var finalY=(m15+m16)/2;
-  s+=L(x4,m15,cx,finalY,"FA17");
-  s+=L(rx4,m16,cx,finalY,"FA17");
+  s+=L(x4,m15,x4,finalY,"FA15");
+  s+=L(rx4,m16,rx4,finalY,"FA16");
+  s+=L(x4,finalY,cx,finalY,"FA17");
+  s+=L(rx4,finalY,cx,finalY,"FA17");
   s+=MN(cx,finalY-2,"FA17");
   var fp=gP("FA17");
   if(fp.status==='終了') s+=T(cx,finalY+16,'栄冠','middle',14,'#1a4a2e',900);
