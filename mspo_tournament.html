@@ -55,10 +55,9 @@ var currentTab = '男子A';
 // ============================================================
 // Drawing primitives
 // ============================================================
-function L(x1,y1,x2,y2,id,win){
+function L(x1,y1,x2,y2,id){
   var c='#aaa',w=1;
-  if(win){c='#dc2626';w=2.5;}
-  else if(id){var p=gP(id);if(p.status==='試合中'){c='#dc2626';w=2.5;}else if(p.status==='終了'){c='#aaa';w=1;}}
+  if(id){var p=gP(id);if(p.status==='試合中'){c='#dc2626';w=2.5;}}
   return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'"/>';
 }
 function T(x,y,txt,anchor,size,color,weight){
@@ -78,7 +77,7 @@ function gR(id){return resultsData[id]||null;}
 function isWin(id){var p=gP(id);return p.status==='終了';}
 
 // 手動描画ラウンド用：2本の水平線+縦線+スコア+勝者赤線を描画（左側用）
-function drawRoundL(s,x1,y1,x2,y2,xConn,id,w1,w2){
+function drawRoundL(s,x1,y1,x2,y2,xConn,id){
   var mid=(y1+y2)/2;
   var p=gP(id), r=gR(id);
   if(p.status==='終了' && r){
@@ -93,8 +92,8 @@ function drawRoundL(s,x1,y1,x2,y2,xConn,id,w1,w2){
     s+='<text x="'+(xConn+4)+'" y="'+(y1-2)+'" font-size="11" font-weight="900" fill="#dc2626">'+sL+'</text>';
     s+='<text x="'+(xConn+4)+'" y="'+(y2+14)+'" font-size="11" font-weight="900" fill="#dc2626">'+sR+'</text>';
   } else {
-    s+=L(x1,y1,x2,y1,id,w1);
-    s+=L(x1,y2,x2,y2,id,w2);
+    s+=L(x1,y1,x2,y1,id);
+    s+=L(x1,y2,x2,y2,id);
     s+=L(xConn,y1,xConn,y2,id);
   }
   s+=MN(xConn,mid+5,id);
@@ -103,7 +102,7 @@ function drawRoundL(s,x1,y1,x2,y2,xConn,id,w1,w2){
 }
 
 // 右側用
-function drawRoundR(s,x1,y1,x2,y2,xConn,id,w1,w2){
+function drawRoundR(s,x1,y1,x2,y2,xConn,id){
   var mid=(y1+y2)/2;
   var p=gP(id), r=gR(id);
   if(p.status==='終了' && r){
@@ -118,8 +117,8 @@ function drawRoundR(s,x1,y1,x2,y2,xConn,id,w1,w2){
     s+='<text x="'+(xConn-4)+'" y="'+(y1-2)+'" text-anchor="end" font-size="11" font-weight="900" fill="#dc2626">'+sL+'</text>';
     s+='<text x="'+(xConn-4)+'" y="'+(y2+14)+'" text-anchor="end" font-size="11" font-weight="900" fill="#dc2626">'+sR+'</text>';
   } else {
-    s+=L(x1,y1,x2,y1,id,w1);
-    s+=L(x1,y2,x2,y2,id,w2);
+    s+=L(x1,y1,x2,y1,id);
+    s+=L(x1,y2,x2,y2,id);
     s+=L(xConn,y1,xConn,y2,id);
   }
   s+=MN(xConn,mid+5,id);
@@ -250,14 +249,27 @@ function draw_MA(){
   for(var i=0;i<2;i++){
     var y1=lR1mids[i*2], y2=lR1mids[i*2+1];
     var w1=isWin(lR1ids[i*2]), w2=isWin(lR1ids[i*2+1]);
-    s=drawRoundL(s,lr2x,y1,lr2e,y2,lr2e,lR2ids[i],w1,w2);
+    s=drawRoundL(s,lr2x,y1,lr2e,y2,lr2e,lR2ids[i]);
     lR2mids.push((y1+y2)/2);
   }
 
-  // Left Semi: ⑬
+  // Left Semi: ⑬ — 横線のみ（縦線なし）
   var lsx=lr2e, lse=lsx+RW;
-  s=drawRoundL(s,lsx,lR2mids[0],lse,lR2mids[1],lse,"MA13",isWin("MA09"),isWin("MA10"));
   var lSemiMid=(lR2mids[0]+lR2mids[1])/2;
+  var pSL=gP("MA13"), rSL=gR("MA13");
+  if(pSL.status==='終了' && rSL){
+    var wTop=(rSL.winsL>rSL.winsR);
+    s+=drawLine(lsx,lR2mids[0],lse,lR2mids[0],wTop?'#dc2626':'#aaa',wTop?2.5:1);
+    s+=drawLine(lsx,lR2mids[1],lse,lR2mids[1],wTop?'#aaa':'#dc2626',wTop?1:2.5);
+    var cL='①②③④⑤⑥⑦⑧⑨'.split('');
+    s+='<text x="'+(lse+4)+'" y="'+(lR2mids[0]-2)+'" font-size="11" font-weight="900" fill="#dc2626">'+(rSL.winsL>=2?(cL[rSL.winsL-1]||rSL.winsL):String(rSL.winsL))+'</text>';
+    s+='<text x="'+(lse+4)+'" y="'+(lR2mids[1]+14)+'" font-size="11" font-weight="900" fill="#dc2626">'+(rSL.winsR>=2?(cL[rSL.winsR-1]||rSL.winsR):String(rSL.winsR))+'</text>';
+  } else {
+    s+=L(lsx,lR2mids[0],lse,lR2mids[0],"MA13");
+    s+=L(lsx,lR2mids[1],lse,lR2mids[1],"MA13");
+  }
+  s+=MN(lse,lSemiMid+5,"MA13");
+  s+=LIVE((lsx+lse)/2,lSemiMid-8,"MA13");
 
   // Right R1: ⑤⑥⑦⑧
   var rr1x=rx-NW, rr1e=rr1x-RW;
@@ -276,24 +288,55 @@ function draw_MA(){
   for(var i=0;i<2;i++){
     var y1=rR1mids[i*2], y2=rR1mids[i*2+1];
     var w1=isWin(rR1ids[i*2]), w2=isWin(rR1ids[i*2+1]);
-    s=drawRoundR(s,rr2x,y1,rr2e,y2,rr2e,rR2ids[i],w1,w2);
+    s=drawRoundR(s,rr2x,y1,rr2e,y2,rr2e,rR2ids[i]);
     rR2mids.push((y1+y2)/2);
   }
 
-  // Right Semi: ⑭
+  // Right Semi: ⑭ — 横線のみ（縦線なし）
   var rsx=rr2e, rse=rsx-RW;
-  s=drawRoundR(s,rsx,rR2mids[0],rse,rR2mids[1],rse,"MA14",isWin("MA11"),isWin("MA12"));
   var rSemiMid=(rR2mids[0]+rR2mids[1])/2;
+  var pSR=gP("MA14"), rSR=gR("MA14");
+  if(pSR.status==='終了' && rSR){
+    var wTop=(rSR.winsL>rSR.winsR);
+    s+=drawLine(rsx,rR2mids[0],rse,rR2mids[0],wTop?'#dc2626':'#aaa',wTop?2.5:1);
+    s+=drawLine(rsx,rR2mids[1],rse,rR2mids[1],wTop?'#aaa':'#dc2626',wTop?1:2.5);
+    var cL='①②③④⑤⑥⑦⑧⑨'.split('');
+    s+='<text x="'+(rse-4)+'" y="'+(rR2mids[0]-2)+'" text-anchor="end" font-size="11" font-weight="900" fill="#dc2626">'+(rSR.winsL>=2?(cL[rSR.winsL-1]||rSR.winsL):String(rSR.winsL))+'</text>';
+    s+='<text x="'+(rse-4)+'" y="'+(rR2mids[1]+14)+'" text-anchor="end" font-size="11" font-weight="900" fill="#dc2626">'+(rSR.winsR>=2?(cL[rSR.winsR-1]||rSR.winsR):String(rSR.winsR))+'</text>';
+  } else {
+    s+=L(rsx,rR2mids[0],rse,rR2mids[0],"MA14");
+    s+=L(rsx,rR2mids[1],rse,rR2mids[1],"MA14");
+  }
+  s+=MN(rse,rSemiMid+5,"MA14");
+  s+=LIVE((rsx+rse)/2,rSemiMid-8,"MA14");
 
-  // Final ⑮
-  s+=L(lse,lSemiMid,cx,lSemiMid,"MA15",isWin("MA13"));
-  s+=L(rse,rSemiMid,cx,rSemiMid,"MA15",isWin("MA14"));
-  if(Math.abs(lSemiMid-rSemiMid)>1) s+=L(cx,lSemiMid,cx,rSemiMid,"MA15");
-  var fMid=(lSemiMid+rSemiMid)/2;
-  s+=MN(cx,fMid-2,"MA15");
-  var fp=gP("MA15");
-  if(fp.status==='終了') s+=T(cx,fMid+16,'栄冠','middle',14,'#1a4a2e',900);
-  else if(fp.status==='試合中') s+='<text x="'+cx+'" y="'+(fMid+16)+'" text-anchor="middle" font-size="10" font-weight="900" fill="#dc2626">●LIVE</text>';
+  // Final ⑮ — 左右から中央に縦線→中央から上に横線→優勝チーム名
+  var finalY=Math.min(lSemiMid,rSemiMid)-60; // 決勝横線のY（準決勝より上）
+  var fp=gP("MA15"), fr=gR("MA15");
+  // 左準決勝から中央へ縦線
+  s+=L(lse,lSemiMid,lse,finalY,"MA15");
+  // 右準決勝から中央へ縦線
+  s+=L(rse,rSemiMid,rse,finalY,"MA15");
+  // 決勝横線（⑮の位置）
+  if(fp.status==='終了' && fr){
+    var wLeft=(fr.winsL>fr.winsR);
+    s+=drawLine(lse,finalY,cx,finalY,wLeft?'#dc2626':'#aaa',wLeft?2.5:1);
+    s+=drawLine(rse,finalY,cx,finalY,wLeft?'#aaa':'#dc2626',wLeft?1:2.5);
+    // 優勝チーム名を横線の上に表示
+    s+=drawLine(cx,finalY,cx,finalY-30,'#dc2626',2.5);
+    s+='<text x="'+cx+'" y="'+(finalY-36)+'" text-anchor="middle" font-size="16" font-weight="900" fill="#dc2626">🏆 '+esc(fr.winner)+'</text>';
+    // スコア表示
+    var cL='①②③④⑤⑥⑦⑧⑨'.split('');
+    var sL=fr.winsL>=2?(cL[fr.winsL-1]||fr.winsL):String(fr.winsL);
+    var sR=fr.winsR>=2?(cL[fr.winsR-1]||fr.winsR):String(fr.winsR);
+    s+='<text x="'+(cx-6)+'" y="'+(finalY-4)+'" text-anchor="end" font-size="11" font-weight="900" fill="#dc2626">'+sL+'</text>';
+    s+='<text x="'+(cx+6)+'" y="'+(finalY-4)+'" text-anchor="start" font-size="11" font-weight="900" fill="#dc2626">'+sR+'</text>';
+  } else {
+    s+=L(lse,finalY,cx,finalY,"MA15");
+    s+=L(rse,finalY,cx,finalY,"MA15");
+  }
+  s+=MN(cx,finalY+16,"MA15");
+  if(fp.status==='試合中') s+='<text x="'+cx+'" y="'+(finalY+30)+'" text-anchor="middle" font-size="10" font-weight="900" fill="#dc2626">●LIVE</text>';
 
   s+='</svg>';
   return s;
