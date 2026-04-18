@@ -76,6 +76,56 @@ function MN(x,y,id,anchor,circleNum){
 }
 function gR(id){return resultsData[id]||null;}
 function isWin(id){var p=gP(id);return p.status==='終了';}
+
+// 手動描画ラウンド用：2本の水平線+縦線+スコア+勝者赤線を描画（左側用）
+function drawRoundL(s,x1,y1,x2,y2,xConn,id,w1,w2){
+  var mid=(y1+y2)/2;
+  var p=gP(id), r=gR(id);
+  if(p.status==='終了' && r){
+    var wTop=(r.winsL>r.winsR);
+    s+=drawLine(x1,y1,x2,y1,wTop?'#dc2626':'#aaa',wTop?2.5:1);
+    s+=drawLine(x1,y2,x2,y2,wTop?'#aaa':'#dc2626',wTop?1:2.5);
+    if(wTop){s+=drawLine(xConn,y1,xConn,mid,'#dc2626',2.5);s+=drawLine(xConn,mid,xConn,y2,'#aaa',1);}
+    else{s+=drawLine(xConn,y1,xConn,mid,'#aaa',1);s+=drawLine(xConn,mid,xConn,y2,'#dc2626',2.5);}
+    var cL='①②③④⑤⑥⑦⑧⑨'.split('');
+    var sL=r.winsL>=2?(cL[r.winsL-1]||r.winsL):String(r.winsL);
+    var sR=r.winsR>=2?(cL[r.winsR-1]||r.winsR):String(r.winsR);
+    s+='<text x="'+(xConn+4)+'" y="'+(y1-2)+'" font-size="11" font-weight="900" fill="#dc2626">'+sL+'</text>';
+    s+='<text x="'+(xConn+4)+'" y="'+(y2+14)+'" font-size="11" font-weight="900" fill="#dc2626">'+sR+'</text>';
+  } else {
+    s+=L(x1,y1,x2,y1,id,w1);
+    s+=L(x1,y2,x2,y2,id,w2);
+    s+=L(xConn,y1,xConn,y2,id);
+  }
+  s+=MN(xConn,mid+5,id);
+  s+=LIVE((x1+x2)/2,mid-8,id);
+  return s;
+}
+
+// 右側用
+function drawRoundR(s,x1,y1,x2,y2,xConn,id,w1,w2){
+  var mid=(y1+y2)/2;
+  var p=gP(id), r=gR(id);
+  if(p.status==='終了' && r){
+    var wTop=(r.winsL>r.winsR);
+    s+=drawLine(x1,y1,x2,y1,wTop?'#dc2626':'#aaa',wTop?2.5:1);
+    s+=drawLine(x1,y2,x2,y2,wTop?'#aaa':'#dc2626',wTop?1:2.5);
+    if(wTop){s+=drawLine(xConn,y1,xConn,mid,'#dc2626',2.5);s+=drawLine(xConn,mid,xConn,y2,'#aaa',1);}
+    else{s+=drawLine(xConn,y1,xConn,mid,'#aaa',1);s+=drawLine(xConn,mid,xConn,y2,'#dc2626',2.5);}
+    var cL='①②③④⑤⑥⑦⑧⑨'.split('');
+    var sL=r.winsL>=2?(cL[r.winsL-1]||r.winsL):String(r.winsL);
+    var sR=r.winsR>=2?(cL[r.winsR-1]||r.winsR):String(r.winsR);
+    s+='<text x="'+(xConn-4)+'" y="'+(y1-2)+'" text-anchor="end" font-size="11" font-weight="900" fill="#dc2626">'+sL+'</text>';
+    s+='<text x="'+(xConn-4)+'" y="'+(y2+14)+'" text-anchor="end" font-size="11" font-weight="900" fill="#dc2626">'+sR+'</text>';
+  } else {
+    s+=L(x1,y1,x2,y1,id,w1);
+    s+=L(x1,y2,x2,y2,id,w2);
+    s+=L(xConn,y1,xConn,y2,id);
+  }
+  s+=MN(xConn,mid+5,id);
+  s+=LIVE((x1+x2)/2,mid-8,id);
+  return s;
+}
 function gP(id){for(var i=0;i<progressData.length;i++){if(progressData[i].matchId===id)return progressData[i];}return{status:'待機中'};}
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
@@ -200,23 +250,14 @@ function draw_MA(){
   for(var i=0;i<2;i++){
     var y1=lR1mids[i*2], y2=lR1mids[i*2+1];
     var w1=isWin(lR1ids[i*2]), w2=isWin(lR1ids[i*2+1]);
-    s+=L(lr2x,y1,lr2e,y1,lR2ids[i],w1);
-    s+=L(lr2x,y2,lr2e,y2,lR2ids[i],w2);
-    s+=L(lr2e,y1,lr2e,y2,lR2ids[i]);
-    var mid=(y1+y2)/2;
-    s+=MN(lr2e,mid+5,lR2ids[i]);
-    s+=LIVE((lr2x+lr2e)/2,mid-8,lR2ids[i]);
-    lR2mids.push(mid);
+    s=drawRoundL(s,lr2x,y1,lr2e,y2,lr2e,lR2ids[i],w1,w2);
+    lR2mids.push((y1+y2)/2);
   }
 
   // Left Semi: ⑬
   var lsx=lr2e, lse=lsx+RW;
-  s+=L(lsx,lR2mids[0],lse,lR2mids[0],"MA13",isWin("MA09"));
-  s+=L(lsx,lR2mids[1],lse,lR2mids[1],"MA13",isWin("MA10"));
-  s+=L(lse,lR2mids[0],lse,lR2mids[1],"MA13");
+  s=drawRoundL(s,lsx,lR2mids[0],lse,lR2mids[1],lse,"MA13",isWin("MA09"),isWin("MA10"));
   var lSemiMid=(lR2mids[0]+lR2mids[1])/2;
-  s+=MN(lse,lSemiMid+5,"MA13");
-  s+=LIVE((lsx+lse)/2,lSemiMid-8,"MA13");
 
   // Right R1: ⑤⑥⑦⑧
   var rr1x=rx-NW, rr1e=rr1x-RW;
@@ -235,23 +276,14 @@ function draw_MA(){
   for(var i=0;i<2;i++){
     var y1=rR1mids[i*2], y2=rR1mids[i*2+1];
     var w1=isWin(rR1ids[i*2]), w2=isWin(rR1ids[i*2+1]);
-    s+=L(rr2x,y1,rr2e,y1,rR2ids[i],w1);
-    s+=L(rr2x,y2,rr2e,y2,rR2ids[i],w2);
-    s+=L(rr2e,y1,rr2e,y2,rR2ids[i]);
-    var mid=(y1+y2)/2;
-    s+=MN(rr2e,mid+5,rR2ids[i]);
-    s+=LIVE((rr2x+rr2e)/2,mid-8,rR2ids[i]);
-    rR2mids.push(mid);
+    s=drawRoundR(s,rr2x,y1,rr2e,y2,rr2e,rR2ids[i],w1,w2);
+    rR2mids.push((y1+y2)/2);
   }
 
   // Right Semi: ⑭
   var rsx=rr2e, rse=rsx-RW;
-  s+=L(rsx,rR2mids[0],rse,rR2mids[0],"MA14",isWin("MA11"));
-  s+=L(rsx,rR2mids[1],rse,rR2mids[1],"MA14",isWin("MA12"));
-  s+=L(rse,rR2mids[0],rse,rR2mids[1],"MA14");
+  s=drawRoundR(s,rsx,rR2mids[0],rse,rR2mids[1],rse,"MA14",isWin("MA11"),isWin("MA12"));
   var rSemiMid=(rR2mids[0]+rR2mids[1])/2;
-  s+=MN(rse,rSemiMid+5,"MA14");
-  s+=LIVE((rsx+rse)/2,rSemiMid-8,"MA14");
 
   // Final ⑮
   s+=L(lse,lSemiMid,cx,lSemiMid,"MA15",isWin("MA13"));
