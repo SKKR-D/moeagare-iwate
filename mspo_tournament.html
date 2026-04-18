@@ -443,7 +443,7 @@ function draw_FA(){
 // Map each ID to its position in the bracket
 // ============================================================
 
-// First, redefine all brackets with explicit position data
+// 女子Aトーナメント - 18チーム 原点対称構造
 function draw_FA_clean(){
   var RH=46,NW=140,RW=95,MG=12;
   var W=NW+4*RW+60+4*RW+NW+MG*2, H=9*RH*2+MG*2;
@@ -463,98 +463,69 @@ function draw_FA_clean(){
   var x0=lx+NW, x1=x0+RW, x2=x1+RW, x3=x2+RW, x4=x3+RW;
   var rx0=rx-NW, rx1=rx0-RW, rx2=rx1-RW, rx3=rx2-RW, rx4=rx3-RW;
 
-  // Use correct progress IDs from the generation script:
-  // FA01:2v3①, FA02:8v9⑤(Excel②=wrong,⑤=correct), FA03:4v5③, FA04:6v7④
-  // FA05:FA02勝v10, FA06:11v12⑥, FA07:13v14⑦, FA08:15v16⑧
-  // FA09:1vFA01勝⑨, FA10:17v18⑩
-  // FA11:FA09勝vFA03勝⑪, FA12:FA04勝vFA05勝⑫
-  // FA13:FA06勝vFA07勝⑬, FA14:FA08勝vFA10勝⑭
-  // FA15:FA11勝vFA12勝, FA16:FA13勝vFA14勝, FA17:FA15勝vFA16勝
+  // ========= LEFT SIDE =========
 
-  // LEFT SIDE
-  // ① FA01: 2v3
+  // 左上の山
+  // ① FA01: 2上田 vs 3見前 (1回戦)
   s+=drawMatch(x0,yL(1),x1,yL(2),x1,"FA01"); var m01=(yL(1)+yL(2))/2;
-  // ⑤ FA02: 8v9
-  s+=drawMatch(x0,yL(7),x1,yL(8),x1,"FA02"); var m02=(yL(7)+yL(8))/2;
-  // ⑨ FA09: 1(seed) vs FA01勝者
+  // ⑨ FA09: 1仙北(seed上) vs ①勝者(下) (2回戦)
   s+=L(x0,yL(0),x2,yL(0),"FA09");
   s+=L(x1,m01,x2,m01,"FA09");
   s+=L(x2,yL(0),x2,m01,"FA09");
   var m09=(yL(0)+m01)/2; s+=MN(x2,m09+5,"FA09"); s+=LIVE((x1+x2)/2,m09-8,"FA09");
-  // ③ FA03: 4v5
+  // ③ FA03: 4大宮 vs 5松園 (2回戦)
   s+=drawMatch(x1,yL(3),x2,yL(4),x2,"FA03"); var m03=(yL(3)+yL(4))/2;
-  // ④ FA04: 6v7
-  s+=drawMatch(x1,yL(5),x2,yL(6),x2,"FA04"); var m04=(yL(5)+yL(6))/2;
-  // FA02 line extends to R2
-  s+=L(x1,m02,x2,m02,"FA02");
-  // ⑪ FA11: FA09勝 vs FA03勝
+  // ⑪ FA11: ⑨勝 vs ③勝 (3回戦QF)
   s+=L(x2,m09,x3,m09,"FA11"); s+=L(x2,m03,x3,m03,"FA11"); s+=L(x3,m09,x3,m03,"FA11");
   var m11=(m09+m03)/2; s+=MN(x3,m11+5,"FA11"); s+=LIVE((x2+x3)/2,m11-8,"FA11");
-  // ⑫ FA12: FA04勝 vs FA02勝(=⑤勝)
+
+  // 左下の山
+  // ④ FA04: 6岩大附属 vs 7城東 (2回戦)
+  s+=drawMatch(x1,yL(5),x2,yL(6),x2,"FA04"); var m04=(yL(5)+yL(6))/2;
+  // ⑤ FA02: 8飯岡 vs 9土淵 (2回戦)
+  s+=drawMatch(x1,yL(7),x2,yL(8),x2,"FA02"); var m02=(yL(7)+yL(8))/2;
+  // ⑫ FA12: ④勝 vs ⑤勝 (3回戦QF)
   s+=L(x2,m04,x3,m04,"FA12"); s+=L(x2,m02,x3,m02,"FA12"); s+=L(x3,m04,x3,m02,"FA12");
   var m12=(m04+m02)/2; s+=MN(x3,m12+5,"FA12"); s+=LIVE((x2+x3)/2,m12-8,"FA12");
-  // ⑮ FA15: Semi
+
+  // 左準決勝 ⑮ FA15
   s+=L(x3,m11,x4,m11,"FA15"); s+=L(x3,m12,x4,m12,"FA15"); s+=L(x4,m11,x4,m12,"FA15");
   var m15=(m11+m12)/2; s+=MN(x4,m15+5,"FA15"); s+=LIVE((x3+x4)/2,m15-8,"FA15");
 
-  // RIGHT SIDE
-  // ⑥ FA06: 10v11 (indices 0,1)
+  // ========= RIGHT SIDE =========
+
+  // 右上の山
+  // ⑥ FA06: 10乙部 vs 11河南 (2回戦)
   s+=drawMatchR(rx0,yL(0),rx1,yL(1),rx1,"FA06"); var m06=(yL(0)+yL(1))/2;
-  // ⑦ FA07: 12v13 (indices 2,3)
+  // ⑦ FA07: 12見前南 vs 13下橋 (2回戦)
   s+=drawMatchR(rx0,yL(2),rx1,yL(3),rx1,"FA07"); var m07=(yL(2)+yL(3))/2;
-  // ⑧ FA08: 14v15 (indices 4,5)
-  s+=drawMatchR(rx0,yL(4),rx1,yL(5),rx1,"FA08"); var m08=(yL(4)+yL(5))/2;
-  // ② (FA?): 16v17 (indices 6,7) — BUT what's the progress ID?
-  // From generate_tournament.py, there's NO match for 16vs17 directly!
-  // The script had FA08:15v16 and FA10:17v18. That's wrong per the Excel.
-  // Excel: ⑧=14v15, ②=16v17, ⑩=②勝v18
-  // Script: FA08=15v16(wrong!), FA10=17v18(wrong!)
-  // 
-  // The IDs in the PROGRESS SHEET are what matters. Let me check what was generated:
-  // FA05: FA02勝者 vs 10(乙部中) — this seems wrong too, 10=乙部中 is index 0 of right
-  // FA06: 11(河南中) vs 12(見前南中) — indices 1,2 of right ≠ 10v11
-  //
-  // THE ROOT CAUSE: the generate_tournament.py had wrong match definitions for FA!
-  // I can't fix the SVG without fixing the progress sheet data too.
-  // For now, I'll draw the VISUAL correctly and use whatever IDs are in progress.
-
-  // Since the progress sheet IDs may be wrong, let me draw with the Excel structure
-  // and label with circle numbers only (not IDs). The match IDs from progress will
-  // be matched by position later when the data is corrected.
-
-  // For now, just draw structure + circles, link to closest progress IDs:
-  // RIGHT R2 (all are 2-team matches from R1/direct seeding):
-  // Actually in the 18-team bracket, the right side has no R1.
-  // All 9 right teams go directly into R2 (which is their first round).
-  // Except ② and ⑩ create a mini sub-bracket for 16,17,18.
-  
-  // ②=16v17
-  s+=drawMatchR(rx0,yL(6),rx1,yL(7),rx1,"FA05"); var mR02=(yL(6)+yL(7))/2;
-  // (using FA05 as placeholder — will need data fix)
-  
-  // ⑩: ②勝者 vs 18
-  s+=L(rx1,mR02,rx2,mR02,"FA10");
-  s+=L(rx0,yL(8),rx2,yL(8),"FA10"); // 18 seed extends
-  s+=L(rx2,mR02,rx2,yL(8),"FA10");
-  var m10=(mR02+yL(8))/2; s+=MN(rx2,m10+5,"FA10"); s+=LIVE((rx1+rx2)/2,m10-8,"FA10");
-
-  // ⑬ FA13: ⑥勝 vs ⑦勝
+  // ⑬ FA13: ⑥勝 vs ⑦勝 (3回戦QF)
   s+=L(rx1,m06,rx2,m06,"FA13"); s+=L(rx1,m07,rx2,m07,"FA13"); s+=L(rx2,m06,rx2,m07,"FA13");
   var m13=(m06+m07)/2; s+=MN(rx2,m13+5,"FA13"); s+=LIVE((rx1+rx2)/2,m13-8,"FA13");
 
-  // ⑭ FA14: ⑧勝 vs ⑩勝
-  s+=L(rx1,m08,rx3,m08,"FA14"); // ⑧ line extends extra
+  // 右下の山
+  // ⑧ FA08: 14下小路 vs 15城西 (2回戦)
+  s+=drawMatchR(rx0,yL(4),rx1,yL(5),rx1,"FA08"); var m08=(yL(4)+yL(5))/2;
+  // ② FA05: 16厨川 vs 17北陵 (1回戦)
+  s+=drawMatchR(rx0,yL(6),rx1,yL(7),rx1,"FA05"); var mR02=(yL(6)+yL(7))/2;
+  // ⑩ FA10: ②勝者(上) vs 18黒石野(seed下) (2回戦)
+  s+=L(rx1,mR02,rx2,mR02,"FA10");
+  s+=L(rx0,yL(8),rx2,yL(8),"FA10");
+  s+=L(rx2,mR02,rx2,yL(8),"FA10");
+  var m10=(mR02+yL(8))/2; s+=MN(rx2,m10+5,"FA10"); s+=LIVE((rx1+rx2)/2,m10-8,"FA10");
+  // ⑭ FA14: ⑧勝 vs ⑩勝 (3回戦QF)
+  s+=L(rx1,m08,rx3,m08,"FA14");
   s+=L(rx2,m10,rx3,m10,"FA14");
   s+=L(rx3,m08,rx3,m10,"FA14");
   var m14=(m08+m10)/2; s+=MN(rx3,m14+5,"FA14"); s+=LIVE((rx2+rx3)/2,m14-8,"FA14");
 
-  // ⑯ FA16: Semi R
-  s+=L(rx2,m13,rx4,m13,"FA16"); // extends
+  // 右準決勝 ⑯ FA16
+  s+=L(rx2,m13,rx4,m13,"FA16");
   s+=L(rx3,m14,rx4,m14,"FA16");
   s+=L(rx4,m13,rx4,m14,"FA16");
   var m16=(m13+m14)/2; s+=MN(rx4,m16+5,"FA16"); s+=LIVE((rx3+rx4)/2,m16-8,"FA16");
 
-  // FINAL ⑰
+  // ========= 決勝 ⑰ FA17 =========
   s+=L(x4,m15,cx,m15,"FA17"); s+=L(rx4,m16,cx,m16,"FA17");
   if(Math.abs(m15-m16)>1) s+=L(cx,m15,cx,m16,"FA17");
   var mF=(m15+m16)/2;
@@ -568,6 +539,7 @@ function draw_FA_clean(){
 }
 
 // ============================================================
+// 女子B// ============================================================
 // 女子B: 12チーム (左6,右6) - 画像から正確に
 // Left: 1飯岡,2乙部→①、3黒石野,4土淵→②、①勝v5見前→⑤、②勝v6下小路→⑥、⑤勝v⑥勝→⑨
 // Right: 7厨川,8仙北→③、9大宮,10河南→④、③勝v11上田→⑦、④勝v12北陵→⑧、⑦勝v⑧勝→⑩
