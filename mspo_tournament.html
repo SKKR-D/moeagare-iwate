@@ -593,38 +593,38 @@ function draw_FB(){
   var rx0=rx-NW, rx1=rx0-RW, rx2=rx1-RW, rx3=rx2-RW;
 
   // LEFT
-  // ① FB01: 1v2
-  s+=drawMatch(x0,yL(0),x1,yL(1),x1,"FB01"); var m01=(yL(0)+yL(1))/2;
-  // ② FB02: 3v4
-  s+=drawMatch(x0,yL(2),x1,yL(3),x1,"FB02"); var m02=(yL(2)+yL(3))/2;
-  // ⑤ FB05: ①勝 vs 5(seed)
-  s+=L(x1,m01,x2,m01,"FB05");
-  s+=L(x0,yL(4),x2,yL(4),"FB05"); // seed extends
-  s+=L(x2,m01,x2,yL(4),"FB05");
-  var m05=(m01+yL(4))/2; s+=MN(x2,m05+5,"FB05"); s+=LIVE((x1+x2)/2,m05-8,"FB05");
-  // ⑥ FB06: ②勝 vs 6(seed)
-  s+=L(x1,m02,x2,m02,"FB06");
-  s+=L(x0,yL(5),x2,yL(5),"FB06"); // seed extends
-  s+=L(x2,m02,x2,yL(5),"FB06");
+  // ① FB01: 2乙部 vs 3黒石野 (index 1,2)
+  s+=drawMatch(x0,yL(1),x1,yL(2),x1,"FB01"); var m01=(yL(1)+yL(2))/2;
+  // ② FB02: 4土淵 vs 5見前 (index 3,4)
+  s+=drawMatch(x0,yL(3),x1,yL(4),x1,"FB02"); var m02=(yL(3)+yL(4))/2;
+  // ⑤ FB05: 1飯岡(seed・上) vs ①勝者(下)
+  s+=L(x0,yL(0),x2,yL(0),"FB05"); // 1飯岡のシード線を延長
+  s+=L(x1,m01,x2,m01,"FB05");     // ①勝者の線を延長
+  s+=L(x2,yL(0),x2,m01,"FB05");   // 縦接続
+  var m05=(yL(0)+m01)/2; s+=MN(x2,m05+5,"FB05"); s+=LIVE((x1+x2)/2,m05-8,"FB05");
+  // ⑥ FB06: ②勝者(上) vs 6下小路(seed・下)
+  s+=L(x1,m02,x2,m02,"FB06");     // ②勝者の線を延長
+  s+=L(x0,yL(5),x2,yL(5),"FB06"); // 6下小路のシード線を延長
+  s+=L(x2,m02,x2,yL(5),"FB06");   // 縦接続
   var m06=(m02+yL(5))/2; s+=MN(x2,m06+5,"FB06"); s+=LIVE((x1+x2)/2,m06-8,"FB06");
   // ⑨ FB09: ⑤勝 vs ⑥勝
   s+=L(x2,m05,x3,m05,"FB09"); s+=L(x2,m06,x3,m06,"FB09"); s+=L(x3,m05,x3,m06,"FB09");
   var m09=(m05+m06)/2; s+=MN(x3,m09+5,"FB09"); s+=LIVE((x2+x3)/2,m09-8,"FB09");
 
   // RIGHT
-  // ③ FB03: 7v8
-  s+=drawMatchR(rx0,yL(0),rx1,yL(1),rx1,"FB03"); var mr03=(yL(0)+yL(1))/2;
-  // ④ FB04: 9v10
-  s+=drawMatchR(rx0,yL(2),rx1,yL(3),rx1,"FB04"); var mr04=(yL(2)+yL(3))/2;
-  // ⑦ FB07: ③勝 vs 11(seed)
-  s+=L(rx1,mr03,rx2,mr03,"FB07");
-  s+=L(rx0,yL(4),rx2,yL(4),"FB07");
-  s+=L(rx2,mr03,rx2,yL(4),"FB07");
-  var mr07=(mr03+yL(4))/2; s+=MN(rx2,mr07+5,"FB07"); s+=LIVE((rx1+rx2)/2,mr07-8,"FB07");
-  // ⑧ FB08: ④勝 vs 12(seed)
-  s+=L(rx1,mr04,rx2,mr04,"FB08");
-  s+=L(rx0,yL(5),rx2,yL(5),"FB08");
-  s+=L(rx2,mr04,rx2,yL(5),"FB08");
+  // ③ FB03: 8仙北 vs 9大宮 (index 1,2)
+  s+=drawMatchR(rx0,yL(1),rx1,yL(2),rx1,"FB03"); var mr03=(yL(1)+yL(2))/2;
+  // ④ FB04: 10河南 vs 11上田 (index 3,4)
+  s+=drawMatchR(rx0,yL(3),rx1,yL(4),rx1,"FB04"); var mr04=(yL(3)+yL(4))/2;
+  // ⑦ FB07: 7厨川(seed・上) vs ③勝者(下)
+  s+=L(rx0,yL(0),rx2,yL(0),"FB07"); // 7厨川のシード線を延長
+  s+=L(rx1,mr03,rx2,mr03,"FB07");    // ③勝者の線を延長
+  s+=L(rx2,yL(0),rx2,mr03,"FB07");   // 縦接続
+  var mr07=(yL(0)+mr03)/2; s+=MN(rx2,mr07+5,"FB07"); s+=LIVE((rx1+rx2)/2,mr07-8,"FB07");
+  // ⑧ FB08: ④勝者(上) vs 12北陵(seed・下)
+  s+=L(rx1,mr04,rx2,mr04,"FB08");     // ④勝者の線を延長
+  s+=L(rx0,yL(5),rx2,yL(5),"FB08");   // 12北陵のシード線を延長
+  s+=L(rx2,mr04,rx2,yL(5),"FB08");    // 縦接続
   var mr08=(mr04+yL(5))/2; s+=MN(rx2,mr08+5,"FB08"); s+=LIVE((rx1+rx2)/2,mr08-8,"FB08");
   // ⑩ FB10: ⑦勝 vs ⑧勝
   s+=L(rx2,mr07,rx3,mr07,"FB10"); s+=L(rx2,mr08,rx3,mr08,"FB10"); s+=L(rx3,mr07,rx3,mr08,"FB10");
