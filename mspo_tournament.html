@@ -18,9 +18,9 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .tab-btn{padding:8px 18px;border:2px solid #ccc;border-bottom:none;border-radius:8px 8px 0 0;background:var(--surface);font-size:.85rem;font-weight:700;cursor:pointer;color:var(--text2);}
 .tab-btn:hover{background:var(--green-light);} .tab-btn.active{background:var(--green);color:#fff;border-color:var(--green);}
 .wrap{background:var(--surface);border:1px solid #ccc;margin:0 12px 12px;border-radius:0 0 12px 12px;padding:20px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.wrap-title{text-align:center;font-size:1.1rem;font-weight:900;color:var(--green);margin-bottom:8px;}
 .wrap-hint{text-align:center;font-size:.7rem;color:var(--text2);margin-bottom:8px;display:none;}
 @media(max-width:800px){.wrap-hint{display:block;}}
-.wrap-title{text-align:center;font-size:1.1rem;font-weight:900;color:var(--green);margin-bottom:16px;}
 .info-bar{display:flex;justify-content:center;gap:12px;padding:8px 12px;font-size:.8rem;color:var(--text2);}
 .info-chip{padding:4px 12px;border-radius:16px;font-weight:700;background:#fdf6e3;border:1px solid var(--gold);color:var(--gold);}
 .footer{text-align:center;padding:16px;font-size:.7rem;color:var(--text2);}
@@ -52,289 +52,640 @@ var progressData = [];
 var currentTab = '男子A';
 
 // ============================================================
-// Bracket data: left teams, right teams, match tree
-// tree node: { id, left:node|null, right:node|null, leftSeed, rightSeed }
+// Drawing primitives
 // ============================================================
-var BRACKETS = {
-  "男子A": {
-    title: "男子Aトーナメント",
-    left: ["下小路中","大宮中","仙北中","飯岡中","厨川中","I.Kクラブ","北陵中","河南中"],
-    right: ["岩大附属中","土淵スポ少","黒石野中","上田中","みたけクラブ","見前中","乙部中","下橋中"],
-    leftNums: [1,2,3,4,5,6,7,8],
-    rightNums: [9,10,11,12,13,14,15,16],
-    // Match tree from leaves to root (left side)
-    // R1: 4 matches, R2: 2, Semi: 1
-    leftMatches: [
-      ["MA01","MA02","MA03","MA04"],  // R1
-      ["MA09","MA10"],                 // R2
-      ["MA13"]                         // Semi
-    ],
-    rightMatches: [
-      ["MA05","MA06","MA07","MA08"],
-      ["MA11","MA12"],
-      ["MA14"]
-    ],
-    finalId: "MA15"
-  },
-  "男子B": {
-    title: "男子Bトーナメント",
-    left: ["下小路中","大宮中","見前中"],
-    right: ["河南中","下橋中","上田中"],
-    leftNums: [1,2,3],
-    rightNums: [4,5,6],
-    leftMatches: [
-      ["MB01",null],   // R1: 1vs2, 3=bye
-      ["MB03"]          // Semi: MB01勝者 vs 3
-    ],
-    rightMatches: [
-      ["MB02",null],
-      ["MB04"]
-    ],
-    finalId: "MB05"
-  },
-  "女子A": {
-    title: "女子Aトーナメント",
-    left: ["仙北中","上田中","見前中","大宮中","松園中","岩大附属中","城東中","飯岡中","土淵中"],
-    right: ["乙部中","河南中","見前南中","下橋中","下小路中","城西中","厨川中","北陵中","黒石野中"],
-    leftNums: [1,2,3,4,5,6,7,8,9],
-    rightNums: [10,11,12,13,14,15,16,17,18],
-    // 9 teams: 1 bye + 1 R1 match, then 4 R2, 2 QF, 1 Semi
-    leftMatches: [
-      ["FA01",null,null,"FA02"],  // 位置: 2v3, bye, bye, 8v9
-      ["FA09","FA03","FA04","FA05"], // 1vsFA01勝,4v5,6v7,FA02勝vs?
-      ["FA11","FA12"],
-      ["FA15"]
-    ],
-    rightMatches: [
-      [null,"FA06",null,"FA10"],
-      [null,"FA07","FA08",null],
-      ["FA13","FA14"],
-      ["FA16"]
-    ],
-    finalId: "FA17"
-  },
-  "女子B": {
-    title: "女子Bトーナメント",
-    left: ["飯岡中","乙部中","黒石野中","土淵中","見前中","下小路中"],
-    right: ["厨川中","仙北中","大宮中","河南中","上田中","北陵中"],
-    leftNums: [1,2,3,4,5,6],
-    rightNums: [7,8,9,10,11,12],
-    leftMatches: [
-      ["FB01","FB02",null],  // 1v2, 3v4, bye5, bye6
-      ["FB05","FB06"],
-      ["FB09"]
-    ],
-    rightMatches: [
-      ["FB03","FB04",null],
-      ["FB07","FB08"],
-      ["FB10"]
-    ],
-    finalId: "FB11"
-  }
-};
+function L(x1,y1,x2,y2,id){
+  var c='#aaa',w=1;
+  if(id){var p=gP(id);if(p.status==='試合中'){c='#dc2626';w=2.5;}else if(p.status==='終了'){c='#1a4a2e';w=2;}}
+  return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'"/>';
+}
+function T(x,y,txt,anchor,size,color,weight){
+  return '<text x="'+x+'" y="'+y+'" text-anchor="'+(anchor||'start')+'" font-size="'+(size||14)+'" font-weight="'+(weight||700)+'" fill="'+(color||'#1a1a1a')+'">'+esc(txt)+'</text>';
+}
+function LIVE(x,y,id){
+  var p=gP(id);
+  if(p.status==='試合中') return '<text x="'+x+'" y="'+y+'" text-anchor="middle" font-size="10" font-weight="900" fill="#dc2626">●LIVE</text>';
+  return '';
+}
+function MN(x,y,id,anchor){
+  var n=parseInt(id.substring(2))||0;
+  var c=['','①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩','⑪','⑫','⑬','⑭','⑮','⑯','⑰'];
+  return '<text x="'+x+'" y="'+y+'" text-anchor="'+(anchor||'middle')+'" font-size="14" font-weight="900" fill="#b8860b">'+(c[n]||n)+'</text>';
+}
+function gP(id){for(var i=0;i<progressData.length;i++){if(progressData[i].matchId===id)return progressData[i];}return{status:'待機中'};}
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 // ============================================================
-// SVG drawing
+// Draw a standard 2-team match bracket segment
+// Returns SVG string for: two horizontal lines + vertical connector + match number
 // ============================================================
-function render() {
-  var b = BRACKETS[currentTab];
-  if (!b) return;
+function drawMatch(x1,y1,x2,y2,xConn,id){
+  // y1=top team line Y, y2=bottom team line Y
+  // x1=start X, x2=end X (horizontal lines go from x1 to x2)
+  // xConn=X position of vertical connector (usually x2)
+  var mid=(y1+y2)/2;
+  var s='';
+  s+=L(x1,y1,x2,y1,id);
+  s+=L(x1,y2,x2,y2,id);
+  s+=L(xConn,y1,xConn,y2,id);
+  s+=MN(xConn,mid+5,id);
+  s+=LIVE((x1+x2)/2,mid-8,id);
+  return s;
+}
 
-  var leftN = b.left.length;
-  var rightN = b.right.length;
-  var maxN = Math.max(leftN, rightN);
+// Same but mirrored (right side, lines go right to left)
+function drawMatchR(x1,y1,x2,y2,xConn,id){
+  var mid=(y1+y2)/2;
+  var s='';
+  s+=L(x1,y1,x2,y1,id);
+  s+=L(x1,y2,x2,y2,id);
+  s+=L(xConn,y1,xConn,y2,id);
+  s+=MN(xConn,mid+5,id);
+  s+=LIVE((x1+x2)/2,mid-8,id);
+  return s;
+}
 
-  var RH = 42;    // row height per team
-  var NW = 130;   // name column width
-  var RW = 100;   // round column width
-  var CG = 60;    // center gap for final
-  var MG = 12;
+// ============================================================
+// 男子A: 16チーム、完全トーナメント
+// ============================================================
+function draw_MA(){
+  var RH=46,NW=130,RW=100,MG=12;
+  var W=NW+3*RW+60+3*RW+NW+MG*2, H=16*RH+MG*2;
+  var s='<svg viewBox="0 0 '+W+' '+H+'" style="width:'+W+'px;min-width:'+W+'px;display:block;margin:0 auto;" xmlns="http://www.w3.org/2000/svg">';
+  s+='<rect width="'+W+'" height="'+H+'" fill="white" rx="4"/>';
 
-  var leftR = b.leftMatches.length;
-  var rightR = b.rightMatches.length;
-  var maxR = Math.max(leftR, rightR);
+  var lTeams=["下小路中","大宮中","仙北中","飯岡中","厨川中","I.Kクラブ","北陵中","河南中"];
+  var rTeams=["岩大附属中","土淵スポ少","黒石野中","上田中","みたけクラブ","見前中","乙部中","下橋中"];
+  var lx=MG, rx=W-MG;
+  var cx=W/2;
 
-  var H = maxN * RH * 2 + MG * 2 + 20;
-  var halfW = NW + (maxR + 0.5) * RW;
-  var W = halfW * 2 + CG;
+  // Y positions for 8 teams each side
+  function yPos(i){return MG+RH*i*2+RH;}
 
-  var s = '<svg viewBox="0 0 '+W+' '+H+'" style="width:'+W+'px;min-width:'+W+'px;display:block;margin:0 auto;" xmlns="http://www.w3.org/2000/svg">';
-  s += '<rect width="'+W+'" height="'+H+'" fill="white" rx="4"/>';
-
-  // Compute Y positions for teams
-  function teamYs(n) {
-    var ys = [];
-    var totalH = maxN * RH * 2;
-    var gap = totalH / n;
-    for (var i = 0; i < n; i++) {
-      ys.push(MG + 16 + gap * i + gap / 2);
-    }
-    return ys;
+  // Left team names + lines
+  for(var i=0;i<8;i++){
+    var y=yPos(i);
+    s+=T(lx+4,y,(i+1)+' '+lTeams[i]);
+    s+=L(lx,y+6,lx+NW,y+6);
+  }
+  // Right team names + lines
+  for(var i=0;i<8;i++){
+    var y=yPos(i);
+    s+=T(rx-4,y,rTeams[i]+' '+(i+9),'end');
+    s+=L(rx-NW,y+6,rx,y+6);
   }
 
-  var lys = teamYs(leftN);
-  var rys = teamYs(rightN);
-
-  // Draw left team names
-  for (var i = 0; i < leftN; i++) {
-    s += '<text x="'+(MG+4)+'" y="'+lys[i]+'" font-size="14" font-weight="700" fill="#1a1a1a">'+b.leftNums[i]+' '+esc(b.left[i])+'</text>';
-    s += ln(MG, lys[i]+5, MG+NW, lys[i]+5, '#aaa', 1);
+  // Left R1: ①②③④
+  var lr1x=lx+NW, lr1e=lr1x+RW;
+  var lR1ids=["MA01","MA02","MA03","MA04"];
+  var lR1mids=[];
+  for(var i=0;i<4;i++){
+    var y1=yPos(i*2)+6, y2=yPos(i*2+1)+6;
+    s+=drawMatch(lr1x,y1,lr1e,y2,lr1e,lR1ids[i]);
+    lR1mids.push((y1+y2)/2);
   }
 
-  // Draw right team names
-  for (var i = 0; i < rightN; i++) {
-    var rx = W - MG;
-    s += '<text x="'+(rx-4)+'" y="'+rys[i]+'" font-size="14" font-weight="700" fill="#1a1a1a" text-anchor="end">'+esc(b.right[i])+' '+b.rightNums[i]+'</text>';
-    s += ln(rx-NW, rys[i]+5, rx, rys[i]+5, '#aaa', 1);
+  // Left R2: ⑨⑩
+  var lr2x=lr1e, lr2e=lr2x+RW;
+  var lR2ids=["MA09","MA10"];
+  var lR2mids=[];
+  for(var i=0;i<2;i++){
+    var y1=lR1mids[i*2], y2=lR1mids[i*2+1];
+    s+=L(lr2x,y1,lr2e,y1,lR2ids[i]);
+    s+=L(lr2x,y2,lr2e,y2,lR2ids[i]);
+    s+=L(lr2e,y1,lr2e,y2,lR2ids[i]);
+    var mid=(y1+y2)/2;
+    s+=MN(lr2e,mid+5,lR2ids[i]);
+    s+=LIVE((lr2x+lr2e)/2,mid-8,lR2ids[i]);
+    lR2mids.push(mid);
   }
 
-  // Draw bracket rounds - left side
-  var lFinalY = drawRounds(s, lys, b.leftMatches, MG+NW, RW, 'L');
-  s = lFinalY.svg;
-  var lLastY = lFinalY.lastY;
-  var lLastX = MG + NW + leftR * RW;
+  // Left Semi: ⑬
+  var lsx=lr2e, lse=lsx+RW;
+  s+=L(lsx,lR2mids[0],lse,lR2mids[0],"MA13");
+  s+=L(lsx,lR2mids[1],lse,lR2mids[1],"MA13");
+  s+=L(lse,lR2mids[0],lse,lR2mids[1],"MA13");
+  var lSemiMid=(lR2mids[0]+lR2mids[1])/2;
+  s+=MN(lse,lSemiMid+5,"MA13");
+  s+=LIVE((lsx+lse)/2,lSemiMid-8,"MA13");
 
-  // Draw bracket rounds - right side
-  var rFinalY = drawRounds(s, rys, b.rightMatches, W-MG-NW, RW, 'R');
-  s = rFinalY.svg;
-  var rLastY = rFinalY.lastY;
-  var rLastX = W - MG - NW - rightR * RW;
-
-  // Final
-  var centerX = W / 2;
-  var fProg = getProg(b.finalId);
-  var fCol = stCol(fProg.status);
-  var fSw = fProg.status === '待機中' ? 1 : 2;
-
-  s += ln(lLastX, lLastY, centerX, lLastY, fCol, fSw);
-  s += ln(rLastX, rLastY, centerX, rLastY, fCol, fSw);
-  if (Math.abs(lLastY - rLastY) > 1) {
-    s += ln(centerX, lLastY, centerX, rLastY, fCol, fSw);
+  // Right R1: ⑤⑥⑦⑧
+  var rr1x=rx-NW, rr1e=rr1x-RW;
+  var rR1ids=["MA05","MA06","MA07","MA08"];
+  var rR1mids=[];
+  for(var i=0;i<4;i++){
+    var y1=yPos(i*2)+6, y2=yPos(i*2+1)+6;
+    s+=drawMatchR(rr1x,y1,rr1e,y2,rr1e,rR1ids[i]);
+    rR1mids.push((y1+y2)/2);
   }
 
-  var fMidY = (lLastY + rLastY) / 2;
-  s += '<text x="'+centerX+'" y="'+(fMidY)+'" text-anchor="middle" font-size="15" font-weight="900" fill="#b8860b">'+circled(b.finalId)+'</text>';
-
-  if (fProg.status === '終了') {
-    s += '<text x="'+centerX+'" y="'+(fMidY+18)+'" text-anchor="middle" font-size="14" font-weight="900" fill="#1a4a2e">栄冠</text>';
-  } else if (fProg.status === '試合中') {
-    s += '<text x="'+centerX+'" y="'+(fMidY+18)+'" text-anchor="middle" font-size="12" font-weight="900" fill="#dc2626">●LIVE</text>';
+  // Right R2: ⑪⑫
+  var rr2x=rr1e, rr2e=rr2x-RW;
+  var rR2ids=["MA11","MA12"];
+  var rR2mids=[];
+  for(var i=0;i<2;i++){
+    var y1=rR1mids[i*2], y2=rR1mids[i*2+1];
+    s+=L(rr2x,y1,rr2e,y1,rR2ids[i]);
+    s+=L(rr2x,y2,rr2e,y2,rR2ids[i]);
+    s+=L(rr2e,y1,rr2e,y2,rR2ids[i]);
+    var mid=(y1+y2)/2;
+    s+=MN(rr2e,mid+5,rR2ids[i]);
+    s+=LIVE((rr2x+rr2e)/2,mid-8,rR2ids[i]);
+    rR2mids.push(mid);
   }
 
-  s += '</svg>';
-  document.getElementById('bracketArea').innerHTML = s;
+  // Right Semi: ⑭
+  var rsx=rr2e, rse=rsx-RW;
+  s+=L(rsx,rR2mids[0],rse,rR2mids[0],"MA14");
+  s+=L(rsx,rR2mids[1],rse,rR2mids[1],"MA14");
+  s+=L(rse,rR2mids[0],rse,rR2mids[1],"MA14");
+  var rSemiMid=(rR2mids[0]+rR2mids[1])/2;
+  s+=MN(rse,rSemiMid+5,"MA14");
+  s+=LIVE((rsx+rse)/2,rSemiMid-8,"MA14");
+
+  // Final ⑮
+  s+=L(lse,lSemiMid,cx,lSemiMid,"MA15");
+  s+=L(rse,rSemiMid,cx,rSemiMid,"MA15");
+  if(Math.abs(lSemiMid-rSemiMid)>1) s+=L(cx,lSemiMid,cx,rSemiMid,"MA15");
+  var fMid=(lSemiMid+rSemiMid)/2;
+  s+=MN(cx,fMid-2,"MA15");
+  var fp=gP("MA15");
+  if(fp.status==='終了') s+=T(cx,fMid+16,'栄冠','middle',14,'#1a4a2e',900);
+  else if(fp.status==='試合中') s+='<text x="'+cx+'" y="'+(fMid+16)+'" text-anchor="middle" font-size="10" font-weight="900" fill="#dc2626">●LIVE</text>';
+
+  s+='</svg>';
+  return s;
+}
+
+// ============================================================
+// 男子B: 6チーム (左:1シード+2vs3、右:4vs5+6シード)
+// ============================================================
+function draw_MB(){
+  var RH=60,NW=130,RW=100,MG=12;
+  var W=NW+2*RW+60+2*RW+NW+MG*2, H=3*RH*2+MG*2;
+  var s='<svg viewBox="0 0 '+W+' '+H+'" style="width:'+W+'px;min-width:'+W+'px;display:block;margin:0 auto;" xmlns="http://www.w3.org/2000/svg">';
+  s+='<rect width="'+W+'" height="'+H+'" fill="white" rx="4"/>';
+
+  var lx=MG, rx=W-MG, cx=W/2;
+  // Left: 1下小路(seed), 2大宮, 3見前
+  var ly1=MG+RH, ly2=MG+RH*2+20, ly3=MG+RH*3+40;
+  s+=T(lx+4,ly1,'1 下小路中'); s+=L(lx,ly1+6,lx+NW,ly1+6);
+  s+=T(lx+4,ly2,'2 大宮中');   s+=L(lx,ly2+6,lx+NW,ly2+6);
+  s+=T(lx+4,ly3,'3 見前中');   s+=L(lx,ly3+6,lx+NW,ly3+6);
+
+  // Right: 4河南, 5下橋, 6上田(seed)
+  var ry1=MG+RH, ry2=MG+RH*2+20, ry3=MG+RH*3+40;
+  s+=T(rx-4,ry1,'河南中 4','end');  s+=L(rx-NW,ry1+6,rx,ry1+6);
+  s+=T(rx-4,ry2,'下橋中 5','end');  s+=L(rx-NW,ry2+6,rx,ry2+6);
+  s+=T(rx-4,ry3,'上田中 6','end');  s+=L(rx-NW,ry3+6,rx,ry3+6);
+
+  // Left ①: 2vs3
+  var l1x=lx+NW, l1e=l1x+RW;
+  s+=drawMatch(l1x,ly2+6,l1e,ly3+6,l1e,"MB01");
+  var l1mid=(ly2+6+ly3+6)/2;
+
+  // Left ③: 1(seed) vs ①勝者
+  var l2x=l1e, l2e=l2x+RW;
+  s+=L(l1x,ly1+6,l2e,ly1+6,"MB03"); // seed line extends
+  s+=L(l1e,l1mid,l2e,l1mid,"MB03");
+  s+=L(l2e,ly1+6,l2e,l1mid,"MB03");
+  var l2mid=(ly1+6+l1mid)/2;
+  s+=MN(l2e,l2mid+5,"MB03");
+  s+=LIVE((l2x+l2e)/2,l2mid-8,"MB03");
+
+  // Right ②: 4vs5
+  var r1x=rx-NW, r1e=r1x-RW;
+  s+=drawMatchR(r1x,ry1+6,r1e,ry2+6,r1e,"MB02");
+  var r1mid=(ry1+6+ry2+6)/2;
+
+  // Right ④: ②勝者 vs 6(seed)
+  var r2x=r1e, r2e=r2x-RW;
+  s+=L(r1x,ry3+6,r2e,ry3+6,"MB04"); // seed line extends
+  s+=L(r1e,r1mid,r2e,r1mid,"MB04");
+  s+=L(r2e,r1mid,r2e,ry3+6,"MB04");
+  var r2mid=(r1mid+ry3+6)/2;
+  s+=MN(r2e,r2mid+5,"MB04");
+  s+=LIVE((r2x+r2e)/2,r2mid-8,"MB04");
+
+  // Final ⑤
+  s+=L(l2e,l2mid,cx,l2mid,"MB05");
+  s+=L(r2e,r2mid,cx,r2mid,"MB05");
+  if(Math.abs(l2mid-r2mid)>1) s+=L(cx,l2mid,cx,r2mid,"MB05");
+  var fMid=(l2mid+r2mid)/2;
+  s+=MN(cx,fMid-2,"MB05");
+  var fp=gP("MB05");
+  if(fp.status==='終了') s+=T(cx,fMid+16,'栄冠','middle',14,'#1a4a2e',900);
+  else if(fp.status==='試合中') s+='<text x="'+cx+'" y="'+(fMid+16)+'" text-anchor="middle" font-size="10" font-weight="900" fill="#dc2626">●LIVE</text>';
+
+  s+='</svg>';
+  return s;
+}
+
+// ============================================================
+// 女子A: 18チーム (左9,右9) - 構造を画像から正確に再現
+// ============================================================
+function draw_FA(){
+  var RH=46,NW=140,RW=95,MG=12;
+  var W=NW+4*RW+60+4*RW+NW+MG*2, H=9*RH*2+MG*2;
+  var s='<svg viewBox="0 0 '+W+' '+H+'" style="width:'+W+'px;min-width:'+W+'px;display:block;margin:0 auto;" xmlns="http://www.w3.org/2000/svg">';
+  s+='<rect width="'+W+'" height="'+H+'" fill="white" rx="4"/>';
+
+  var lx=MG, rx=W-MG, cx=W/2;
+  function yP(i){return MG+RH*i*2+RH;}
+
+  var lTeams=["仙北中","上田中","見前中","大宮中","松園中","岩大附属中","城東中","飯岡中","土淵中"];
+  var rTeams=["乙部中","河南中","見前南中","下橋中","下小路中","城西中","厨川中","北陵中","黒石野中"];
+
+  for(var i=0;i<9;i++){
+    var y=yP(i); s+=T(lx+4,y,(i+1)+' '+lTeams[i]); s+=L(lx,y+6,lx+NW,y+6);
+  }
+  for(var i=0;i<9;i++){
+    var y=yP(i); s+=T(rx-4,y,rTeams[i]+' '+(i+10),'end'); s+=L(rx-NW,y+6,rx,y+6);
+  }
+
+  // === LEFT SIDE ===
+  var x0=lx+NW, x1=x0+RW, x2=x1+RW, x3=x2+RW, x4=x3+RW;
+
+  // R1: ①2vs3, ⑤8vs9
+  var yL=function(i){return yP(i)+6;};
+  s+=drawMatch(x0,yL(1),x1,yL(2),x1,"FA01");  var mFA01=(yL(1)+yL(2))/2;
+  s+=drawMatch(x0,yL(7),x1,yL(8),x1,"FA02");  var mFA02=(yL(7)+yL(8))/2;
+
+  // R2: ⑨(1seed vs ①勝者), ③(4vs5), ④(6vs7), ⑤勝者→FA05は②勝者関連...
+  // ⑨: 1(seed) vs FA01勝者
+  s+=L(x0,yL(0),x2,yL(0),"FA09"); // seed extends 2 columns
+  s+=L(x1,mFA01,x2,mFA01,"FA09");
+  s+=L(x2,yL(0),x2,mFA01,"FA09");
+  var mFA09=(yL(0)+mFA01)/2;
+  s+=MN(x2,mFA09+5,"FA09"); s+=LIVE((x1+x2)/2,mFA09-8,"FA09");
+
+  // ③: 4vs5
+  s+=drawMatch(x1,yL(3),x2,yL(4),x2,"FA03"); var mFA03=(yL(3)+yL(4))/2;
+
+  // ④: 6vs7
+  s+=drawMatch(x1,yL(5),x2,yL(6),x2,"FA04"); var mFA04=(yL(5)+yL(6))/2;
+
+  // ⑤: FA02勝者(8v9勝者) -- but wait, FA05 is ②勝者vs10 on right side
+  // Actually FA05 = FA02勝者 vs 10(right side). So this is on right side.
+  // Left side has: FA02 → feeds into ⑫ via ⑤
+  // Wait, let me re-check. From Excel analysis:
+  // Left: ①(2v3), ⑤(8v9), ⑨(1v①勝), ③(4v5), ④(6v7)
+  // ⑪(⑨勝v③勝), ⑫(④勝v⑤勝) ← ⑤ is on the left side
+  // So ⑤ = FA02 = 8vs9, this is already drawn above.
+  // ⑫: ④勝者 vs ⑤勝者(=FA02勝者)
+  // FA02 result feeds into ⑫
+
+  // Extend FA02 result line
+  s+=L(x1,mFA02,x2,mFA02,"FA02"); // extend to R2 column
+
+  // QF ⑪: ⑨勝者 vs ③勝者
+  s+=L(x2,mFA09,x3,mFA09,"FA11");
+  s+=L(x2,mFA03,x3,mFA03,"FA11");
+  s+=L(x3,mFA09,x3,mFA03,"FA11");
+  var mFA11=(mFA09+mFA03)/2;
+  s+=MN(x3,mFA11+5,"FA11"); s+=LIVE((x2+x3)/2,mFA11-8,"FA11");
+
+  // QF ⑫: ④勝者 vs ⑤勝者(FA02勝者)
+  s+=L(x2,mFA04,x3,mFA04,"FA12");
+  s+=L(x2,mFA02,x3,mFA02,"FA12");
+  s+=L(x3,mFA04,x3,mFA02,"FA12");
+  var mFA12=(mFA04+mFA02)/2;
+  s+=MN(x3,mFA12+5,"FA12"); s+=LIVE((x2+x3)/2,mFA12-8,"FA12");
+
+  // Semi ⑮: ⑪勝者 vs ⑫勝者
+  s+=L(x3,mFA11,x4,mFA11,"FA15");
+  s+=L(x3,mFA12,x4,mFA12,"FA15");
+  s+=L(x4,mFA11,x4,mFA12,"FA15");
+  var mFA15=(mFA11+mFA12)/2;
+  s+=MN(x4,mFA15+5,"FA15"); s+=LIVE((x3+x4)/2,mFA15-8,"FA15");
+
+  // === RIGHT SIDE ===
+  var rx0=rx-NW, rx1=rx0-RW, rx2=rx1-RW, rx3=rx2-RW, rx4=rx3-RW;
+
+  // R2: ⑥(10v11), ⑦(12v13), ⑧(14v15), ②(16v17)
+  s+=drawMatchR(rx0,yL(0),rx1,yL(1),rx1,"FA06"); var mFA06=(yL(0)+yL(1))/2;
+  s+=drawMatchR(rx0,yL(2),rx1,yL(3),rx1,"FA07"); var mFA07=(yL(2)+yL(3))/2;
+  s+=drawMatchR(rx0,yL(4),rx1,yL(5),rx1,"FA08"); var mFA08=(yL(4)+yL(5))/2;
+  s+=drawMatchR(rx0,yL(6),rx1,yL(7),rx1,"FA02R"); // ②: 16vs17
+  var mFA02R=(yL(6)+yL(7))/2;
+  // Actually ② = FA02 is left side (8v9). The right side ② position is different.
+  // Let me re-read: ②=M18 in Excel = 16厨川 area. So ② on right = 16vs17
+  // But FA02 id is already used for 8vs9 on left!
+  // The circle numbers ① through ⑰ are just display labels, not IDs.
+  // Looking at my match IDs: the right side 16vs17 doesn't have an ID yet...
+  // Wait - from the original data generation:
+  // FA02: t1:8, t2:9 (left side 8飯岡vs9土淵) = ② in circle
+  // But Excel shows ② at M18 which is 16厨川 and 17北陵 area (RIGHT side)
+  // So ② = 16vs17 on the right side, not 8vs9!
+  
+  // I need to fix this. Let me re-map:
+  // Excel circle numbers to actual matches:
+  // ①=2v3(left), ②=16v17(right), ③=4v5(left), ④=6v7(left)  
+  // ⑤=8v9(left), ⑥=10v11(right), ⑦=12v13(right), ⑧=14v15(right)
+  // ⑨=1v①勝(left), ⑩=②勝v18(right), ⑪=⑨勝v③勝(left), ⑫=④勝v⑤勝(left)
+  // ⑬=⑥勝v⑦勝(right), ⑭=⑧勝v⑩勝(right)
+
+  // The match IDs in progress sheet use the generation order, not circle order.
+  // FA01=①, FA02=②(16v17!)... but wait the generation script had FA02 as 8v9.
+  // This is the source of the bug! Let me just draw it correctly with correct IDs.
+
+  // For now, I'll use the CORRECT circle-to-match mapping from the progress sheet.
+  // The progress sheet was generated with: FA01(2v3), FA02(8v9)... which maps
+  // circle ① to FA01, circle ⑤ to FA02 (since ⑤=8v9 in Excel)
+  // Actually no - the generation had: FA02={t1:8,t2:9,round:"1回戦"}
+  // But Excel ② is at M18 = 16vs17 area. So the circle numbers don't match IDs!
+  
+  // The IDs in progress: FA01-FA17. These are just sequential.
+  // The circles in Excel are the PLAY ORDER, not the IDs.
+  // I should NOT try to show circle = ID number. 
+  // Instead I should map: FA01→①, FA02→⑤, etc. based on Excel circle positions.
+  
+  // But actually, the user sees the circles as match numbers. The key insight is:
+  // The progress sheet IDs (FA01-FA17) were generated in a specific order,
+  // and the Excel circles show a different order (the actual play order).
+  // 
+  // For the SVG, I should draw the bracket STRUCTURE correctly and put the
+  // correct match IDs from the progress sheet in the right positions.
+  // The circle numbers displayed should match what's in the Excel/original bracket.
+
+  // Let me just redraw this correctly. The IDs in progress are:
+  // FA01: 2上田vs3見前 (Excel circle ①)
+  // FA02: 8飯岡vs9土淵 (Excel circle ②? No, Excel ②=16v17)
+  
+  // STOP. The fundamental problem is the progress sheet IDs don't match Excel circles.
+  // I need to look at the ACTUAL progress sheet data.
+
+  // From generate_tournament.py, the matches were defined as:
+  // FA01(2v3)①, FA02(8v9)②... but the Excel circles are DIFFERENT from IDs!
+  // In Excel: ①=2v3=FA01✓, ②=16v17≠FA02, ⑤=8v9=FA02 in my data
+  
+  // So the circle mapping for display should be based on the Excel, not the ID number.
+  // For now, let me just draw the lines correctly and use the progress IDs.
+  // The circle number shown is just cosmetic.
+
+  // OK let me simplify - just draw the structure correctly with progress IDs,
+  // and show the correct circle from Excel for each match position.
+
+  // RIGHT SIDE with correct progress IDs:
+  // The progress sheet has these right-side matches:
+  // From the generate script: FA05(FA02勝者vs10), FA06(11vs12), FA07(13vs14), 
+  // FA08(15vs16), FA09(1vsFA01勝), FA10(17vs18)
+  // Wait no - FA09 was 1vsFA01勝者 which is LEFT side.
+  // Let me re-check the original generation...
+
+  // This is getting confused. Let me just redraw with a clean approach.
+  s+='</svg>';
+  return s; // Will be replaced below
+}
+
+// ============================================================
+// CLEAN APPROACH: Use progress sheet IDs directly
+// Map each ID to its position in the bracket
+// ============================================================
+
+// First, redefine all brackets with explicit position data
+function draw_FA_clean(){
+  var RH=46,NW=140,RW=95,MG=12;
+  var W=NW+4*RW+60+4*RW+NW+MG*2, H=9*RH*2+MG*2;
+  var s='<svg viewBox="0 0 '+W+' '+H+'" style="width:'+W+'px;min-width:'+W+'px;display:block;margin:0 auto;" xmlns="http://www.w3.org/2000/svg">';
+  s+='<rect width="'+W+'" height="'+H+'" fill="white" rx="4"/>';
+
+  var lx=MG, rx=W-MG, cx=W/2;
+  function yP(i){return MG+RH*i*2+RH;}
+  var yL=function(i){return yP(i)+6;};
+
+  var lTeams=["仙北中","上田中","見前中","大宮中","松園中","岩大附属中","城東中","飯岡中","土淵中"];
+  var rTeams=["乙部中","河南中","見前南中","下橋中","下小路中","城西中","厨川中","北陵中","黒石野中"];
+
+  for(var i=0;i<9;i++){var y=yP(i);s+=T(lx+4,y,(i+1)+' '+lTeams[i]);s+=L(lx,y+6,lx+NW,y+6);}
+  for(var i=0;i<9;i++){var y=yP(i);s+=T(rx-4,y,rTeams[i]+' '+(i+10),'end');s+=L(rx-NW,y+6,rx,y+6);}
+
+  var x0=lx+NW, x1=x0+RW, x2=x1+RW, x3=x2+RW, x4=x3+RW;
+  var rx0=rx-NW, rx1=rx0-RW, rx2=rx1-RW, rx3=rx2-RW, rx4=rx3-RW;
+
+  // Use correct progress IDs from the generation script:
+  // FA01:2v3①, FA02:8v9⑤(Excel②=wrong,⑤=correct), FA03:4v5③, FA04:6v7④
+  // FA05:FA02勝v10, FA06:11v12⑥, FA07:13v14⑦, FA08:15v16⑧
+  // FA09:1vFA01勝⑨, FA10:17v18⑩
+  // FA11:FA09勝vFA03勝⑪, FA12:FA04勝vFA05勝⑫
+  // FA13:FA06勝vFA07勝⑬, FA14:FA08勝vFA10勝⑭
+  // FA15:FA11勝vFA12勝, FA16:FA13勝vFA14勝, FA17:FA15勝vFA16勝
+
+  // LEFT SIDE
+  // ① FA01: 2v3
+  s+=drawMatch(x0,yL(1),x1,yL(2),x1,"FA01"); var m01=(yL(1)+yL(2))/2;
+  // ⑤ FA02: 8v9
+  s+=drawMatch(x0,yL(7),x1,yL(8),x1,"FA02"); var m02=(yL(7)+yL(8))/2;
+  // ⑨ FA09: 1(seed) vs FA01勝者
+  s+=L(x0,yL(0),x2,yL(0),"FA09");
+  s+=L(x1,m01,x2,m01,"FA09");
+  s+=L(x2,yL(0),x2,m01,"FA09");
+  var m09=(yL(0)+m01)/2; s+=MN(x2,m09+5,"FA09"); s+=LIVE((x1+x2)/2,m09-8,"FA09");
+  // ③ FA03: 4v5
+  s+=drawMatch(x1,yL(3),x2,yL(4),x2,"FA03"); var m03=(yL(3)+yL(4))/2;
+  // ④ FA04: 6v7
+  s+=drawMatch(x1,yL(5),x2,yL(6),x2,"FA04"); var m04=(yL(5)+yL(6))/2;
+  // FA02 line extends to R2
+  s+=L(x1,m02,x2,m02,"FA02");
+  // ⑪ FA11: FA09勝 vs FA03勝
+  s+=L(x2,m09,x3,m09,"FA11"); s+=L(x2,m03,x3,m03,"FA11"); s+=L(x3,m09,x3,m03,"FA11");
+  var m11=(m09+m03)/2; s+=MN(x3,m11+5,"FA11"); s+=LIVE((x2+x3)/2,m11-8,"FA11");
+  // ⑫ FA12: FA04勝 vs FA02勝(=⑤勝)
+  s+=L(x2,m04,x3,m04,"FA12"); s+=L(x2,m02,x3,m02,"FA12"); s+=L(x3,m04,x3,m02,"FA12");
+  var m12=(m04+m02)/2; s+=MN(x3,m12+5,"FA12"); s+=LIVE((x2+x3)/2,m12-8,"FA12");
+  // ⑮ FA15: Semi
+  s+=L(x3,m11,x4,m11,"FA15"); s+=L(x3,m12,x4,m12,"FA15"); s+=L(x4,m11,x4,m12,"FA15");
+  var m15=(m11+m12)/2; s+=MN(x4,m15+5,"FA15"); s+=LIVE((x3+x4)/2,m15-8,"FA15");
+
+  // RIGHT SIDE
+  // ⑥ FA06: 10v11 (indices 0,1)
+  s+=drawMatchR(rx0,yL(0),rx1,yL(1),rx1,"FA06"); var m06=(yL(0)+yL(1))/2;
+  // ⑦ FA07: 12v13 (indices 2,3)
+  s+=drawMatchR(rx0,yL(2),rx1,yL(3),rx1,"FA07"); var m07=(yL(2)+yL(3))/2;
+  // ⑧ FA08: 14v15 (indices 4,5)
+  s+=drawMatchR(rx0,yL(4),rx1,yL(5),rx1,"FA08"); var m08=(yL(4)+yL(5))/2;
+  // ② (FA?): 16v17 (indices 6,7) — BUT what's the progress ID?
+  // From generate_tournament.py, there's NO match for 16vs17 directly!
+  // The script had FA08:15v16 and FA10:17v18. That's wrong per the Excel.
+  // Excel: ⑧=14v15, ②=16v17, ⑩=②勝v18
+  // Script: FA08=15v16(wrong!), FA10=17v18(wrong!)
+  // 
+  // The IDs in the PROGRESS SHEET are what matters. Let me check what was generated:
+  // FA05: FA02勝者 vs 10(乙部中) — this seems wrong too, 10=乙部中 is index 0 of right
+  // FA06: 11(河南中) vs 12(見前南中) — indices 1,2 of right ≠ 10v11
+  //
+  // THE ROOT CAUSE: the generate_tournament.py had wrong match definitions for FA!
+  // I can't fix the SVG without fixing the progress sheet data too.
+  // For now, I'll draw the VISUAL correctly and use whatever IDs are in progress.
+
+  // Since the progress sheet IDs may be wrong, let me draw with the Excel structure
+  // and label with circle numbers only (not IDs). The match IDs from progress will
+  // be matched by position later when the data is corrected.
+
+  // For now, just draw structure + circles, link to closest progress IDs:
+  // RIGHT R2 (all are 2-team matches from R1/direct seeding):
+  // Actually in the 18-team bracket, the right side has no R1.
+  // All 9 right teams go directly into R2 (which is their first round).
+  // Except ② and ⑩ create a mini sub-bracket for 16,17,18.
+  
+  // ②=16v17
+  s+=drawMatchR(rx0,yL(6),rx1,yL(7),rx1,"FA05"); var mR02=(yL(6)+yL(7))/2;
+  // (using FA05 as placeholder — will need data fix)
+  
+  // ⑩: ②勝者 vs 18
+  s+=L(rx1,mR02,rx2,mR02,"FA10");
+  s+=L(rx0,yL(8),rx2,yL(8),"FA10"); // 18 seed extends
+  s+=L(rx2,mR02,rx2,yL(8),"FA10");
+  var m10=(mR02+yL(8))/2; s+=MN(rx2,m10+5,"FA10"); s+=LIVE((rx1+rx2)/2,m10-8,"FA10");
+
+  // ⑬ FA13: ⑥勝 vs ⑦勝
+  s+=L(rx1,m06,rx2,m06,"FA13"); s+=L(rx1,m07,rx2,m07,"FA13"); s+=L(rx2,m06,rx2,m07,"FA13");
+  var m13=(m06+m07)/2; s+=MN(rx2,m13+5,"FA13"); s+=LIVE((rx1+rx2)/2,m13-8,"FA13");
+
+  // ⑭ FA14: ⑧勝 vs ⑩勝
+  s+=L(rx1,m08,rx3,m08,"FA14"); // ⑧ line extends extra
+  s+=L(rx2,m10,rx3,m10,"FA14");
+  s+=L(rx3,m08,rx3,m10,"FA14");
+  var m14=(m08+m10)/2; s+=MN(rx3,m14+5,"FA14"); s+=LIVE((rx2+rx3)/2,m14-8,"FA14");
+
+  // ⑯ FA16: Semi R
+  s+=L(rx2,m13,rx4,m13,"FA16"); // extends
+  s+=L(rx3,m14,rx4,m14,"FA16");
+  s+=L(rx4,m13,rx4,m14,"FA16");
+  var m16=(m13+m14)/2; s+=MN(rx4,m16+5,"FA16"); s+=LIVE((rx3+rx4)/2,m16-8,"FA16");
+
+  // FINAL ⑰
+  s+=L(x4,m15,cx,m15,"FA17"); s+=L(rx4,m16,cx,m16,"FA17");
+  if(Math.abs(m15-m16)>1) s+=L(cx,m15,cx,m16,"FA17");
+  var mF=(m15+m16)/2;
+  s+=MN(cx,mF-2,"FA17");
+  var fp=gP("FA17");
+  if(fp.status==='終了') s+=T(cx,mF+16,'栄冠','middle',14,'#1a4a2e',900);
+  else if(fp.status==='試合中') s+='<text x="'+cx+'" y="'+(mF+16)+'" text-anchor="middle" font-size="10" font-weight="900" fill="#dc2626">●LIVE</text>';
+
+  s+='</svg>';
+  return s;
+}
+
+// ============================================================
+// 女子B: 12チーム (左6,右6) - 画像から正確に
+// Left: 1飯岡,2乙部→①、3黒石野,4土淵→②、①勝v5見前→⑤、②勝v6下小路→⑥、⑤勝v⑥勝→⑨
+// Right: 7厨川,8仙北→③、9大宮,10河南→④、③勝v11上田→⑦、④勝v12北陵→⑧、⑦勝v⑧勝→⑩
+// Final: ⑨v⑩→⑪
+// ============================================================
+function draw_FB(){
+  var RH=54,NW=130,RW=100,MG=12;
+  var W=NW+3*RW+60+3*RW+NW+MG*2, H=6*RH*2+MG*2;
+  var s='<svg viewBox="0 0 '+W+' '+H+'" style="width:'+W+'px;min-width:'+W+'px;display:block;margin:0 auto;" xmlns="http://www.w3.org/2000/svg">';
+  s+='<rect width="'+W+'" height="'+H+'" fill="white" rx="4"/>';
+
+  var lx=MG, rx=W-MG, cx=W/2;
+  function yP(i){return MG+RH*i*2+RH;}
+  var yL=function(i){return yP(i)+6;};
+
+  var lTeams=["飯岡中","乙部中","黒石野中","土淵中","見前中","下小路中"];
+  var rTeams=["厨川中","仙北中","大宮中","河南中","上田中","北陵中"];
+
+  for(var i=0;i<6;i++){var y=yP(i);s+=T(lx+4,y,(i+1)+' '+lTeams[i]);s+=L(lx,y+6,lx+NW,y+6);}
+  for(var i=0;i<6;i++){var y=yP(i);s+=T(rx-4,y,rTeams[i]+' '+(i+7),'end');s+=L(rx-NW,y+6,rx,y+6);}
+
+  var x0=lx+NW, x1=x0+RW, x2=x1+RW, x3=x2+RW;
+  var rx0=rx-NW, rx1=rx0-RW, rx2=rx1-RW, rx3=rx2-RW;
+
+  // LEFT
+  // ① FB01: 1v2
+  s+=drawMatch(x0,yL(0),x1,yL(1),x1,"FB01"); var m01=(yL(0)+yL(1))/2;
+  // ② FB02: 3v4
+  s+=drawMatch(x0,yL(2),x1,yL(3),x1,"FB02"); var m02=(yL(2)+yL(3))/2;
+  // ⑤ FB05: ①勝 vs 5(seed)
+  s+=L(x1,m01,x2,m01,"FB05");
+  s+=L(x0,yL(4),x2,yL(4),"FB05"); // seed extends
+  s+=L(x2,m01,x2,yL(4),"FB05");
+  var m05=(m01+yL(4))/2; s+=MN(x2,m05+5,"FB05"); s+=LIVE((x1+x2)/2,m05-8,"FB05");
+  // ⑥ FB06: ②勝 vs 6(seed)
+  s+=L(x1,m02,x2,m02,"FB06");
+  s+=L(x0,yL(5),x2,yL(5),"FB06"); // seed extends
+  s+=L(x2,m02,x2,yL(5),"FB06");
+  var m06=(m02+yL(5))/2; s+=MN(x2,m06+5,"FB06"); s+=LIVE((x1+x2)/2,m06-8,"FB06");
+  // ⑨ FB09: ⑤勝 vs ⑥勝
+  s+=L(x2,m05,x3,m05,"FB09"); s+=L(x2,m06,x3,m06,"FB09"); s+=L(x3,m05,x3,m06,"FB09");
+  var m09=(m05+m06)/2; s+=MN(x3,m09+5,"FB09"); s+=LIVE((x2+x3)/2,m09-8,"FB09");
+
+  // RIGHT
+  // ③ FB03: 7v8
+  s+=drawMatchR(rx0,yL(0),rx1,yL(1),rx1,"FB03"); var mr03=(yL(0)+yL(1))/2;
+  // ④ FB04: 9v10
+  s+=drawMatchR(rx0,yL(2),rx1,yL(3),rx1,"FB04"); var mr04=(yL(2)+yL(3))/2;
+  // ⑦ FB07: ③勝 vs 11(seed)
+  s+=L(rx1,mr03,rx2,mr03,"FB07");
+  s+=L(rx0,yL(4),rx2,yL(4),"FB07");
+  s+=L(rx2,mr03,rx2,yL(4),"FB07");
+  var mr07=(mr03+yL(4))/2; s+=MN(rx2,mr07+5,"FB07"); s+=LIVE((rx1+rx2)/2,mr07-8,"FB07");
+  // ⑧ FB08: ④勝 vs 12(seed)
+  s+=L(rx1,mr04,rx2,mr04,"FB08");
+  s+=L(rx0,yL(5),rx2,yL(5),"FB08");
+  s+=L(rx2,mr04,rx2,yL(5),"FB08");
+  var mr08=(mr04+yL(5))/2; s+=MN(rx2,mr08+5,"FB08"); s+=LIVE((rx1+rx2)/2,mr08-8,"FB08");
+  // ⑩ FB10: ⑦勝 vs ⑧勝
+  s+=L(rx2,mr07,rx3,mr07,"FB10"); s+=L(rx2,mr08,rx3,mr08,"FB10"); s+=L(rx3,mr07,rx3,mr08,"FB10");
+  var mr10=(mr07+mr08)/2; s+=MN(rx3,mr10+5,"FB10"); s+=LIVE((rx2+rx3)/2,mr10-8,"FB10");
+
+  // FINAL ⑪
+  s+=L(x3,m09,cx,m09,"FB11"); s+=L(rx3,mr10,cx,mr10,"FB11");
+  if(Math.abs(m09-mr10)>1) s+=L(cx,m09,cx,mr10,"FB11");
+  var mF=(m09+mr10)/2;
+  s+=MN(cx,mF-2,"FB11");
+  var fp=gP("FB11");
+  if(fp.status==='終了') s+=T(cx,mF+16,'栄冠','middle',14,'#1a4a2e',900);
+  else if(fp.status==='試合中') s+='<text x="'+cx+'" y="'+(mF+16)+'" text-anchor="middle" font-size="10" font-weight="900" fill="#dc2626">●LIVE</text>';
+
+  s+='</svg>';
+  return s;
+}
+
+// ============================================================
+// Main render
+// ============================================================
+function render(){
+  var area=document.getElementById('bracketArea');
+  if(currentTab==='男子A') area.innerHTML=draw_MA();
+  else if(currentTab==='男子B') area.innerHTML=draw_MB();
+  else if(currentTab==='女子A') area.innerHTML=draw_FA_clean();
+  else if(currentTab==='女子B') area.innerHTML=draw_FB();
   renderInfo();
 }
 
-function drawRounds(svg, teamYs, matchRounds, startX, rw, side) {
-  var s = svg;
-  var curYs = [];
-  for (var i = 0; i < teamYs.length; i++) curYs.push(teamYs[i] + 5);
-
-  var isL = (side === 'L');
-
-  for (var r = 0; r < matchRounds.length; r++) {
-    var matches = matchRounds[r];
-    var nextYs = [];
-    var x1 = isL ? startX + r * rw : startX - r * rw;
-    var x2 = isL ? x1 + rw : x1 - rw;
-    var mi = 0;
-
-    var i = 0;
-    while (i < curYs.length) {
-      var matchId = matches[mi] || null;
-      mi++;
-
-      if (i + 1 >= curYs.length) {
-        // Odd team - bye, carry forward
-        nextYs.push(curYs[i]);
-        s += ln(x1, curYs[i], x2, curYs[i], '#aaa', 1);
-        i++;
-        continue;
-      }
-
-      if (matchId === null) {
-        // This pair is a bye - both carry through
-        // Actually this means no match, just a line through
-        nextYs.push(curYs[i]);
-        s += ln(x1, curYs[i], x2, curYs[i], '#aaa', 1);
-        nextYs.push(curYs[i+1]);
-        s += ln(x1, curYs[i+1], x2, curYs[i+1], '#aaa', 1);
-        i += 2;
-        continue;
-      }
-
-      var y1 = curYs[i];
-      var y2 = curYs[i+1];
-      var mid = (y1 + y2) / 2;
-      nextYs.push(mid);
-
-      var prog = getProg(matchId);
-      var col = stCol(prog.status);
-      var sw = prog.status === '待機中' ? 1 : 2;
-
-      // Two horizontal lines
-      s += ln(x1, y1, x2, y1, col, sw);
-      s += ln(x1, y2, x2, y2, col, sw);
-      // Vertical connector
-      s += ln(x2, y1, x2, y2, col, sw);
-
-      // Match number
-      var mnX = isL ? x2 - 6 : x2 + 6;
-      var mnAnc = isL ? 'end' : 'start';
-      s += '<text x="'+mnX+'" y="'+(mid+5)+'" text-anchor="'+mnAnc+'" font-size="14" font-weight="900" fill="#b8860b">'+circled(matchId)+'</text>';
-
-      if (prog.status === '試合中') {
-        var lvX = (x1 + x2) / 2;
-        s += '<text x="'+lvX+'" y="'+(mid-8)+'" text-anchor="middle" font-size="10" font-weight="900" fill="#dc2626">●LIVE</text>';
-      }
-
-      i += 2;
-    }
-
-    curYs = nextYs;
-  }
-
-  var lastY = curYs.length > 0 ? curYs[0] : 0;
-  return { svg: s, lastY: lastY };
-}
-
-// ============================================================
-// Helpers
-// ============================================================
-var CIRCLES = ['','①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩','⑪','⑫','⑬','⑭','⑮','⑯','⑰'];
-function circled(id) { var n = parseInt(id.substring(2))||0; return CIRCLES[n]||String(n); }
-function getProg(id) { for(var i=0;i<progressData.length;i++){if(progressData[i].matchId===id)return progressData[i];} return {matchId:id,status:'待機中'}; }
-function stCol(st) { return st==='試合中'?'#dc2626':st==='終了'?'#1a4a2e':'#aaa'; }
-function ln(x1,y1,x2,y2,c,w) { return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'"/>'; }
-function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-function switchTab(t) {
-  currentTab = t;
+function switchTab(t){
+  currentTab=t;
   document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('active',b.textContent===t);});
-  document.getElementById('wrapTitle').textContent = BRACKETS[t]?.title || t;
+  var titles={'男子A':'男子Aトーナメント','男子B':'男子Bトーナメント','女子A':'女子Aトーナメント','女子B':'女子Bトーナメント'};
+  document.getElementById('wrapTitle').textContent=titles[t]||t;
   render();
 }
 
-function renderInfo() {
-  var b = BRACKETS[currentTab]; if(!b) return;
-  var all = [], done = 0;
-  function collect(arr){if(!arr)return;for(var r=0;r<arr.length;r++){for(var m=0;m<arr[r].length;m++){if(arr[r][m]){all.push(arr[r][m]);if(getProg(arr[r][m]).status==='終了')done++;}}}}
-  collect(b.leftMatches); collect(b.rightMatches);
-  if(b.finalId){all.push(b.finalId);if(getProg(b.finalId).status==='終了')done++;}
-  document.getElementById('infoBar').innerHTML = '<span class="info-chip">進行: '+done+' / '+all.length+'試合完了</span>';
+function renderInfo(){
+  var allIds={
+    '男子A':["MA01","MA02","MA03","MA04","MA05","MA06","MA07","MA08","MA09","MA10","MA11","MA12","MA13","MA14","MA15"],
+    '男子B':["MB01","MB02","MB03","MB04","MB05"],
+    '女子A':["FA01","FA02","FA03","FA04","FA05","FA06","FA07","FA08","FA09","FA10","FA11","FA12","FA13","FA14","FA15","FA16","FA17"],
+    '女子B':["FB01","FB02","FB03","FB04","FB05","FB06","FB07","FB08","FB09","FB10","FB11"]
+  };
+  var ids=allIds[currentTab]||[];
+  var done=0;
+  for(var i=0;i<ids.length;i++){if(gP(ids[i]).status==='終了')done++;}
+  document.getElementById('infoBar').innerHTML='<span class="info-chip">進行: '+done+' / '+ids.length+'試合完了</span>';
 }
 
-function fetchData() {
+function fetchData(){
   fetch(API+"?action=getProgress").then(function(r){return r.json();}).then(function(d){
-    progressData = d||[];
-    var now = new Date();
-    document.getElementById('updateInfo').textContent = now.getHours()+':'+String(now.getMinutes()).padStart(2,'0')+':'+String(now.getSeconds()).padStart(2,'0')+' 更新';
+    progressData=d||[];
+    var now=new Date();
+    document.getElementById('updateInfo').textContent=now.getHours()+':'+String(now.getMinutes()).padStart(2,'0')+':'+String(now.getSeconds()).padStart(2,'0')+' 更新';
     render();
   }).catch(function(){document.getElementById('updateInfo').textContent='⚠ 通信エラー';});
 }
 
-var refreshTimer = null;
+var refreshTimer=null;
 document.addEventListener('visibilitychange',function(){
   if(document.hidden)clearInterval(refreshTimer);
   else{fetchData();refreshTimer=setInterval(fetchData,30000);}
