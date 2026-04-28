@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>クラブ選手権 団体戦 参加申込｜岩手県中学生ソフトテニス連盟</title>
+<title>第１回全日本中学生クラブ選手権予選 兼 岩手県中学生スポーツ少年団ソフトテニス大会 参加申込｜岩手県中学生ソフトテニス連盟</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -129,7 +129,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--te
       <div class="icon">🏆</div>
       <h1>
         <small>岩手県中学生ソフトテニス連盟</small>
-        <span class="tournament-name">クラブ選手権</span>
+        <span class="tournament-name">第１回全日本中学生クラブ選手権予選 兼 岩手県中学生スポーツ少年団ソフトテニス大会</span>
         団体戦 参加申込
       </h1>
     </div>
@@ -144,8 +144,8 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--te
     <div class="card">
       <h2>基本情報</h2>
       <div class="form-row">
-        <label>チーム名（クラブ名）<span class="req">※必須</span></label>
-        <input type="text" id="teamName" required placeholder="例：○○クラブ">
+        <label>チーム名<span class="req">※必須</span></label>
+        <input type="text" id="teamName" required placeholder="例：○○クラブ、○○スポーツ少年団">
       </div>
       <div class="form-row">
         <label>男女<span class="req">※必須</span></label>
@@ -181,6 +181,36 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--te
           <option>気仙</option><option>遠野</option><option>釜石・大槌</option>
           <option>宮古</option>
         </select>
+      </div>
+    </div>
+
+    <!-- ===== 引率・申込責任者（基本情報の直後） ===== -->
+    <div class="card">
+      <h2>引率・申込責任者</h2>
+      <h3>引率責任者</h3>
+      <div class="grid-2">
+        <div class="form-row"><label>氏名<span class="req">※必須</span></label><input type="text" id="leaderName" required></div>
+        <div class="form-row"><label>役職<span class="req">※必須</span></label>
+          <select id="leaderTitle" required>
+            <option value="">選択</option><option>教職員</option><option>部活動指導員</option><option>外部コーチ</option><option>地域クラブ指導者</option><option>保護者</option>
+          </select>
+        </div>
+      </div>
+      <h3>申込責任者</h3>
+      <label class="same-check"><input type="checkbox" id="sameAsLeader" onchange="toggleSame()">引率責任者と同じ</label>
+      <div id="applicantFields">
+        <div class="grid-2">
+          <div class="form-row"><label>氏名<span class="req">※必須</span></label><input type="text" id="applicantName" required></div>
+          <div class="form-row"><label>役職<span class="req">※必須</span></label>
+            <select id="applicantTitle" required>
+              <option value="">選択</option><option>教職員</option><option>部活動指導員</option><option>外部コーチ</option><option>地域クラブ指導者</option><option>保護者</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="form-row"><label>携帯番号<span class="req">※必須</span></label><input type="tel" id="applicantPhone" required pattern="^0[0-9]{9,10}$" placeholder="09012345678"><div class="hint">ハイフンなし</div></div>
+        <div class="form-row"><label>メールアドレス<span class="req">※必須</span></label><input type="email" id="applicantEmail" required placeholder="example@mail.com"><div class="hint">PDF控えをこのアドレスに送信</div></div>
       </div>
     </div>
 
@@ -222,41 +252,10 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--te
       </div>
     </div>
 
-    <!-- ===== 監督情報 ===== -->
+    <!-- ===== 監督情報（部門ごと） ===== -->
     <div class="card" id="coachCard" style="display:none">
       <h2>監督情報（ベンチ入り指導者）</h2>
-      <div class="note-box">※ 監督（ベンチ入り指導者）を登録してください。No.1のみ必須です。</div>
       <div id="coachArea"></div>
-    </div>
-
-    <!-- ===== 引率・申込責任者 ===== -->
-    <div class="card" id="applicantCard" style="display:none">
-      <h2>引率・申込責任者</h2>
-      <h3>引率責任者</h3>
-      <div class="grid-2">
-        <div class="form-row"><label>氏名<span class="req">※必須</span></label><input type="text" id="leaderName" required></div>
-        <div class="form-row"><label>役職<span class="req">※必須</span></label>
-          <select id="leaderTitle" required>
-            <option value="">選択</option><option>教職員</option><option>部活動指導員</option><option>外部コーチ</option><option>地域クラブ指導者</option><option>保護者</option>
-          </select>
-        </div>
-      </div>
-      <h3>申込責任者</h3>
-      <label class="same-check"><input type="checkbox" id="sameAsLeader" onchange="toggleSame()">引率責任者と同じ</label>
-      <div id="applicantFields">
-        <div class="grid-2">
-          <div class="form-row"><label>氏名<span class="req">※必須</span></label><input type="text" id="applicantName" required></div>
-          <div class="form-row"><label>役職<span class="req">※必須</span></label>
-            <select id="applicantTitle" required>
-              <option value="">選択</option><option>教職員</option><option>部活動指導員</option><option>外部コーチ</option><option>地域クラブ指導者</option><option>保護者</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      <div class="grid-2">
-        <div class="form-row"><label>携帯番号<span class="req">※必須</span></label><input type="tel" id="applicantPhone" required pattern="^0[0-9]{9,10}$" placeholder="09012345678"><div class="hint">ハイフンなし</div></div>
-        <div class="form-row"><label>メールアドレス<span class="req">※必須</span></label><input type="email" id="applicantEmail" required placeholder="example@mail.com"><div class="hint">PDF控えをこのアドレスに送信</div></div>
-      </div>
     </div>
 
     <!-- ===== 参加料 ===== -->
@@ -330,7 +329,6 @@ function selectSection(val) {
   document.getElementById('teamChampion').style.display = showChampion ? '' : 'none';
   document.getElementById('teamSoft').style.display = showSoft ? '' : 'none';
   document.getElementById('coachCard').style.display = val ? '' : 'none';
-  document.getElementById('applicantCard').style.display = val ? '' : 'none';
   document.getElementById('feeCard').style.display = val ? '' : 'none';
   document.getElementById('submitBtn').style.display = val ? '' : 'none';
 
@@ -402,21 +400,28 @@ function toggleVacant(pid) {
   checkDuplicatePlayers();
 }
 
-/* ========== 監督欄の構築 ========== */
+/* ========== 監督欄の構築（部門ごと） ========== */
 function buildCoaches() {
   var area = document.getElementById('coachArea');
-  if (area.children.length > 0) return;
+  area.innerHTML = '';
 
-  var coachCount = (selectedSection === 'both') ? 2 : 1;
+  var sections = [];
+  if (selectedSection === 'champion') sections.push({ key: 0, label: 'チャンピオンの部　監督', req: true });
+  if (selectedSection === 'soft') sections.push({ key: 0, label: 'ソフトテニスの部　監督', req: true });
+  if (selectedSection === 'both') {
+    sections.push({ key: 0, label: 'チャンピオンの部　監督', req: true });
+    sections.push({ key: 1, label: 'ソフトテニスの部　監督', req: true });
+  }
+
   var html = '';
-  for (var i = 0; i < coachCount; i++) {
-    var reqLabel = (i === 0) ? '<span class="req">※必須</span>' : '（任意）';
-    var reqAttr = (i === 0) ? ' required' : '';
-    html += '<h3>監督 No.' + (i + 1) + ' ' + reqLabel + '</h3>';
+  for (var i = 0; i < sections.length; i++) {
+    var s = sections[i];
+    var reqLabel = '<span class="req">※必須</span>';
+    html += '<h3>' + s.label + ' ' + reqLabel + '</h3>';
     html += '<div class="grid-2">';
-    html += '<div class="form-row"><label>氏名</label><input type="text" id="coachName_' + i + '"' + reqAttr + '></div>';
+    html += '<div class="form-row"><label>氏名</label><input type="text" id="coachName_' + i + '" required></div>';
     html += '<div class="form-row"><label>役職</label>';
-    html += '<select id="coachTitle_' + i + '"' + reqAttr + '><option value="">選択</option><option>教職員</option><option>部活動指導員</option><option>外部コーチ</option><option>地域クラブ指導者</option><option>保護者</option></select>';
+    html += '<select id="coachTitle_' + i + '" required><option value="">選択</option><option>教職員</option><option>部活動指導員</option><option>外部コーチ</option><option>地域クラブ指導者</option><option>保護者</option></select>';
     html += '</div></div>';
   }
   area.innerHTML = html;
@@ -541,10 +546,16 @@ function getPlayers(section) {
 /* ========== 監督データ取得 ========== */
 function getCoaches() {
   var coaches = [];
-  for (var i = 0; i < 2; i++) {
+  var labels = [];
+  if (selectedSection === 'champion') labels = ['チャンピオンの部'];
+  if (selectedSection === 'soft') labels = ['ソフトテニスの部'];
+  if (selectedSection === 'both') labels = ['チャンピオンの部', 'ソフトテニスの部'];
+
+  for (var i = 0; i < labels.length; i++) {
     var nameEl = document.getElementById('coachName_' + i);
     if (!nameEl) break;
     coaches.push({
+      sectionLabel: labels[i],
       name: nameEl.value,
       title: (document.getElementById('coachTitle_' + i) || {}).value || ''
     });
@@ -698,7 +709,7 @@ function showConfirmModal(payload) {
   html += '<tr><th>監督</th><td>';
   for (var c = 0; c < payload.coaches.length; c++) {
     if (!payload.coaches[c].name) continue;
-    html += (c + 1) + '. ' + payload.coaches[c].name + '（' + payload.coaches[c].title + '）<br>';
+    html += payload.coaches[c].sectionLabel + '：' + payload.coaches[c].name + '（' + payload.coaches[c].title + '）<br>';
   }
   html += '</td></tr>';
   html += '<tr><th>引率責任者</th><td>' + payload.leader.name + '（' + payload.leader.title + '）</td></tr>';
@@ -772,7 +783,7 @@ function doSubmit() {
 
 /* ========== INIT ========== */
 var urlParams = new URLSearchParams(window.location.search);
-var tournamentParam = urlParams.get('tournament') || 'クラブ選手権';
+var tournamentParam = urlParams.get('tournament') || '第１回全日本中学生クラブ選手権予選 兼 岩手県中学生スポーツ少年団ソフトテニス大会';
 var dateParam = urlParams.get('date') || '';
 var feeParam = urlParams.get('fee');
 
