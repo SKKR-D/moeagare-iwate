@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>第１回全日本中学生クラブ選手権予選 兼 岩手県中学生スポーツ少年団ソフトテニス大会 参加申込｜岩手県中学生ソフトテニス連盟</title>
+<title>第1回岩手県中学生クラブチーム・スポーツ少年団合同ソフトテニス交流大会 参加申込｜岩手県中学生ソフトテニス連盟</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -129,7 +129,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--te
       <div class="icon">🏆</div>
       <h1>
         <small>岩手県中学生ソフトテニス連盟</small>
-        <span class="tournament-name">第１回全日本中学生クラブ選手権予選 兼 岩手県中学生スポーツ少年団ソフトテニス大会</span>
+        <span class="tournament-name">第1回岩手県中学生クラブチーム・スポーツ少年団合同ソフトテニス交流大会</span>
         団体戦 参加申込
       </h1>
     </div>
@@ -238,7 +238,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--te
     <div class="card" id="teamChampion" style="display:none">
       <h2>選手情報</h2>
       <div class="team-section" id="sectionChampion">
-        <h3><span class="team-label">チャンピオンの部</span>選手登録（最大8名・最低3名）</h3>
+        <h3><span class="team-label">チャンピオンの部</span>選手登録（最大8名・最低4名）</h3>
         <div id="playersChampion"></div>
       </div>
     </div>
@@ -246,7 +246,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--te
     <!-- ===== チーム② ソフトテニスの部 ===== -->
     <div class="card" id="teamSoft" style="display:none">
       <div class="team-section second" id="sectionSoft">
-        <h3><span class="team-label">ソフトテニスの部</span>選手登録（最大8名・最低3名）</h3>
+        <h3><span class="team-label">ソフトテニスの部</span>選手登録（最大8名・最低4名）</h3>
         <div id="playersSoft"></div>
         <div class="dup-warning" id="dupWarning">⚠ チャンピオンの部と同じ選手が入力されています。同じ選手は両方の部門に出場できません。</div>
       </div>
@@ -289,7 +289,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--te
 var GAS_URL = 'https://script.google.com/macros/s/AKfycbwMaX6mOexotFkV6n5Y79QXO9IhDgBRvT4PHuCr9c9j435683_N7G8yKkQPcIi-wXtu/exec';
 var GRADES = ['1年', '2年', '3年'];
 var MAX_PLAYERS = 8;
-var MIN_PLAYERS = 3;
+var MIN_PLAYERS = 4;
 var FEE_PER_SECTION = 7000;
 var selectedSection = '';
 
@@ -783,7 +783,7 @@ function doSubmit() {
 
 /* ========== INIT ========== */
 var urlParams = new URLSearchParams(window.location.search);
-var tournamentParam = urlParams.get('tournament') || '第１回全日本中学生クラブ選手権予選 兼 岩手県中学生スポーツ少年団ソフトテニス大会';
+var tournamentParam = urlParams.get('tournament') || '第1回岩手県中学生クラブチーム・スポーツ少年団合同ソフトテニス交流大会';
 var dateParam = urlParams.get('date') || '';
 var feeParam = urlParams.get('fee');
 
