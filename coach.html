@@ -28,6 +28,7 @@
         .tab-wrap { display: flex; gap: 10px; margin-bottom: 15px; }
         .tab { flex: 1; text-align: center; padding: 10px; background: #e2e8f0; border-radius: 8px; font-weight: bold; color: var(--text-dim); cursor: pointer;}
         .tab.active { background: var(--blue-active); color: white; }
+        .success-box { background: #dcfce7; border: 2px solid var(--green); color: #166534; padding: 20px; text-align: center; font-weight: 900; border-radius: 12px; }
     </style>
 </head>
 <body>
@@ -44,22 +45,29 @@
 
         <div class="card" id="panel-reg">
             <h2>自チーム選手登録（8名）</h2>
-            <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 15px;">※大会当日の朝、受付として送信してください。フルネーム（姓と名の間はスペース）で入力してください。</p>
-            <div id="player-inputs"></div>
-            <button class="btn btn-green" id="btn-submit-players" onclick="submitPlayers()" disabled>選手リストを送信（受付）</button>
-            <div id="reg-msg" class="error-msg"></div>
+            <div id="reg-form-area">
+                <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 15px;">※大会当日の朝、受付として送信してください。</p>
+                <div id="player-inputs"></div>
+                <button class="btn btn-green" id="btn-submit-players" onclick="submitPlayers()" disabled>選手リストを送信（受付）</button>
+                <div id="reg-msg" class="error-msg"></div>
+            </div>
+            <div id="reg-done-area" style="display:none;" class="success-box">
+                ✅ 今日の受付は完了しています
+            </div>
         </div>
 
         <div class="card" id="panel-order" style="display: none;">
             <h2>オーダー提出</h2>
             <div class="input-group" style="margin-bottom: 15px;">
                 <label style="width:70px; text-align:left;">試合番号</label>
-                <input type="text" id="match-id" class="text-input" placeholder="例: M01" style="text-transform: uppercase;">
+                <select id="match-id" class="select-input" onchange="checkDuplicates()">
+                    <option value="">読込中...</option>
+                </select>
             </div>
 
-            <div class="order-pair"><div class="pair-title">第1マッチ</div><div style="display: flex; gap: 5px;"><select class="select-input p-select" id="o1a" onchange="checkDuplicates()"></select><select class="select-input p-select" id="o1b" onchange="checkDuplicates()"></select></div></div>
-            <div class="order-pair"><div class="pair-title">第2マッチ</div><div style="display: flex; gap: 5px;"><select class="select-input p-select" id="o2a" onchange="checkDuplicates()"></select><select class="select-input p-select" id="o2b" onchange="checkDuplicates()"></select></div></div>
-            <div class="order-pair"><div class="pair-title">第3マッチ</div><div style="display: flex; gap: 5px;"><select class="select-input p-select" id="o3a" onchange="checkDuplicates()"></select><select class="select-input p-select" id="o3b" onchange="checkDuplicates()"></select></div></div>
+            <div class="order-pair"><div class="pair-title">第1マッチ</div><div style="display: flex; gap: 5px;"><select class="select-input p-select" id="o1a" onchange="updateDynamicSelects()"></select><select class="select-input p-select" id="o1b" onchange="updateDynamicSelects()"></select></div></div>
+            <div class="order-pair"><div class="pair-title">第2マッチ</div><div style="display: flex; gap: 5px;"><select class="select-input p-select" id="o2a" onchange="updateDynamicSelects()"></select><select class="select-input p-select" id="o2b" onchange="updateDynamicSelects()"></select></div></div>
+            <div class="order-pair"><div class="pair-title">第3マッチ</div><div style="display: flex; gap: 5px;"><select class="select-input p-select" id="o3a" onchange="updateDynamicSelects()"></select><select class="select-input p-select" id="o3b" onchange="updateDynamicSelects()"></select></div></div>
 
             <div id="order-error" class="error-msg"></div>
             <button class="btn btn-blue" id="btn-submit-order" onclick="submitOrder()" disabled>オーダーを送信</button>
@@ -68,7 +76,6 @@
 
     <script>
         const API = "https://script.google.com/macros/s/AKfycbx5_cG0rpznrzTGXXCNpu3lxX-8ivMQbYW3aQZwS2z56weEu13a8oz4Q8XUlGdQfcU/exec";
-
         const urlParams = new URLSearchParams(window.location.search);
         const teamId = urlParams.get('t');
         const token = urlParams.get('k');
@@ -79,35 +86,40 @@
         window.onload = async () => {
             const playerInputs = document.getElementById('player-inputs');
             for(let i=1; i<=8; i++) {
-                playerInputs.innerHTML += `
-                    <div class="input-group">
-                        <label>No.${i}</label>
-                        <input type="text" id="p${i}" class="text-input" placeholder="選手 ${i} 氏名" oninput="validateRegForm()">
-                    </div>
-                `;
+                playerInputs.innerHTML += `<div class="input-group"><label>No.${i}</label><input type="text" id="p${i}" class="text-input" placeholder="選手 ${i} 氏名" oninput="validateRegForm()"></div>`;
             }
 
             if (!teamId || !token) {
-                document.getElementById('display-team-name').textContent = "テスト中学校（パラメータなし）";
-                document.getElementById('btn-submit-players').disabled = false;
+                document.getElementById('display-team-name').textContent = "テスト";
                 return;
             }
 
             try {
+                // チーム情報取得
                 const res = await fetch(`${API}?action=getTeamInfo&t=${teamId}&k=${token}`).then(r => r.json());
                 if (res.status === "success") {
                     teamName = res.teamName;
                     document.getElementById('display-team-name').textContent = teamName;
-                    document.getElementById('btn-submit-players').disabled = false;
-                    if (res.players && res.players.length > 0) {
-                        res.players.forEach((p, idx) => {
-                            if (document.getElementById(`p${idx+1}`)) document.getElementById(`p${idx+1}`).value = p;
-                        });
+                    
+                    // ① 登録済みなら完了画面を表示
+                    if (res.isRegistered) {
                         registeredPlayers = res.players;
+                        document.getElementById('reg-form-area').style.display = 'none';
+                        document.getElementById('reg-done-area').style.display = 'block';
+                    } else {
+                        document.getElementById('btn-submit-players').disabled = false;
+                        if (res.players) res.players.forEach((p, idx) => { if (document.getElementById(`p${idx+1}`)) document.getElementById(`p${idx+1}`).value = p; });
                     }
-                } else {
-                    document.getElementById('display-team-name').textContent = "❌ 認証エラー（URLが不正です）";
                 }
+                
+                // ② 試合番号プルダウンの生成
+                const statusRes = await fetch(`${API}?action=getSystemStatus`).then(r => r.json());
+                const matchSel = document.getElementById('match-id');
+                matchSel.innerHTML = '<option value="">▼ 試合を選択 ▼</option>';
+                statusRes.allMatches.forEach(m => {
+                    matchSel.innerHTML += `<option value="${m}">${m}</option>`;
+                });
+
             } catch (e) {
                 document.getElementById('display-team-name').textContent = "❌ 通信エラー";
             }
@@ -115,9 +127,7 @@
 
         function validateRegForm() {
             let hasAny = false;
-            for(let i=1; i<=8; i++) {
-                if(document.getElementById(`p${i}`).value.trim()) hasAny = true;
-            }
+            for(let i=1; i<=8; i++) if(document.getElementById(`p${i}`).value.trim()) hasAny = true;
             document.getElementById('btn-submit-players').disabled = !hasAny;
         }
 
@@ -128,134 +138,83 @@
             document.getElementById('panel-order').style.display = 'none';
             document.getElementById('tab-' + tab).classList.add('active');
             document.getElementById('panel-' + tab).style.display = 'block';
-            if(tab === 'order') updateOrderSelects();
+            if(tab === 'order') updateDynamicSelects();
         }
 
         async function submitPlayers() {
             const btn = document.getElementById('btn-submit-players');
-            btn.disabled = true;
-            btn.textContent = "送信中...";
-
+            btn.disabled = true; btn.textContent = "送信中...";
             registeredPlayers = [];
             for(let i=1; i<=8; i++) {
                 const name = document.getElementById(`p${i}`).value.trim();
                 if(name) registeredPlayers.push(name);
             }
-            
-            if(registeredPlayers.length < 4) {
-                const msg = document.getElementById('reg-msg');
-                msg.textContent = "※最低でも4名以上の登録が必要です。";
-                msg.style.display = 'block';
-                btn.disabled = false;
-                btn.textContent = "選手リストを送信（受付）";
-                return;
-            }
+            if(registeredPlayers.length < 4) { alert("4名以上の登録が必要です"); btn.disabled = false; return; }
 
-            if (teamId === null) {
-                alert("テストモード：次へ進みます。");
-                switchTab('order');
-                return;
-            }
-
-            // GET通信用にパラメータを組み立て
-            const playersJson = encodeURIComponent(JSON.stringify(registeredPlayers));
-            const targetUrl = `${API}?action=REGISTER_PLAYERS&teamId=${teamId}&token=${token}&players=${playersJson}`;
-
+            const targetUrl = `${API}?action=REGISTER_PLAYERS&teamId=${teamId}&token=${token}&players=${encodeURIComponent(JSON.stringify(registeredPlayers))}`;
             try {
-                const res = await fetch(targetUrl).then(r => r.json());
-
-                if (res.status === "success") {
-                    alert("選手登録（朝の受付）がスプレッドシートに反映されました！\n続いて「②オーダー作成」タブからオーダーを提出してください。");
-                    document.getElementById('reg-msg').style.display = 'none';
-                    switchTab('order');
-                } else {
-                    alert("エラー: " + res.message);
-                }
+                await fetch(targetUrl, { mode: 'no-cors' });
+                document.getElementById('reg-form-area').style.display = 'none';
+                document.getElementById('reg-done-area').style.display = 'block';
+                switchTab('order');
             } catch (e) {
-                alert("送信に失敗しました。電波の良い所で再試行してください。");
-            } finally {
-                btn.disabled = false;
-                btn.textContent = "選手リストを送信（受付）";
+                alert("送信に失敗しました。"); btn.disabled = false;
             }
         }
 
-        function updateOrderSelects() {
-            const selects = document.querySelectorAll('.p-select');
-            selects.forEach(sel => {
-                const currentVal = sel.value;
+        // ③ 動的フィルタリング機能
+        function updateDynamicSelects() {
+            const selects = Array.from(document.querySelectorAll('.p-select'));
+            const currentValues = selects.map(sel => sel.value); // 現在選択されている値を保持
+
+            selects.forEach((sel, index) => {
+                const myValue = currentValues[index];
                 sel.innerHTML = '<option value="">▼ 選択 ▼</option>';
+                
                 registeredPlayers.forEach(p => {
-                    sel.innerHTML += `<option value="${p}">${p}</option>`;
+                    // 他のプルダウンで選ばれていないかチェック
+                    const isUsedElsewhere = currentValues.some((val, i) => i !== index && val === p);
+                    if (!isUsedElsewhere) {
+                        sel.innerHTML += `<option value="${p}">${p}</option>`;
+                    }
                 });
-                sel.value = currentVal;
+                sel.value = myValue; // 値を復元
             });
             checkDuplicates();
         }
 
         function checkDuplicates() {
             const selects = document.querySelectorAll('.p-select');
-            const selected = [];
             let allFilled = true;
-            let hasDuplicate = false;
-
-            selects.forEach(sel => {
-                if(sel.value === "") {
-                    allFilled = false;
-                } else {
-                    if(selected.includes(sel.value)) hasDuplicate = true;
-                    selected.push(sel.value);
-                }
-            });
-
+            selects.forEach(sel => { if(sel.value === "") allFilled = false; });
+            const matchId = document.getElementById('match-id').value;
+            
             const btn = document.getElementById('btn-submit-order');
-            const errorMsg = document.getElementById('order-error');
-            const matchId = document.getElementById('match-id').value.trim();
-
-            if(hasDuplicate) {
-                errorMsg.textContent = "⚠️ 同じ選手が複数回選択されています。";
-                errorMsg.style.display = "block";
-                btn.disabled = true;
-            } else if (!allFilled || matchId === "") {
-                errorMsg.style.display = "none";
-                btn.disabled = true;
-            } else {
-                errorMsg.style.display = "none";
-                btn.disabled = false;
-            }
+            btn.disabled = (!allFilled || matchId === "");
         }
-
-        document.getElementById('match-id').addEventListener('input', checkDuplicates);
 
         async function submitOrder() {
             const btn = document.getElementById('btn-submit-order');
-            btn.disabled = true;
-            btn.textContent = "送信中...";
-
-            const matchId = document.getElementById('match-id').value.trim().toUpperCase();
+            btn.disabled = true; btn.textContent = "送信中...";
+            const matchId = document.getElementById('match-id').value;
             
-            const o1Json = encodeURIComponent(JSON.stringify([document.getElementById('o1a').value, document.getElementById('o1b').value]));
-            const o2Json = encodeURIComponent(JSON.stringify([document.getElementById('o2a').value, document.getElementById('o2b').value]));
-            const o3Json = encodeURIComponent(JSON.stringify([document.getElementById('o3a').value, document.getElementById('o3b').value]));
-            const tNameJson = encodeURIComponent(teamName);
+            const o1 = encodeURIComponent(JSON.stringify([document.getElementById('o1a').value, document.getElementById('o1b').value]));
+            const o2 = encodeURIComponent(JSON.stringify([document.getElementById('o2a').value, document.getElementById('o2b').value]));
+            const o3 = encodeURIComponent(JSON.stringify([document.getElementById('o3a').value, document.getElementById('o3b').value]));
+            const tName = encodeURIComponent(teamName);
 
-            const targetUrl = `${API}?action=SUBMIT_ORDER&matchId=${matchId}&teamName=${tNameJson}&o1=${o1Json}&o2=${o2Json}&o3=${o3Json}`;
+            const targetUrl = `${API}?action=SUBMIT_ORDER&matchId=${matchId}&teamName=${tName}&o1=${o1}&o2=${o2}&o3=${o3}`;
             
             try {
-                const res = await fetch(targetUrl).then(r => r.json());
-
-                if (res.status === "success") {
-                    alert(`試合番号 【${matchId}】 のオーダー提出がスプレッドシートに反映されました！`);
-                    document.querySelectorAll('.p-select').forEach(sel => sel.value = "");
-                    document.getElementById('match-id').value = "";
-                } else {
-                    alert("送信エラーが発生しました。");
-                }
+                await fetch(targetUrl, { mode: 'no-cors' });
+                alert(`試合番号 【${matchId}】 のオーダーを送信しました！`);
+                document.querySelectorAll('.p-select').forEach(sel => sel.value = "");
+                document.getElementById('match-id').value = "";
+                updateDynamicSelects();
             } catch (e) {
-                alert("通信エラー：送信に失敗しました。");
+                alert("送信に失敗しました。");
             } finally {
-                btn.disabled = false;
-                btn.textContent = "オーダーを送信";
-                checkDuplicates();
+                btn.disabled = false; btn.textContent = "オーダーを送信"; checkDuplicates();
             }
         }
     </script>
