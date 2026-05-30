@@ -67,9 +67,6 @@
     </div>
 
     <script>
-        // ============================================================
-        // 発行したウェブアプリのURL
-        // ============================================================
         const API = "https://script.google.com/macros/s/AKfycbx5_cG0rpznrzTGXXCNpu3lxX-8ivMQbYW3aQZwS2z56weEu13a8oz4Q8XUlGdQfcU/exec";
 
         const urlParams = new URLSearchParams(window.location.search);
@@ -79,7 +76,6 @@
         let teamName = "テストモード";
         let registeredPlayers = []; 
 
-        // 画面起動時にURLパラメータからチーム情報を自動取得
         window.onload = async () => {
             const playerInputs = document.getElementById('player-inputs');
             for(let i=1; i<=8; i++) {
@@ -113,7 +109,7 @@
                     document.getElementById('display-team-name').textContent = "❌ 認証エラー（URLが不正です）";
                 }
             } catch (e) {
-                document.getElementById('display-team-name').textContent = "❌ 通信エラー（URL・権限設定を確認）";
+                document.getElementById('display-team-name').textContent = "❌ 通信エラー";
             }
         };
 
@@ -156,30 +152,25 @@
             }
 
             if (teamId === null) {
-                alert("テストモード：送信をスキップして次へ進みます。");
+                alert("テストモード：次へ進みます。");
                 switchTab('order');
                 return;
             }
 
-            const payload = {
-                type: "REGISTER_PLAYERS",
-                teamId: teamId,
-                token: token,
-                players: registeredPlayers
-            };
+            // GET通信用にパラメータを組み立て
+            const playersJson = encodeURIComponent(JSON.stringify(registeredPlayers));
+            const targetUrl = `${API}?action=REGISTER_PLAYERS&teamId=${teamId}&token=${token}&players=${playersJson}`;
 
             try {
-                // 【修正ポイント】ブラウザのセキュリティ（CORS）を強制突破して送信
-                await fetch(API, {
-                    method: 'POST',
-                    mode: 'no-cors', // ← これがブロック回避の鍵です
-                    headers: { 'Content-Type': 'text/plain' },
-                    body: JSON.stringify(payload)
-                });
-                
-                alert("選手登録（朝の受付）が完了しました！\n続いて「②オーダー作成」タブからオーダーを提出してください。");
-                document.getElementById('reg-msg').style.display = 'none';
-                switchTab('order');
+                const res = await fetch(targetUrl).then(r => r.json());
+
+                if (res.status === "success") {
+                    alert("選手登録（朝の受付）がスプレッドシートに反映されました！\n続いて「②オーダー作成」タブからオーダーを提出してください。");
+                    document.getElementById('reg-msg').style.display = 'none';
+                    switchTab('order');
+                } else {
+                    alert("エラー: " + res.message);
+                }
             } catch (e) {
                 alert("送信に失敗しました。電波の良い所で再試行してください。");
             } finally {
@@ -241,27 +232,24 @@
             btn.textContent = "送信中...";
 
             const matchId = document.getElementById('match-id').value.trim().toUpperCase();
-            const orderData = {
-                type: "SUBMIT_ORDER",
-                matchId: matchId,
-                teamName: teamName,
-                o1: [document.getElementById('o1a').value, document.getElementById('o1b').value],
-                o2: [document.getElementById('o2a').value, document.getElementById('o2b').value],
-                o3: [document.getElementById('o3a').value, document.getElementById('o3b').value]
-            };
+            
+            const o1Json = encodeURIComponent(JSON.stringify([document.getElementById('o1a').value, document.getElementById('o1b').value]));
+            const o2Json = encodeURIComponent(JSON.stringify([document.getElementById('o2a').value, document.getElementById('o2b').value]));
+            const o3Json = encodeURIComponent(JSON.stringify([document.getElementById('o3a').value, document.getElementById('o3b').value]));
+            const tNameJson = encodeURIComponent(teamName);
+
+            const targetUrl = `${API}?action=SUBMIT_ORDER&matchId=${matchId}&teamName=${tNameJson}&o1=${o1Json}&o2=${o2Json}&o3=${o3Json}`;
             
             try {
-                // 【修正ポイント】ブラウザのセキュリティ（CORS）を強制突破して送信
-                await fetch(API, {
-                    method: 'POST',
-                    mode: 'no-cors', // ← これがブロック回避の鍵です
-                    headers: { 'Content-Type': 'text/plain' },
-                    body: JSON.stringify(orderData)
-                });
-                
-                alert(`試合番号 【${matchId}】 のオーダー送信が完了しました！`);
-                document.querySelectorAll('.p-select').forEach(sel => sel.value = "");
-                document.getElementById('match-id').value = "";
+                const res = await fetch(targetUrl).then(r => r.json());
+
+                if (res.status === "success") {
+                    alert(`試合番号 【${matchId}】 のオーダー提出がスプレッドシートに反映されました！`);
+                    document.querySelectorAll('.p-select').forEach(sel => sel.value = "");
+                    document.getElementById('match-id').value = "";
+                } else {
+                    alert("送信エラーが発生しました。");
+                }
             } catch (e) {
                 alert("通信エラー：送信に失敗しました。");
             } finally {
