@@ -33,56 +33,33 @@
 <body>
     <div class="header">
         <div style="font-size: 0.8rem; font-weight: bold;">監督ポータル</div>
-        <div class="team-name" id="display-team-name">読込中...</div>
+        <div class="team-name" id="display-team-name">認証中...</div>
     </div>
 
     <div class="container">
-        <!-- タブ切り替え -->
         <div class="tab-wrap">
             <div class="tab active" id="tab-reg" onclick="switchTab('reg')">① 選手登録</div>
             <div class="tab" id="tab-order" onclick="switchTab('order')">② オーダー作成</div>
         </div>
 
-        <!-- 選手登録パネル -->
         <div class="card" id="panel-reg">
             <h2>自チーム選手登録（8名）</h2>
-            <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 15px;">※大会当日の朝、受付として送信してください。姓と名の間はスペースを空けてください。</p>
-            <div id="player-inputs">
-                <!-- JSで8枠生成 -->
-            </div>
-            <button class="btn btn-green" id="btn-submit-players" onclick="submitPlayers()">選手リストを送信（受付）</button>
+            <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 15px;">※大会当日の朝、受付として送信してください。フルネーム（姓と名の間はスペース）で入力してください。</p>
+            <div id="player-inputs"></div>
+            <button class="btn btn-green" id="btn-submit-players" onclick="submitPlayers()" disabled>選手リストを送信（受付）</button>
             <div id="reg-msg" class="error-msg"></div>
         </div>
 
-        <!-- オーダー作成パネル -->
         <div class="card" id="panel-order" style="display: none;">
             <h2>オーダー提出</h2>
             <div class="input-group" style="margin-bottom: 15px;">
                 <label style="width:70px; text-align:left;">試合番号</label>
-                <input type="text" id="match-id" class="text-input" placeholder="例: T001" style="text-transform: uppercase;">
+                <input type="text" id="match-id" class="text-input" placeholder="例: M01" style="text-transform: uppercase;">
             </div>
 
-            <div class="order-pair">
-                <div class="pair-title">第1マッチ</div>
-                <div style="display: flex; gap: 5px;">
-                    <select class="select-input p-select" id="o1a" onchange="checkDuplicates()"></select>
-                    <select class="select-input p-select" id="o1b" onchange="checkDuplicates()"></select>
-                </div>
-            </div>
-            <div class="order-pair">
-                <div class="pair-title">第2マッチ</div>
-                <div style="display: flex; gap: 5px;">
-                    <select class="select-input p-select" id="o2a" onchange="checkDuplicates()"></select>
-                    <select class="select-input p-select" id="o2b" onchange="checkDuplicates()"></select>
-                </div>
-            </div>
-            <div class="order-pair">
-                <div class="pair-title">第3マッチ</div>
-                <div style="display: flex; gap: 5px;">
-                    <select class="select-input p-select" id="o3a" onchange="checkDuplicates()"></select>
-                    <select class="select-input p-select" id="o3b" onchange="checkDuplicates()"></select>
-                </div>
-            </div>
+            <div class="order-pair"><div class="pair-title">第1マッチ</div><div style="display: flex; gap: 5px;"><select class="select-input p-select" id="o1a" onchange="checkDuplicates()"></select><select class="select-input p-select" id="o1b" onchange="checkDuplicates()"></select></div></div>
+            <div class="order-pair"><div class="pair-title">第2マッチ</div><div style="display: flex; gap: 5px;"><select class="select-input p-select" id="o2a" onchange="checkDuplicates()"></select><select class="select-input p-select" id="o2b" onchange="checkDuplicates()"></select></div></div>
+            <div class="order-pair"><div class="pair-title">第3マッチ</div><div style="display: flex; gap: 5px;"><select class="select-input p-select" id="o3a" onchange="checkDuplicates()"></select><select class="select-input p-select" id="o3b" onchange="checkDuplicates()"></select></div></div>
 
             <div id="order-error" class="error-msg"></div>
             <button class="btn btn-blue" id="btn-submit-order" onclick="submitOrder()" disabled>オーダーを送信</button>
@@ -90,26 +67,64 @@
     </div>
 
     <script>
-        // --- 初期設定 ---
+        // ============================================================
+        // 発行したウェブアプリのURL
+        // ============================================================
+        const API = "https://script.google.com/macros/s/AKfycbx5_cG0rpznrzTGXXCNpu3lxX-8ivMQbYW3aQZwS2z56weEu13a8oz4Q8XUlGdQfcU/exec";
+
         const urlParams = new URLSearchParams(window.location.search);
-        const teamId = urlParams.get('t') || '00';
-        const token = urlParams.get('k') || 'test';
+        const teamId = urlParams.get('t');
+        const token = urlParams.get('k');
         
-        // （仮）GASから取得した想定のチーム名と選手データ
-        let teamName = teamId === '00' ? "テスト中学校" : "読込中...";
+        let teamName = "テストモード";
         let registeredPlayers = []; 
 
-        document.getElementById('display-team-name').textContent = teamName;
+        // 画面起動時にURLパラメータからチーム情報を自動取得
+        window.onload = async () => {
+            // 8枠の入力欄を生成
+            const playerInputs = document.getElementById('player-inputs');
+            for(let i=1; i<=8; i++) {
+                playerInputs.innerHTML += `
+                    <div class="input-group">
+                        <label>No.${i}</label>
+                        <input type="text" id="p${i}" class="text-input" placeholder="選手 ${i} 氏名" oninput="validateRegForm()">
+                    </div>
+                `;
+            }
 
-        // --- UI生成 ---
-        const playerInputs = document.getElementById('player-inputs');
-        for(let i=1; i<=8; i++) {
-            playerInputs.innerHTML += `
-                <div class="input-group">
-                    <label>No.${i}</label>
-                    <input type="text" id="p${i}" class="text-input" placeholder="選手 ${i} 氏名">
-                </div>
-            `;
+            if (!teamId || !token) {
+                document.getElementById('display-team-name').textContent = "テスト中学校（パラメータなし）";
+                document.getElementById('btn-submit-players').disabled = false;
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API}?action=getTeamInfo&t=${teamId}&k=${token}`).then(r => r.json());
+                if (res.status === "success") {
+                    teamName = res.teamName;
+                    document.getElementById('display-team-name').textContent = teamName;
+                    document.getElementById('btn-submit-players').disabled = false;
+                    // 既に登録済みの選手がいればフォームに復元
+                    if (res.players && res.players.length > 0) {
+                        res.players.forEach((p, idx) => {
+                            if (document.getElementById(`p${idx+1}`)) document.getElementById(`p${idx+1}`).value = p;
+                        });
+                        registeredPlayers = res.players;
+                    }
+                } else {
+                    document.getElementById('display-team-name').textContent = "❌ 認証エラー（URLが不正です）";
+                }
+            } catch (e) {
+                document.getElementById('display-team-name').textContent = "❌ 通信エラー";
+            }
+        };
+
+        function validateRegForm() {
+            let hasAny = false;
+            for(let i=1; i<=8; i++) {
+                if(document.getElementById(`p${i}`).value.trim()) hasAny = true;
+            }
+            document.getElementById('btn-submit-players').disabled = !hasAny;
         }
 
         function switchTab(tab) {
@@ -117,33 +132,62 @@
             document.getElementById('tab-order').classList.remove('active');
             document.getElementById('panel-reg').style.display = 'none';
             document.getElementById('panel-order').style.display = 'none';
-            
             document.getElementById('tab-' + tab).classList.add('active');
             document.getElementById('panel-' + tab).style.display = 'block';
-
             if(tab === 'order') updateOrderSelects();
         }
 
-        function submitPlayers() {
+        async function submitPlayers() {
+            const btn = document.getElementById('btn-submit-players');
+            btn.disabled = true;
+            btn.textContent = "送信中...";
+
             registeredPlayers = [];
-            let emptyCount = 0;
             for(let i=1; i<=8; i++) {
                 const name = document.getElementById(`p${i}`).value.trim();
                 if(name) registeredPlayers.push(name);
-                else emptyCount++;
             }
             
             if(registeredPlayers.length < 4) {
                 const msg = document.getElementById('reg-msg');
                 msg.textContent = "※最低でも4名以上の登録が必要です。";
                 msg.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = "選手リストを送信（受付）";
                 return;
             }
 
-            // 【GAS連携ポイント】ここでGASへ選手配列をPOST送信します
-            alert(`${registeredPlayers.length}名の選手を登録しました！\nオーダー作成に進んでください。`);
-            document.getElementById('reg-msg').style.display = 'none';
-            switchTab('order');
+            if (teamId === null) {
+                alert("テストモード：送信をスキップして次へ進みます。");
+                switchTab('order');
+                return;
+            }
+
+            try {
+                const res = await fetch(API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({
+                        type: "REGISTER_PLAYERS",
+                        teamId: teamId,
+                        token: token,
+                        players: registeredPlayers
+                    })
+                }).then(r => r.json());
+
+                if (res.status === "success") {
+                    alert("選手登録（朝の受付）が完了しました！\n続いて「②オーダー作成」タブからオーダーを提出してください。");
+                    document.getElementById('reg-msg').style.display = 'none';
+                    switchTab('order');
+                } else {
+                    alert("エラー: " + res.message);
+                }
+            } catch (e) {
+                alert("送信に失敗しました。電波の良い所で再試行してください。");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "選手リストを送信（受付）";
+            }
         }
 
         function updateOrderSelects() {
@@ -154,7 +198,7 @@
                 registeredPlayers.forEach(p => {
                     sel.innerHTML += `<option value="${p}">${p}</option>`;
                 });
-                sel.value = currentVal; // 選択状態を復元
+                sel.value = currentVal;
             });
             checkDuplicates();
         }
@@ -184,33 +228,51 @@
                 btn.disabled = true;
             } else if (!allFilled || matchId === "") {
                 errorMsg.style.display = "none";
-                btn.disabled = true; // 未入力がある場合は押せない
+                btn.disabled = true;
             } else {
                 errorMsg.style.display = "none";
-                btn.disabled = false; // 全て入力＆重複なしで有効化
+                btn.disabled = false;
             }
         }
 
-        // 試合番号入力時もチェックを走らせる
         document.getElementById('match-id').addEventListener('input', checkDuplicates);
 
-        function submitOrder() {
+        async function submitOrder() {
+            const btn = document.getElementById('btn-submit-order');
+            btn.disabled = true;
+            btn.textContent = "送信中...";
+
             const matchId = document.getElementById('match-id').value.trim().toUpperCase();
             const orderData = {
+                type: "SUBMIT_ORDER",
                 matchId: matchId,
+                teamName: teamName,
                 o1: [document.getElementById('o1a').value, document.getElementById('o1b').value],
                 o2: [document.getElementById('o2a').value, document.getElementById('o2b').value],
                 o3: [document.getElementById('o3a').value, document.getElementById('o3b').value]
             };
             
-            // 【GAS連携ポイント】ここでGASへオーダーデータをPOST送信します
-            console.log("送信データ:", orderData);
-            alert(`${matchId} のオーダーを送信しました！`);
-            
-            // 送信後リセット
-            document.querySelectorAll('.p-select').forEach(sel => sel.value = "");
-            document.getElementById('match-id').value = "";
-            checkDuplicates();
+            try {
+                const res = await fetch(API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify(orderData)
+                }).then(r => r.json());
+
+                if (res.status === "success") {
+                    alert(`試合番号 【${matchId}】 のオーダー送信が完了しました！`);
+                    document.querySelectorAll('.p-select').forEach(sel => sel.value = "");
+                    document.getElementById('match-id').value = "";
+                } else {
+                    alert("送信エラーが発生しました。");
+                }
+            } catch (e) {
+                alert("通信エラー：送信に失敗しました。");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "オーダーを送信";
+                checkDuplicates();
+            }
         }
     </script>
 </body>
