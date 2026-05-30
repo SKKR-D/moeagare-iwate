@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>【公式】監督ポータル</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #f1f5f9; --surface: #ffffff; --border: #94a3b8; --text: #0f172a; --text-dim: #475569; --blue-active: #0284c7; --red-active: #ea580c; --gold: #d97706; --green: #16a34a; --error: #f43f5e; }
+        * { box-sizing: border-box; margin: 0; padding: 0; touch-action: manipulation; }
+        body { font-family: 'Noto Sans JP', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 50px;}
+        .header { background: #1e293b; color: white; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 100;}
+        .team-name { font-size: 1.2rem; font-weight: 900; color: #38bdf8; }
+        .container { max-width: 500px; margin: 0 auto; padding: 15px; }
+        .card { background: var(--surface); border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        h2 { font-size: 1.1rem; border-bottom: 2px solid var(--border); padding-bottom: 5px; margin-bottom: 15px; color: var(--blue-active); }
+        .input-group { margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        .input-group label { font-weight: 900; width: 40px; text-align: right; color: var(--text-dim); }
+        .text-input, .select-input { flex: 1; padding: 12px; border: 2px solid var(--border); border-radius: 8px; font-size: 1rem; font-weight: bold; background: #fff;}
+        .text-input:focus, .select-input:focus { border-color: var(--blue-active); outline: none; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; color: white; font-size: 1.1rem; font-weight: 900; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .btn-green { background: linear-gradient(135deg, var(--green), #15803d); }
+        .btn-blue { background: linear-gradient(135deg, var(--blue-active), #0369a1); margin-top: 15px;}
+        .btn:disabled { background: #94a3b8; cursor: not-allowed; box-shadow: none; }
+        .order-pair { background: #f8fafc; border: 1px solid #cbd5e1; padding: 10px; border-radius: 8px; margin-bottom: 10px; }
+        .pair-title { font-weight: bold; font-size: 0.9rem; margin-bottom: 5px; color: var(--text-dim); }
+        .error-msg { color: var(--error); font-weight: bold; font-size: 0.85rem; text-align: center; margin-top: 10px; display: none; }
+        .tab-wrap { display: flex; gap: 10px; margin-bottom: 15px; }
+        .tab { flex: 1; text-align: center; padding: 10px; background: #e2e8f0; border-radius: 8px; font-weight: bold; color: var(--text-dim); cursor: pointer;}
+        .tab.active { background: var(--blue-active); color: white; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div style="font-size: 0.8rem; font-weight: bold;">監督ポータル</div>
+        <div class="team-name" id="display-team-name">読込中...</div>
+    </div>
+
+    <div class="container">
+        <!-- タブ切り替え -->
+        <div class="tab-wrap">
+            <div class="tab active" id="tab-reg" onclick="switchTab('reg')">① 選手登録</div>
+            <div class="tab" id="tab-order" onclick="switchTab('order')">② オーダー作成</div>
+        </div>
+
+        <!-- 選手登録パネル -->
+        <div class="card" id="panel-reg">
+            <h2>自チーム選手登録（8名）</h2>
+            <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 15px;">※大会当日の朝、受付として送信してください。姓と名の間はスペースを空けてください。</p>
+            <div id="player-inputs">
+                <!-- JSで8枠生成 -->
+            </div>
+            <button class="btn btn-green" id="btn-submit-players" onclick="submitPlayers()">選手リストを送信（受付）</button>
+            <div id="reg-msg" class="error-msg"></div>
+        </div>
+
+        <!-- オーダー作成パネル -->
+        <div class="card" id="panel-order" style="display: none;">
+            <h2>オーダー提出</h2>
+            <div class="input-group" style="margin-bottom: 15px;">
+                <label style="width:70px; text-align:left;">試合番号</label>
+                <input type="text" id="match-id" class="text-input" placeholder="例: T001" style="text-transform: uppercase;">
+            </div>
+
+            <div class="order-pair">
+                <div class="pair-title">第1マッチ</div>
+                <div style="display: flex; gap: 5px;">
+                    <select class="select-input p-select" id="o1a" onchange="checkDuplicates()"></select>
+                    <select class="select-input p-select" id="o1b" onchange="checkDuplicates()"></select>
+                </div>
+            </div>
+            <div class="order-pair">
+                <div class="pair-title">第2マッチ</div>
+                <div style="display: flex; gap: 5px;">
+                    <select class="select-input p-select" id="o2a" onchange="checkDuplicates()"></select>
+                    <select class="select-input p-select" id="o2b" onchange="checkDuplicates()"></select>
+                </div>
+            </div>
+            <div class="order-pair">
+                <div class="pair-title">第3マッチ</div>
+                <div style="display: flex; gap: 5px;">
+                    <select class="select-input p-select" id="o3a" onchange="checkDuplicates()"></select>
+                    <select class="select-input p-select" id="o3b" onchange="checkDuplicates()"></select>
+                </div>
+            </div>
+
+            <div id="order-error" class="error-msg"></div>
+            <button class="btn btn-blue" id="btn-submit-order" onclick="submitOrder()" disabled>オーダーを送信</button>
+        </div>
+    </div>
+
+    <script>
+        // --- 初期設定 ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const teamId = urlParams.get('t') || '00';
+        const token = urlParams.get('k') || 'test';
+        
+        // （仮）GASから取得した想定のチーム名と選手データ
+        let teamName = teamId === '00' ? "テスト中学校" : "読込中...";
+        let registeredPlayers = []; 
+
+        document.getElementById('display-team-name').textContent = teamName;
+
+        // --- UI生成 ---
+        const playerInputs = document.getElementById('player-inputs');
+        for(let i=1; i<=8; i++) {
+            playerInputs.innerHTML += `
+                <div class="input-group">
+                    <label>No.${i}</label>
+                    <input type="text" id="p${i}" class="text-input" placeholder="選手 ${i} 氏名">
+                </div>
+            `;
+        }
+
+        function switchTab(tab) {
+            document.getElementById('tab-reg').classList.remove('active');
+            document.getElementById('tab-order').classList.remove('active');
+            document.getElementById('panel-reg').style.display = 'none';
+            document.getElementById('panel-order').style.display = 'none';
+            
+            document.getElementById('tab-' + tab).classList.add('active');
+            document.getElementById('panel-' + tab).style.display = 'block';
+
+            if(tab === 'order') updateOrderSelects();
+        }
+
+        function submitPlayers() {
+            registeredPlayers = [];
+            let emptyCount = 0;
+            for(let i=1; i<=8; i++) {
+                const name = document.getElementById(`p${i}`).value.trim();
+                if(name) registeredPlayers.push(name);
+                else emptyCount++;
+            }
+            
+            if(registeredPlayers.length < 4) {
+                const msg = document.getElementById('reg-msg');
+                msg.textContent = "※最低でも4名以上の登録が必要です。";
+                msg.style.display = 'block';
+                return;
+            }
+
+            // 【GAS連携ポイント】ここでGASへ選手配列をPOST送信します
+            alert(`${registeredPlayers.length}名の選手を登録しました！\nオーダー作成に進んでください。`);
+            document.getElementById('reg-msg').style.display = 'none';
+            switchTab('order');
+        }
+
+        function updateOrderSelects() {
+            const selects = document.querySelectorAll('.p-select');
+            selects.forEach(sel => {
+                const currentVal = sel.value;
+                sel.innerHTML = '<option value="">▼ 選択 ▼</option>';
+                registeredPlayers.forEach(p => {
+                    sel.innerHTML += `<option value="${p}">${p}</option>`;
+                });
+                sel.value = currentVal; // 選択状態を復元
+            });
+            checkDuplicates();
+        }
+
+        function checkDuplicates() {
+            const selects = document.querySelectorAll('.p-select');
+            const selected = [];
+            let allFilled = true;
+            let hasDuplicate = false;
+
+            selects.forEach(sel => {
+                if(sel.value === "") {
+                    allFilled = false;
+                } else {
+                    if(selected.includes(sel.value)) hasDuplicate = true;
+                    selected.push(sel.value);
+                }
+            });
+
+            const btn = document.getElementById('btn-submit-order');
+            const errorMsg = document.getElementById('order-error');
+            const matchId = document.getElementById('match-id').value.trim();
+
+            if(hasDuplicate) {
+                errorMsg.textContent = "⚠️ 同じ選手が複数回選択されています。";
+                errorMsg.style.display = "block";
+                btn.disabled = true;
+            } else if (!allFilled || matchId === "") {
+                errorMsg.style.display = "none";
+                btn.disabled = true; // 未入力がある場合は押せない
+            } else {
+                errorMsg.style.display = "none";
+                btn.disabled = false; // 全て入力＆重複なしで有効化
+            }
+        }
+
+        // 試合番号入力時もチェックを走らせる
+        document.getElementById('match-id').addEventListener('input', checkDuplicates);
+
+        function submitOrder() {
+            const matchId = document.getElementById('match-id').value.trim().toUpperCase();
+            const orderData = {
+                matchId: matchId,
+                o1: [document.getElementById('o1a').value, document.getElementById('o1b').value],
+                o2: [document.getElementById('o2a').value, document.getElementById('o2b').value],
+                o3: [document.getElementById('o3a').value, document.getElementById('o3b').value]
+            };
+            
+            // 【GAS連携ポイント】ここでGASへオーダーデータをPOST送信します
+            console.log("送信データ:", orderData);
+            alert(`${matchId} のオーダーを送信しました！`);
+            
+            // 送信後リセット
+            document.querySelectorAll('.p-select').forEach(sel => sel.value = "");
+            document.getElementById('match-id').value = "";
+            checkDuplicates();
+        }
+    </script>
+</body>
+</html>
