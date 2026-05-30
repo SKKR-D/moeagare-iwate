@@ -15,8 +15,8 @@
         .card { background: var(--surface); border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
         h2 { font-size: 1.1rem; border-bottom: 2px solid var(--border); padding-bottom: 5px; margin-bottom: 15px; color: var(--blue-active); }
         .input-group { margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
-        .input-group label { font-weight: 900; width: 40px; text-align: right; color: var(--text-dim); }
-        .text-input, .select-input { flex: 1; padding: 12px; border: 2px solid var(--border); border-radius: 8px; font-size: 1rem; font-weight: bold; background: #fff;}
+        .input-group label { font-weight: 900; width: 40px; text-align: right; color: var(--text-dim); flex-shrink: 0; }
+        .text-input, .select-input { flex: 1; padding: 12px; border: 2px solid var(--border); border-radius: 8px; font-size: 1rem; font-weight: bold; background: #fff; min-width: 0;}
         .text-input:focus, .select-input:focus { border-color: var(--blue-active); outline: none; }
         .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; color: white; font-size: 1.1rem; font-weight: 900; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         .btn-green { background: linear-gradient(135deg, var(--green), #15803d); }
@@ -29,6 +29,10 @@
         .tab { flex: 1; text-align: center; padding: 10px; background: #e2e8f0; border-radius: 8px; font-weight: bold; color: var(--text-dim); cursor: pointer;}
         .tab.active { background: var(--blue-active); color: white; }
         .success-box { background: #dcfce7; border: 2px solid var(--green); color: #166534; padding: 20px; text-align: center; font-weight: 900; border-radius: 12px; }
+        
+        /* 欠員チェックボックス用スタイル */
+        .vacant-label { font-size: 0.8rem; font-weight: bold; color: var(--text-dim); cursor: pointer; display: flex; align-items: center; gap: 4px; flex-shrink: 0; background: #e2e8f0; padding: 6px 8px; border-radius: 6px; }
+        .vacant-label input { transform: scale(1.2); }
     </style>
 </head>
 <body>
@@ -86,7 +90,17 @@
         window.onload = async () => {
             const playerInputs = document.getElementById('player-inputs');
             for(let i=1; i<=8; i++) {
-                playerInputs.innerHTML += `<div class="input-group"><label>No.${i}</label><input type="text" id="p${i}" class="text-input" placeholder="選手 ${i} 氏名" oninput="validateRegForm()"></div>`;
+                // ① No.5〜No.8 に欠員チェックボックスを追加
+                let vacantHtml = '';
+                if(i >= 5) {
+                    vacantHtml = `<label class="vacant-label"><input type="checkbox" id="vacant${i}" onchange="toggleVacancy(${i})"> 欠員</label>`;
+                }
+                playerInputs.innerHTML += `
+                    <div class="input-group">
+                        <label>No.${i}</label>
+                        <input type="text" id="p${i}" class="text-input" placeholder="選手 ${i} 氏名" oninput="validateRegForm()">
+                        ${vacantHtml}
+                    </div>`;
             }
 
             if (!teamId || !token) {
@@ -95,13 +109,11 @@
             }
 
             try {
-                // チーム情報取得
                 const res = await fetch(`${API}?action=getTeamInfo&t=${teamId}&k=${token}`).then(r => r.json());
                 if (res.status === "success") {
                     teamName = res.teamName;
                     document.getElementById('display-team-name').textContent = teamName;
                     
-                    // ① 登録済みなら完了画面を表示
                     if (res.isRegistered) {
                         registeredPlayers = res.players;
                         document.getElementById('reg-form-area').style.display = 'none';
@@ -112,7 +124,6 @@
                     }
                 }
                 
-                // ② 試合番号プルダウンの生成
                 const statusRes = await fetch(`${API}?action=getSystemStatus`).then(r => r.json());
                 const matchSel = document.getElementById('match-id');
                 matchSel.innerHTML = '<option value="">▼ 試合を選択 ▼</option>';
@@ -125,9 +136,30 @@
             }
         };
 
+        // 欠員チェックボックスの処理（入力不可＆グレーアウト）
+        function toggleVacancy(i) {
+            const inp = document.getElementById(`p${i}`);
+            const chk = document.getElementById(`vacant${i}`);
+            if (chk.checked) {
+                inp.value = '';
+                inp.disabled = true;
+                inp.style.backgroundColor = '#e2e8f0';
+                inp.placeholder = '（欠員）';
+            } else {
+                inp.disabled = false;
+                inp.style.backgroundColor = '#fff';
+                inp.placeholder = `選手 ${i} 氏名`;
+            }
+            validateRegForm();
+        }
+
         function validateRegForm() {
             let hasAny = false;
-            for(let i=1; i<=8; i++) if(document.getElementById(`p${i}`).value.trim()) hasAny = true;
+            for(let i=1; i<=8; i++) {
+                const inp = document.getElementById(`p${i}`);
+                const chk = document.getElementById(`vacant${i}`);
+                if (inp.value.trim() && !(chk && chk.checked)) hasAny = true;
+            }
             document.getElementById('btn-submit-players').disabled = !hasAny;
         }
 
@@ -144,12 +176,28 @@
         async function submitPlayers() {
             const btn = document.getElementById('btn-submit-players');
             btn.disabled = true; btn.textContent = "送信中...";
+            
             registeredPlayers = [];
+            let realPlayerCount = 0;
+            
             for(let i=1; i<=8; i++) {
+                const chk = document.getElementById(`vacant${i}`);
+                if (chk && chk.checked) continue; // 欠員はスキップ
+                
                 const name = document.getElementById(`p${i}`).value.trim();
-                if(name) registeredPlayers.push(name);
+                if(name) {
+                    registeredPlayers.push(name);
+                    realPlayerCount++;
+                }
             }
-            if(registeredPlayers.length < 4) { alert("4名以上の登録が必要です"); btn.disabled = false; return; }
+            
+            // 最低人数のチェック（団体戦の成立要件）
+            if(realPlayerCount < 4) { 
+                alert("最低4名の登録が必要です"); 
+                btn.disabled = false; 
+                btn.textContent = "選手リストを送信（受付）";
+                return; 
+            }
 
             const targetUrl = `${API}?action=REGISTER_PLAYERS&teamId=${teamId}&token=${token}&players=${encodeURIComponent(JSON.stringify(registeredPlayers))}`;
             try {
@@ -162,23 +210,41 @@
             }
         }
 
-        // ③ 動的フィルタリング機能
         function updateDynamicSelects() {
             const selects = Array.from(document.querySelectorAll('.p-select'));
-            const currentValues = selects.map(sel => sel.value); // 現在選択されている値を保持
+            const currentValues = selects.map(sel => sel.value); 
+
+            // ② 実登録選手が5名以下なら、第3マッチを「欠員」で固定＆グレーアウト
+            const isShortHanded = registeredPlayers.length < 6;
 
             selects.forEach((sel, index) => {
+                // o3a (インデックス4), o3b (インデックス5) への処理
+                if (isShortHanded && (sel.id === 'o3a' || sel.id === 'o3b')) {
+                    sel.innerHTML = '<option value="(欠員)">(欠員)</option>';
+                    sel.value = '(欠員)';
+                    sel.disabled = true;
+                    sel.style.backgroundColor = '#e2e8f0';
+                    return; // 通常の選手流し込みをスキップ
+                }
+
+                // 通常のプルダウン生成
+                sel.disabled = false;
+                sel.style.backgroundColor = '#fff';
                 const myValue = currentValues[index];
                 sel.innerHTML = '<option value="">▼ 選択 ▼</option>';
                 
                 registeredPlayers.forEach(p => {
-                    // 他のプルダウンで選ばれていないかチェック
-                    const isUsedElsewhere = currentValues.some((val, i) => i !== index && val === p);
+                    // 自分以外のプルダウンで選択されている選手は除外（欠員という文字は除外チェックの対象外）
+                    const isUsedElsewhere = currentValues.some((val, i) => i !== index && val === p && val !== "(欠員)");
                     if (!isUsedElsewhere) {
                         sel.innerHTML += `<option value="${p}">${p}</option>`;
                     }
                 });
-                sel.value = myValue; // 値を復元
+                
+                // 復元
+                if(registeredPlayers.includes(myValue) || myValue === "") {
+                    sel.value = myValue; 
+                }
             });
             checkDuplicates();
         }
