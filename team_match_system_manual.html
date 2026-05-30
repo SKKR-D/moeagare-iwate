@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>団体戦運営システム 使い方マニュアル</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#13294b; --navy2:#1e3a5f;
+    --blue:#0284c7; --blue-soft:#e0f2fe;
+    --orange:#ea580c; --orange-soft:#ffedd5;
+    --green:#16a34a; --green-soft:#dcfce7;
+    --gold:#c2820a; --gold-soft:#fef3c7;
+    --red:#dc2626; --red-soft:#fff1f2;
+    --ink:#1a2433; --ink-dim:#56627a;
+    --line:#d6dde8; --paper:#ffffff; --bg:#eef2f7;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Noto Sans JP',sans-serif; color:var(--ink);
+    background:var(--bg); line-height:1.85; font-size:16px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .sheet{max-width:880px;margin:0 auto;background:var(--paper);box-shadow:0 1px 40px rgba(19,41,75,.08);}
+
+  /* ===== Cover ===== */
+  .cover{
+    background:linear-gradient(155deg,var(--navy) 0%,var(--navy2) 60%,#28507e 100%);
+    color:#fff;padding:64px 48px 56px;position:relative;overflow:hidden;
+  }
+  .cover::after{content:"";position:absolute;right:-80px;top:-80px;width:300px;height:300px;
+    border:40px solid rgba(255,255,255,.04);border-radius:50%;}
+  .cover .kicker{font-family:'Zen Kaku Gothic New';font-weight:700;letter-spacing:.35em;
+    font-size:.82rem;color:#7fc4ef;margin-bottom:18px;}
+  .cover h1{font-family:'Zen Kaku Gothic New';font-weight:900;font-size:2.6rem;line-height:1.3;
+    letter-spacing:.02em;margin-bottom:14px;}
+  .cover .sub{font-size:1.02rem;color:#cdd9e8;font-weight:500;max-width:560px;}
+  .cover .tag{display:inline-block;margin-top:26px;background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.25);padding:8px 18px;border-radius:999px;
+    font-size:.85rem;font-weight:700;}
+
+  /* ===== layout ===== */
+  .pad{padding:40px 48px;}
+  @media(max-width:620px){.pad{padding:28px 20px;} .cover{padding:44px 22px;} .cover h1{font-size:2rem;}}
+
+  h2.sec{font-family:'Zen Kaku Gothic New';font-weight:900;font-size:1.7rem;color:var(--navy);
+    display:flex;align-items:center;gap:14px;margin-bottom:6px;letter-spacing:.02em;}
+  h2.sec .badge{flex-shrink:0;width:46px;height:46px;border-radius:12px;display:grid;place-items:center;
+    color:#fff;font-size:1.4rem;}
+  .sec-lead{color:var(--ink-dim);font-size:.95rem;margin:0 0 4px 60px;}
+
+  h3.step{font-family:'Zen Kaku Gothic New';font-weight:700;font-size:1.22rem;color:var(--navy);
+    margin:34px 0 14px;display:flex;align-items:center;gap:13px;}
+  .stepnum{flex-shrink:0;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;
+    font-family:'Zen Kaku Gothic New';font-weight:900;font-size:1.15rem;color:#fff;}
+
+  p{margin-bottom:12px;}
+  .lead{font-size:.97rem;}
+  strong{font-weight:700;}
+  .hl{background:linear-gradient(transparent 62%,var(--gold-soft) 62%);font-weight:700;padding:0 2px;}
+
+  /* ordered numbered actions */
+  ol.acts{list-style:none;counter-reset:a;margin:14px 0 6px;}
+  ol.acts>li{counter-increment:a;position:relative;padding:11px 12px 11px 50px;margin-bottom:9px;
+    background:#f7f9fc;border:1px solid var(--line);border-radius:10px;font-size:.96rem;}
+  ol.acts>li::before{content:counter(a);position:absolute;left:12px;top:11px;width:26px;height:26px;
+    background:var(--navy);color:#fff;border-radius:50%;display:grid;place-items:center;
+    font-weight:700;font-size:.85rem;font-family:'Zen Kaku Gothic New';}
+
+  /* on-screen button representation */
+  .btn{display:inline-flex;align-items:center;gap:5px;font-weight:700;font-size:.86rem;
+    padding:4px 11px;border-radius:7px;white-space:nowrap;vertical-align:middle;line-height:1.4;}
+  .b-green{background:var(--green);color:#fff;}
+  .b-blue{background:var(--blue);color:#fff;}
+  .b-gold{background:var(--gold);color:#fff;}
+  .b-gray{background:#5b6677;color:#fff;}
+  .b-out{background:#fff;border:2px solid var(--gold);color:var(--gold);padding:2px 9px;}
+  .tab-chip{display:inline-block;background:var(--blue);color:#fff;font-weight:700;font-size:.84rem;
+    padding:3px 12px;border-radius:7px;}
+
+  /* callouts */
+  .note{border-radius:12px;padding:15px 18px 15px 16px;margin:16px 0;font-size:.92rem;
+    border-left:6px solid;}
+  .note .nt{font-weight:900;font-family:'Zen Kaku Gothic New';display:block;margin-bottom:4px;font-size:.95rem;}
+  .n-warn{background:var(--red-soft);border-color:var(--red);}
+  .n-warn .nt{color:var(--red);}
+  .n-tip{background:var(--green-soft);border-color:var(--green);}
+  .n-tip .nt{color:#15803d;}
+  .n-info{background:var(--blue-soft);border-color:var(--blue);}
+  .n-info .nt{color:#0369a1;}
+
+  /* phone mockup */
+  .mock{max-width:300px;margin:18px auto;border:3px solid var(--navy);border-radius:22px;
+    overflow:hidden;box-shadow:0 10px 30px rgba(19,41,75,.18);background:#f1f5f9;}
+  .mock .bar{background:var(--navy);color:#fff;text-align:center;padding:10px;}
+  .mock .bar small{font-size:.65rem;opacity:.8;display:block;}
+  .mock .bar .tn{color:#5cc4f5;font-weight:900;font-size:1rem;}
+  .mock .body{padding:14px;}
+  .mock-tabs{display:flex;gap:6px;margin-bottom:12px;}
+  .mock-tabs span{flex:1;text-align:center;padding:7px;border-radius:7px;font-size:.74rem;font-weight:700;
+    background:#dde4ee;color:#56627a;}
+  .mock-tabs span.on{background:var(--blue);color:#fff;}
+  .mock-row{display:flex;align-items:center;gap:8px;background:#fff;border:2px solid var(--line);
+    border-radius:8px;padding:8px;margin-bottom:7px;font-size:.78rem;}
+  .mock-row b{color:var(--ink-dim);width:34px;text-align:right;flex-shrink:0;}
+  .mock-row .ph{color:#9aa6b8;}
+  .mock-row.vac{background:#e6eaf0;color:#9aa6b8;}
+  .mock-fullbtn{text-align:center;padding:11px;border-radius:9px;color:#fff;font-weight:900;
+    font-size:.82rem;margin-top:6px;}
+  .mock-cap{text-align:center;font-size:.78rem;color:var(--ink-dim);margin-top:6px;font-weight:500;}
+
+  .game-mock{max-width:340px;margin:18px auto;border:3px solid var(--navy);border-radius:18px;overflow:hidden;
+    box-shadow:0 10px 30px rgba(19,41,75,.18);}
+  .gm-head{background:#fff;border-bottom:2px solid var(--line);display:flex;justify-content:space-between;
+    padding:8px 12px;font-size:.7rem;}
+  .gm-head .c{text-align:center;}
+  .gm-head .big{font-size:1.5rem;font-weight:900;font-family:Arial Black,sans-serif;}
+  .gm-sub{background:var(--navy);color:#fff;display:flex;justify-content:space-between;padding:5px 12px;font-size:.72rem;font-weight:700;}
+  .gm-battle{display:flex;gap:6px;padding:8px;background:#eef2f7;}
+  .gm-col{flex:1;}
+  .gm-pt{border-radius:12px;background:#0f172a;text-align:center;padding:16px 0 12px;position:relative;}
+  .gm-pt .nm{font-size:.62rem;color:#cbd5e1;}
+  .gm-pt .sc{font-family:Arial Black,sans-serif;font-size:3rem;font-weight:900;line-height:1;}
+  .gm-pt.l{border-bottom:6px solid var(--blue);} .gm-pt.l .sc{color:#38bdf8;}
+  .gm-pt.r{border-bottom:6px solid var(--orange);} .gm-pt.r .sc{color:#fb923c;}
+  .gm-prow{display:flex;align-items:center;gap:6px;background:#fff;border:2px solid var(--line);
+    border-radius:8px;padding:6px 8px;margin-top:6px;font-size:.74rem;font-weight:700;}
+  .rb{font-size:.66rem;font-weight:900;padding:1px 5px;border-radius:5px;color:#fff;}
+  .rb.s{background:#1e293b;} .rb.r{background:#94a3b8;}
+  .gm-fault{margin:8px;text-align:center;padding:11px;border:3px solid var(--gold);border-radius:10px;
+    color:var(--gold);font-weight:900;background:#fff;}
+
+  /* flow */
+  .flow{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0;}
+  .flow .fcard{flex:1;min-width:150px;background:#f7f9fc;border:1px solid var(--line);border-radius:12px;
+    padding:16px;position:relative;}
+  .flow .fcard .who{font-family:'Zen Kaku Gothic New';font-weight:900;font-size:.95rem;margin-bottom:6px;
+    display:flex;align-items:center;gap:7px;}
+  .flow .fcard .dot{width:10px;height:10px;border-radius:50%;}
+  .flow .fcard ul{margin-left:18px;font-size:.86rem;color:var(--ink-dim);}
+
+  /* timeline */
+  table.tl{width:100%;border-collapse:collapse;margin:16px 0;font-size:.9rem;}
+  table.tl th,table.tl td{border:1px solid var(--line);padding:9px 11px;text-align:left;}
+  table.tl th{background:var(--navy);color:#fff;font-weight:700;font-family:'Zen Kaku Gothic New';}
+  table.tl td:first-child{font-weight:700;white-space:nowrap;background:#f3f6fa;color:var(--navy);}
+  table.tl tr:nth-child(even) td:not(:first-child){background:#fafbfd;}
+
+  /* trouble */
+  .qa{border:1px solid var(--line);border-radius:12px;margin-bottom:11px;overflow:hidden;}
+  .qa .q{background:#f3f6fa;padding:12px 16px;font-weight:700;color:var(--navy);font-size:.95rem;
+    display:flex;gap:9px;}
+  .qa .q .qm{color:var(--red);font-family:'Zen Kaku Gothic New';font-weight:900;}
+  .qa .a{padding:12px 16px;font-size:.92rem;}
+  .qa .a .am{color:var(--green);font-weight:900;margin-right:6px;}
+
+  hr.div{border:none;border-top:2px dashed var(--line);margin:38px 0;}
+  .anchor{display:block;position:relative;top:-10px;visibility:hidden;}
+
+  /* TOC */
+  .toc{background:#f7f9fc;border:1px solid var(--line);border-radius:14px;padding:22px 26px;margin-top:6px;}
+  .toc h4{font-family:'Zen Kaku Gothic New';font-weight:900;color:var(--navy);margin-bottom:12px;font-size:1.05rem;}
+  .toc ol{list-style:none;counter-reset:t;}
+  .toc li{counter-increment:t;padding:6px 0;border-bottom:1px dashed var(--line);}
+  .toc li:last-child{border:none;}
+  .toc a{color:var(--ink);text-decoration:none;font-weight:500;font-size:.95rem;}
+  .toc a::before{content:counter(t)"　";color:var(--blue);font-weight:900;}
+  .toc a:hover{color:var(--blue);}
+
+  footer{background:var(--navy);color:#aebfd4;text-align:center;padding:26px;font-size:.82rem;}
+  footer b{color:#fff;}
+
+  @media print{
+    body{background:#fff;font-size:12.5px;}
+    .sheet{box-shadow:none;max-width:100%;}
+    h3.step{page-break-after:avoid;} .note,.mock,.game-mock{page-break-inside:avoid;}
+    .cover{padding:40px;}
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <!-- ====== COVER ====== -->
+  <div class="cover">
+    <div class="kicker">IWATE SOFT TENNIS / TEAM MATCH SYSTEM</div>
+    <h1>団体戦運営システム<br>使い方マニュアル</h1>
+    <p class="sub">スマホで「受付・オーダー提出・審判・結果送信」までを行うシステムです。このマニュアルのとおりに指でタップしていけば、操作に不慣れな方でも最後まで進められます。</p>
+    <span class="tag">監督用 ＋ 審判用　完全ガイド</span>
+  </div>
+
+  <!-- ====== TOC ====== -->
+  <div class="pad" style="padding-bottom:10px;">
+    <div class="toc">
+      <h4>もくじ</h4>
+      <ol>
+        <li><a href="#overview">このシステムでできること（全体の流れ）</a></li>
+        <li><a href="#kantoku">【監督編】受付とオーダー提出</a></li>
+        <li><a href="#shinpan">【審判編】試合の進行と結果送信</a></li>
+        <li><a href="#schedule">当日のタイムスケジュール</a></li>
+        <li><a href="#trouble">困ったときは（よくある質問）</a></li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- ====== OVERVIEW ====== -->
+  <span id="overview" class="anchor"></span>
+  <div class="pad">
+    <h2 class="sec"><span class="badge" style="background:var(--navy)">🎾</span>このシステムでできること</h2>
+    <p class="sec-lead">役割は「監督」と「審判」の2つ。それぞれ別のページ（URL）を使います。</p>
+
+    <div class="flow">
+      <div class="fcard">
+        <div class="who"><span class="dot" style="background:var(--green)"></span>監督がやること</div>
+        <ul>
+          <li>朝の<strong>到着受付</strong>（選手登録）</li>
+          <li>試合ごとの<strong>オーダー提出</strong></li>
+        </ul>
+      </div>
+      <div class="fcard">
+        <div class="who"><span class="dot" style="background:var(--blue)"></span>審判がやること</div>
+        <ul>
+          <li>試合を<strong>読み込む</strong></li>
+          <li>得点を<strong>記録</strong>する</li>
+          <li>結果を<strong>本部へ送信</strong></li>
+        </ul>
+      </div>
+      <div class="fcard">
+        <div class="who"><span class="dot" style="background:var(--gold)"></span>本部（自動）</div>
+        <ul>
+          <li>受付・オーダー・結果を<strong>自動で集計</strong></li>
+          <li>準備が整った試合だけ審判画面に表示</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="note n-info">
+      <span class="nt">💡 いちばん大事な流れ</span>
+      ① 監督が朝に<strong>選手登録</strong> → ② 監督が試合前に<strong>オーダー提出</strong> → ③ <strong>両チームのオーダーが揃う</strong>と、その試合が審判画面に「準備完了」で出てきます → ④ 審判が読み込んで試合運営 → ⑤ 結果を本部へ送信。<br>
+      つまり<strong>監督がオーダーを出さないと、審判はその試合を始められません。</strong>試合前のオーダー提出を忘れないことが、当日いちばんのポイントです。
+    </div>
+
+    <div class="note n-tip">
+      <span class="nt">📱 用意するもの</span>
+      スマートフォン1台（監督用・審判用それぞれ）と、配布された<strong>専用URL（またはQRコード）</strong>だけ。アプリのインストールは不要です。電波（Wi-Fiまたは4G/5G）がつながる場所で使ってください。
+    </div>
+  </div>
+
+  <hr class="div">
+
+  <!-- ====== 監督編 ====== -->
+  <span id="kantoku" class="anchor"></span>
+  <div class="pad">
+    <h2 class="sec"><span class="badge" style="background:var(--green)">A</span>【監督編】受付とオーダー提出</h2>
+    <p class="sec-lead">監督用URLをスマホで開くところから始めます。</p>
+
+    <div class="note n-info">
+      <span class="nt">はじめに：ページを開く</span>
+      配布された<strong>監督用URL</strong>を開きます。画面いちばん上に「認証中…」と出たあと、<strong>自分のチーム名</strong>が表示されればOK。<br>
+      ※ チーム名が出ず「❌ 通信エラー」となる場合は、電波の良い場所でページを再読み込み（更新）してください。
+    </div>
+
+    <!-- M1 -->
+    <h3 class="step"><span class="stepnum" style="background:var(--green)">1</span>朝の到着受付（選手登録）</h3>
+    <p class="lead">会場に着いたら、まず受付として行います。画面上の <span class="tab-chip">① 選手登録</span> タブが最初から開いています。</p>
+
+    <div class="mock">
+      <div class="bar"><small>監督ポータル</small><span class="tn">○○中学校</span></div>
+      <div class="body">
+        <div class="mock-tabs"><span class="on">① 選手登録</span><span>② オーダー作成</span></div>
+        <div class="mock-row"><b>No.1</b><span>橋場　柊一郎</span></div>
+        <div class="mock-row"><b>No.2</b><span>高橋　偲</span></div>
+        <div class="mock-row"><b>No.3</b><span>佐藤　太郎</span></div>
+        <div class="mock-row"><b>No.4</b><span>鈴木　次郎</span></div>
+        <div class="mock-row"><b>No.5</b><span class="ph">選手 5 氏名</span> <span style="font-size:.66rem;background:#dde4ee;padding:3px 6px;border-radius:5px;">☑欠員</span></div>
+        <div class="mock-row vac"><b>No.6</b><span>（欠員）</span> <span style="font-size:.66rem;background:#cbd5e1;padding:3px 6px;border-radius:5px;">☑欠員</span></div>
+        <div class="mock-fullbtn" style="background:var(--green);">選手リストを送信（受付）</div>
+        <div class="mock-cap">↑ 実際の画面イメージ</div>
+      </div>
+    </div>
+
+    <ol class="acts">
+      <li><strong>No.1〜No.8</strong> の欄に、出場選手の氏名を入力します。</li>
+      <li>選手が8人に満たないときは、<strong>No.5〜No.8</strong> の右にある「<strong>欠員</strong>」にチェックを入れます。チェックした欄は灰色になり、入力できなくなります。</li>
+      <li>入力が終わったら、緑色の <span class="btn b-green">選手リストを送信（受付）</span> を押します。</li>
+      <li>画面に「<strong>✅ 今日の受付は完了しています</strong>」と緑色で出たら、受付完了です。</li>
+    </ol>
+
+    <div class="note n-warn">
+      <span class="nt">⚠️ 注意してください</span>
+      ・選手は<strong>最低4名</strong>の登録が必要です。3名以下では送信できません（メッセージが出ます）。<br>
+      ・<strong>一度送信すると、この画面からはやり直しできません。</strong>氏名や人数をよく確認してから送信してください。間違えた場合は本部（競技委員）に連絡を。
+    </div>
+
+    <!-- M2 -->
+    <h3 class="step"><span class="stepnum" style="background:var(--green)">2</span>試合ごとのオーダー提出</h3>
+    <p class="lead">各試合が始まる前に、その試合の出場ペアを提出します。<strong>試合のたびに毎回</strong>行います。上の <span class="tab-chip">② オーダー作成</span> タブを押してください。</p>
+
+    <ol class="acts">
+      <li>「<strong>試合番号</strong>」のプルダウンを押し、これから行う<strong>自分のチームの試合番号</strong>を選びます。</li>
+      <li><strong>第1マッチ・第2マッチ・第3マッチ</strong>それぞれに、出場するペア2名をプルダウンから選びます。</li>
+      <li>すべて選び終えると、青色の <span class="btn b-blue">オーダーを送信</span> が押せるようになります。押すと「送信しました」と確認が出ます。</li>
+    </ol>
+
+    <div class="note n-tip">
+      <span class="nt">💡 仕組み（知っておくと安心）</span>
+      ・<strong>同じ選手は1か所にしか選べません。</strong>あるペアで選んだ選手は、他のマッチの選択肢から自動で消えます（二重登録の防止）。<br>
+      ・登録選手が<strong>5名以下</strong>のときは、<strong>第3マッチが自動で「(欠員)」</strong>に固定され、灰色になります。これはそのマッチが<strong>不戦敗</strong>になることを意味します（操作は不要です）。
+    </div>
+
+    <div class="note n-warn">
+      <span class="nt">⚠️ オーダー提出を忘れずに</span>
+      審判は「両チームのオーダーが揃った試合」しか始められません。<strong>試合直前に、相手チームの監督と一緒に、それぞれオーダーを提出してください。</strong>
+    </div>
+  </div>
+
+  <hr class="div">
+
+  <!-- ====== 審判編 ====== -->
+  <span id="shinpan" class="anchor"></span>
+  <div class="pad">
+    <h2 class="sec"><span class="badge" style="background:var(--blue)">B</span>【審判編】試合の進行と結果送信</h2>
+    <p class="sec-lead">審判用URLをスマホで開くと「TEAM MATCH」の画面が出ます。ここから始めます。</p>
+
+    <!-- R1 -->
+    <h3 class="step"><span class="stepnum" style="background:var(--blue)">1</span>試合を選んで読み込む</h3>
+    <ol class="acts">
+      <li>最初の画面で、青い <span class="btn b-blue">📡 準備完了の試合から選んで読込</span> を押します。</li>
+      <li>「準備完了の試合（＝両チームのオーダーが揃った試合）」の一覧から、<strong>担当する試合番号</strong>を選びます。</li>
+      <li>金色の <span class="btn b-gold">選手データを読込 ➔</span> を押すと、選手名が自動で入ります。</li>
+    </ol>
+    <div class="note n-info">
+      <span class="nt">電波がない・一覧に出ないとき</span>
+      会場の電波が弱い場合などは、グレーの <span class="btn b-gray">✏️ 手入力（オフライン等）</span> を押せば、チーム名や選手名を手で入力して進められます。
+    </div>
+    <div class="note n-warn">
+      <span class="nt">⚠️ 一覧に試合が出ない</span>
+      探している試合が一覧にない場合は、<strong>まだ両チームのオーダーが揃っていません。</strong>両監督にオーダー提出をお願いし、少し待ってから <span class="btn b-blue">📡 準備完了の試合から…</span> をもう一度押してください。
+    </div>
+
+    <!-- R2 -->
+    <h3 class="step"><span class="stepnum" style="background:var(--blue)">2</span>ルール・会場を設定する</h3>
+    <p class="lead">「ルール・会場設定」画面で、試合の条件を決めます（読み込んだ場合、チーム名は自動で入っています）。</p>
+    <ol class="acts">
+      <li><strong>方式</strong>：通常は <span class="btn b-gold">2点先取終了</span>（先に2マッチ取ったら終了）を選びます。すべて行う場合は「全3試合行う」。</li>
+      <li><strong>ゲーム数</strong>：<span class="btn b-gold">7ゲーム</span>（4ゲーム先取）か「5ゲーム」（3ゲーム先取）を選びます。</li>
+      <li><strong>会場</strong>とコート番号を選びます（一関運動公園・和賀川GP など）。一覧にない会場は「その他」を選んで手入力します。</li>
+      <li>緑の <span class="btn b-green">オーダー確認へ ➔</span> を押します。</li>
+    </ol>
+
+    <!-- R3 -->
+    <h3 class="step"><span class="stepnum" style="background:var(--blue)">3</span>オーダーを確認する</h3>
+    <p class="lead">第1〜第3マッチの出場選手が表示されます。<span style="color:var(--blue);font-weight:700;">🔵 左がチーム1</span>、<span style="color:var(--orange);font-weight:700;">🟠 右がチーム2</span>です。内容に間違いがなければ、青い <span class="btn b-blue">決定して次へ ➔</span> を押します。</p>
+    <div class="note n-tip">
+      <span class="nt">💡 欠員（不戦敗）は自動</span>
+      監督が欠員で提出した試合は、<strong>第3マッチが自動で「OP（不戦敗）」にチェックされ灰色</strong>になります。そのまま進めて構いません（不戦勝・不戦敗として自動集計されます）。
+    </div>
+
+    <!-- R4 -->
+    <h3 class="step"><span class="stepnum" style="background:var(--blue)">4</span>担当するマッチを選ぶ</h3>
+    <ol class="acts">
+      <li>このスマホで審判する<strong>マッチ（第1／第2／第3）</strong>を1つ選びます。</li>
+      <li>金色の <span class="btn b-gold">担当を開始する ➔</span> を押します。</li>
+    </ol>
+    <div class="note n-info">
+      <span class="nt">2面・3面で同時に進めるとき</span>
+      コートごとに審判が分かれる場合は、<strong>各コートの審判が、それぞれ自分の担当マッチ（第1・第2・第3）を選んで</strong>始めてください。1つの試合を複数のスマホで分担できます。
+    </div>
+
+    <!-- R5 -->
+    <h3 class="step"><span class="stepnum" style="background:var(--blue)">5</span>サーブとポジションを決める</h3>
+    <ol class="acts">
+      <li><strong>最初にサーブする陣営</strong>を、<span style="color:var(--blue);font-weight:700;">🔵 T1</span> か <span style="color:var(--orange);font-weight:700;">🟠 T2</span> で選びます。</li>
+      <li>下に出る選手ボタンで、<strong>サーブ側・レシーブ側それぞれ、最初の選手</strong>を選びます。</li>
+      <li>金色の <span class="btn b-gold">試合開始！</span> を押すと、得点画面が開きます。</li>
+    </ol>
+
+    <!-- R6 -->
+    <h3 class="step"><span class="stepnum" style="background:var(--blue)">6</span>試合中の操作（得点・フォルト）</h3>
+    <p class="lead">これが審判のメイン画面です。<strong>得点が入ったチームの大きいボタンを押すだけ</strong>が基本です。</p>
+
+    <div class="game-mock">
+      <div class="gm-head">
+        <div class="c"><div style="font-weight:900;color:#56627a;">○○公園 3コート</div><div class="big">2G</div></div>
+        <div class="c">Gカウント<div class="big"><span style="color:var(--blue)">1</span> - <span style="color:var(--orange)">0</span></div></div>
+        <div class="c">団体戦<div style="background:#1e293b;color:#fff;border-radius:6px;padding:2px 8px;"><span style="color:#5cc4f5">0</span>-<span style="color:#fb923c">0</span></div></div>
+      </div>
+      <div class="gm-sub"><span>第1マッチ</span><span>🔄 入替　　↩️ 戻す</span></div>
+      <div class="gm-battle">
+        <div class="gm-col">
+          <div class="gm-pt l"><div class="nm">甲子STC</div><div class="sc">2</div></div>
+          <div class="gm-prow"><span class="rb s">S</span>橋場</div>
+          <div class="gm-prow">高橋</div>
+        </div>
+        <div class="gm-col">
+          <div class="gm-pt r"><div class="nm">TOI連合</div><div class="sc">1</div></div>
+          <div class="gm-prow"><span class="rb r">R</span>佐藤</div>
+          <div class="gm-prow">鈴木</div>
+        </div>
+      </div>
+      <div class="gm-fault">FAULT</div>
+    </div>
+
+    <p style="font-weight:700;color:var(--navy);margin-bottom:6px;">■ 基本の操作</p>
+    <ol class="acts">
+      <li><strong>得点が入ったら</strong>、そのチームの<strong>大きな数字ボタン</strong>を押します（得点が1つ増えます）。</li>
+      <li><strong>フォルトのとき</strong>は <span class="btn b-out">FAULT</span> を押します。<br>　1回押す＝「2nd SRV（セカンドサーブ）」表示。<br>　もう1回押す＝<strong>ダブルフォルト</strong>として相手に得点が入ります。</li>
+      <li><strong>間違えたら</strong> <span class="btn b-gray">↩️ 戻す</span> を押すと、1つ前の状態に戻せます。何度でも戻せます。</li>
+      <li>コートの左右を入れ替えたいときは <span class="btn b-gray">🔄 入替</span> を押します（画面の見た目だけが入れ替わります）。</li>
+    </ol>
+
+    <div class="note n-tip">
+      <span class="nt">💡 自動でやってくれること（覚えなくてOK）</span>
+      ・サーバー（<span class="rb s" style="display:inline">S</span>）とレシーバー（<span class="rb r" style="display:inline">R</span>）は<strong>自動で表示・交代</strong>します。<br>
+      ・得点は <strong>0→1→2→3→デュース(D)→アドバンテージ(A)</strong> と自動表示。<br>
+      ・ゲームが終わると「<strong>チェンジサービス</strong>」「<strong>チェンジサイズ</strong>」を<strong>自動でお知らせ</strong>し、次のゲーム準備に進みます。<br>
+      ・ファイナルゲームの<strong>コートチェンジ</strong>も自動でお知らせします。
+    </div>
+    <div class="note n-info">
+      <span class="nt">勝敗の自動判定</span>
+      1ゲームは<strong>4点先取（2点差）</strong>、ファイナルゲームは<strong>7点先取（2点差）</strong>。規定ゲーム数（7ゲーム制なら<strong>4ゲーム</strong>）を先取すると、そのマッチの勝敗が自動で確定し、結果画面に進みます。
+    </div>
+
+    <!-- R7 -->
+    <h3 class="step"><span class="stepnum" style="background:var(--blue)">7</span>マッチが終わったら結果を送る</h3>
+    <ol class="acts">
+      <li>マッチが決まると<strong>結果画面</strong>（勝者・スコア）が出ます。金色の <span class="btn b-gold">決定して結果を送信 ➔</span> を押します。</li>
+      <li>続けて選べます：<br>　・次のマッチも審判する → <span class="btn b-gold">▶ 次のマッチの審判をする</span><br>　・この試合を終える → <span class="btn b-gray">📊 最終結果・送信画面へ</span></li>
+    </ol>
+
+    <!-- R8 -->
+    <h3 class="step"><span class="stepnum" style="background:var(--blue)">8</span>全結果を本部へ送信する</h3>
+    <ol class="acts">
+      <li>「最終結果」画面に、団体戦のスコアと各マッチの結果が一覧で出ます。</li>
+      <li>緑の <span class="btn b-green">☁ 本部に全結果を送信</span> を押します。</li>
+      <li>「<strong>✅ 送信済</strong>」「本部への送信が完了しました」と出たら<strong>すべて完了</strong>です。</li>
+    </ol>
+    <div class="note n-warn">
+      <span class="nt">⚠️ 送信エラーが出たら</span>
+      「通信エラー」と出た場合は結果が届いていません。電波の良い場所で <span class="btn b-gray">☁ 再送信</span> を押してください。何度か試してもダメなときは本部に口頭で結果を伝えてください。
+    </div>
+  </div>
+
+  <hr class="div">
+
+  <!-- ====== SCHEDULE ====== -->
+  <span id="schedule" class="anchor"></span>
+  <div class="pad">
+    <h2 class="sec"><span class="badge" style="background:var(--gold)">C</span>当日のタイムスケジュール</h2>
+    <p class="sec-lead">進行表に沿った、システム操作のタイミングの目安です。</p>
+    <table class="tl">
+      <tr><th>時刻</th><th>できごと</th><th>システムでやること</th></tr>
+      <tr><td>7:40〜</td><td>受付開始（コート開放）</td><td><strong>監督</strong>：選手登録（到着受付）</td></tr>
+      <tr><td>8:25〜</td><td>監督会議</td><td>―</td></tr>
+      <tr><td>8:50〜</td><td>リーグ戦 第Ⅰ試合 開始</td><td><strong>監督</strong>：試合前にオーダー提出<br><strong>審判</strong>：試合を読込んで運営・結果送信</td></tr>
+      <tr><td>9:30〜<br>13:30</td><td>リーグ戦 第Ⅱ〜Ⅵ試合</td><td>各試合とも「オーダー提出 → 審判運営 → 結果送信」を繰り返す</td></tr>
+      <tr><td>13:45〜</td><td>順位決定戦</td><td>同上（順位リーグの組合せで実施）</td></tr>
+    </table>
+    <div class="note n-tip">
+      <span class="nt">📌 くり返すのはこの3つだけ</span>
+      ①監督がオーダー提出 → ②審判が読込んで運営 → ③審判が結果送信。<strong>この3ステップを試合ごとにくり返す</strong>のが当日の流れです。
+    </div>
+  </div>
+
+  <hr class="div">
+
+  <!-- ====== TROUBLE ====== -->
+  <span id="trouble" class="anchor"></span>
+  <div class="pad">
+    <h2 class="sec"><span class="badge" style="background:var(--red)">?</span>困ったときは（よくある質問）</h2>
+
+    <div class="qa">
+      <div class="q"><span class="qm">Q</span>チーム名のところが「❌ 通信エラー」になる</div>
+      <div class="a"><span class="am">A</span>電波の良い場所に移動し、ページを<strong>再読み込み（更新）</strong>してください。それでも直らないときはURLが正しいか本部に確認を。</div>
+    </div>
+    <div class="qa">
+      <div class="q"><span class="qm">Q</span>審判画面に、始めたい試合が出てこない</div>
+      <div class="a"><span class="am">A</span><strong>両チームのオーダーがまだ揃っていません。</strong>両監督にオーダー提出をお願いし、もう一度「📡 準備完了の試合から…」を押してください。</div>
+    </div>
+    <div class="qa">
+      <div class="q"><span class="qm">Q</span>オーダーの「送信」ボタンが押せない（灰色）</div>
+      <div class="a"><span class="am">A</span><strong>試合番号の選択</strong>と、<strong>全マッチのペア</strong>がすべて埋まっているか確認してください。1つでも空欄だと押せません。</div>
+    </div>
+    <div class="qa">
+      <div class="q"><span class="qm">Q</span>選手登録（受付）を間違えて送ってしまった</div>
+      <div class="a"><span class="am">A</span>監督画面からのやり直しはできません。<strong>本部（競技委員）に連絡</strong>してください。</div>
+    </div>
+    <div class="qa">
+      <div class="q"><span class="qm">Q</span>得点を押し間違えた／フォルトを間違えた</div>
+      <div class="a"><span class="am">A</span>サブヘッダーの <span class="btn b-gray">↩️ 戻す</span> を押せば1つ前に戻ります。落ち着いて何度でも戻せます。</div>
+    </div>
+    <div class="qa">
+      <div class="q"><span class="qm">Q</span>選手が足りない（欠員）の試合はどうする？</div>
+      <div class="a"><span class="am">A</span>監督が登録時に「欠員」処理すれば、<strong>第3マッチは自動で不戦敗</strong>になります。審判側も自動でOP（不戦敗）になるので、特別な操作は不要です。</div>
+    </div>
+    <div class="qa">
+      <div class="q"><span class="qm">Q</span>結果送信で「通信エラー」が出た</div>
+      <div class="a"><span class="am">A</span>結果はまだ届いていません。電波を確認して <span class="btn b-gray">☁ 再送信</span> を押してください。どうしても送れないときは本部へ口頭で報告を。</div>
+    </div>
+
+    <div class="note n-tip" style="margin-top:24px;">
+      <span class="nt">🆘 最後に</span>
+      迷ったら、無理に進めず<strong>本部（競技委員）にすぐ声をかけてください。</strong>操作のやり直しや確認はいつでもできます。落ち着いて、1つずつボタンを押していけば大丈夫です。
+    </div>
+  </div>
+
+  <footer>
+    岩手県中学生ソフトテニス連盟　<b>団体戦運営システム 使い方マニュアル</b><br>
+    操作に困ったときは、まず本部までお声がけください。
+  </footer>
+
+</div>
+</body>
+</html>
