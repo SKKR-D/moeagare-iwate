@@ -43,7 +43,6 @@
             justify-content: center;
         }
 
-        /* モーダル関連 */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -68,7 +67,6 @@
             margin-bottom: 20px;
         }
 
-        /* 入力フォーム関連 */
         .input-label {
             font-size: 0.75rem;
             color: var(--text-dim);
@@ -115,7 +113,6 @@
             color: var(--gold);
         }
 
-        /* ボタン類 */
         .confirm-btn {
             width: 100%;
             padding: 16px;
@@ -151,7 +148,6 @@
             text-decoration: underline;
         }
 
-        /* オーダー表示関連 */
         .order-box {
             background: var(--surface2);
             border: 1px solid var(--border);
@@ -204,7 +200,6 @@
             color: var(--text-dim);
         }
 
-        /* メインアプリUI */
         .app {
             width: 100%;
             max-width: 600px;
@@ -263,7 +258,6 @@
             gap: 8px;
         }
         
-        /* 巨大ポイントボタン */
         .huge-point-btn {
             flex: 2;
             border: none;
@@ -303,7 +297,6 @@
         .btn-left .btn-score-num { color: #38bdf8; text-shadow: 0 0 15px rgba(56, 189, 248, 0.3); }
         .btn-right .btn-score-num { color: #fb923c; text-shadow: 0 0 15px rgba(251, 146, 60, 0.3); }
         
-        /* 選手表示エリア */
         .p-pair-box { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
         .p-row {
             display: flex;
@@ -341,7 +334,6 @@
         .active-server { background: var(--gold-bg) !important; border-color: var(--gold) !important; }
         .active-receiver { background: #e0f7fa !important; border-color: var(--cyan) !important; }
         
-        /* ヘッダー＆フッター系 */
         .sub-header {
             display: flex;
             justify-content: space-between;
@@ -366,7 +358,6 @@
         }
         .fault-btn.warn { background: var(--red-active); color: #fff; border-color: var(--red-active); }
         
-        /* 結果画面系 */
         .result-header {
             text-align: center;
             border-bottom: 2px solid var(--surface2);
@@ -631,9 +622,6 @@
     </div>
 
     <script>
-        // ============================================================
-        // 発行したウェブアプリのURL
-        // ============================================================
         const API = "https://script.google.com/macros/s/AKfycbx5_cG0rpznrzTGXXCNpu3lxX-8ivMQbYW3aQZwS2z56weEu13a8oz4Q8XUlGdQfcU/exec";
 
         const VENUE_CONFIG = {
@@ -1092,9 +1080,6 @@
             document.getElementById('modal').classList.remove('hidden');
         }
 
-        // ============================================================
-        // 【複数面展開のための超重要修正】マッチ決着時に即結果を個別送信
-        // ============================================================
         function processTeamResult() {
             let winner = S.gL > S.gR ? "L" : "R";
             if (winner === "L") TS.winsL++; else TS.winsR++;
@@ -1110,21 +1095,12 @@
                 uiScoreHtml: `${gL_str} - ${gR_str}`
             };
 
-            // 並列処理対応：このマッチ単体のデータを本部へ即時送信
+            // GET通信用にURLパラメータを組み立て
             if (TS.meta.id) {
-                fetch(API, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain' },
-                    body: JSON.stringify({
-                        type: "MATCH_RESULT",
-                        matchId: TS.meta.id,
-                        court: TS.meta.court,
-                        matchNum: TS.currentMatchNum,
-                        teamL: TS.teams.L,
-                        teamR: TS.teams.R,
-                        result: TS.matchResults[TS.currentMatchNum - 1]
-                    })
-                }).catch(e => console.log("個別マッチ送信エラー:", e));
+                const resultData = encodeURIComponent(JSON.stringify(TS.matchResults[TS.currentMatchNum - 1]));
+                const targetUrl = `${API}?action=MATCH_RESULT&matchId=${TS.meta.id}&court=${encodeURIComponent(TS.meta.court)}&matchNum=${TS.currentMatchNum}&teamL=${encodeURIComponent(TS.teams.L)}&teamR=${encodeURIComponent(TS.teams.R)}&data=${resultData}`;
+                
+                fetch(targetUrl).catch(e => console.log("個別マッチ送信エラー:", e));
             }
 
             const over = TS.meta.playMode === 'first_to_2' && (TS.winsL >= 2 || TS.winsR >= 2);
@@ -1196,7 +1172,6 @@
             statusEl.textContent = '';
             
             const summary = {
-                type: "TEAM_FINAL_SUMMARY",
                 matchId: TS.meta.id,
                 court: TS.meta.court,
                 teamLNo: TS.tNos.L,
@@ -1208,15 +1183,12 @@
                 matchResults: TS.matchResults
             };
 
+            const summaryData = encodeURIComponent(JSON.stringify(summary));
+            const targetUrl = `${API}?action=TEAM_FINAL_SUMMARY&matchId=${TS.meta.id}&data=${summaryData}`;
+
             try {
-                const res = await fetch(API, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain' },
-                    body: JSON.stringify(summary)
-                });
-                const result = await res.json();
-                
-                if (result.status === "success") {
+                const res = await fetch(targetUrl).then(r => r.json());
+                if (res.status === "success") {
                     btn.textContent = "✅ 送信済";
                     statusEl.className = 'send-status success';
                     statusEl.textContent = '本部への送信が完了しました。';
@@ -1224,22 +1196,10 @@
                     throw new Error();
                 }
             } catch (e) {
-                try {
-                    await fetch(API, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: { 'Content-Type': 'text/plain' },
-                        body: JSON.stringify(summary)
-                    });
-                    btn.textContent = "✅ 送信済";
-                    statusEl.className = 'send-status success';
-                    statusEl.textContent = '本部への送信が完了しました。';
-                } catch (e2) {
-                    btn.textContent = "☁ 再送信";
-                    btn.disabled = false;
-                    statusEl.className = 'send-status error';
-                    statusEl.textContent = '通信エラー';
-                }
+                btn.textContent = "☁ 再送信";
+                btn.disabled = false;
+                statusEl.className = 'send-status error';
+                statusEl.textContent = '通信エラーが発生しました。';
             }
         }
 
