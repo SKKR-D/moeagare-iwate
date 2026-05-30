@@ -36,8 +36,6 @@
         .option-group { display: flex; gap: 6px; margin-bottom: 12px; }
         
         .opt-btn { flex: 1; padding: 12px 4px; background: var(--surface2); border: 2px solid var(--border); border-radius: 8px; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: 0.2s;}
-        
-        /* ■■ チームカラー対応の選択ハイライト ■■ */
         .opt-btn.sel-gold { background: var(--gold-bg); border-color: var(--gold); color: var(--gold); }
         .opt-btn.sel-blue { background: #e0f2fe; border-color: var(--blue-active); color: var(--blue-active); }
         .opt-btn.sel-orange { background: #ffedd5; border-color: var(--orange-active); color: var(--orange-active); }
@@ -48,13 +46,12 @@
         .confirm-btn:disabled { background: #94a3b8; cursor: not-allowed; opacity: 0.6; box-shadow: none; }
         .back-btn-text { width: 100%; margin-top: 15px; padding: 10px; background: transparent; border: none; color: var(--text-dim); font-weight: bold; font-size: 0.9rem; cursor: pointer; text-decoration: underline; }
         
-        .order-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 12px; }
-        .order-title { font-weight: 900; font-size: 0.9rem; margin-bottom: 10px; border-bottom: 2px solid var(--border); padding-bottom: 4px; display: flex; justify-content: space-between; align-items: center;}
-        .team-mini-label { font-size: 0.75rem; font-weight: 900; margin-bottom: 2px; display: flex; justify-content: space-between; align-items: center;}
-        .op-check-label { font-size: 0.75rem; color: var(--text-dim); font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 4px; }
-        .order-row { display: flex; gap: 6px; } 
-        .order-row input { flex: 1; padding: 10px; font-size: 0.9rem; border-radius: 6px; border: 1px solid var(--border); font-weight: bold; background: white;}
-        .order-vs-divider { text-align: center; font-size: 0.7rem; font-weight: 900; margin: 6px 0; color: var(--text-dim);}
+        /* ■ オーダー確認の縦UI用クラス ■ */
+        .order-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 15px 12px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);}
+        .order-title { font-weight: 900; font-size: 1.1rem; margin-bottom: 15px; border-bottom: 2px solid var(--border); padding-bottom: 5px; text-align: center; color: var(--text); }
+        .v-input { width: 100%; padding: 12px 8px; font-size: 0.95rem; border-radius: 8px; border: 2px solid var(--border); font-weight: bold; text-align: center; background: white; transition: 0.2s;}
+        .v-input:focus { border-color: var(--blue-active); outline: none; }
+        .op-check-label { font-size: 0.75rem; color: var(--text-dim); font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; background: #e2e8f0; padding: 4px 8px; border-radius: 4px; margin-top: 5px;}
         
         .app { width: 100%; max-width: 600px; height: 100vh; display: flex; flex-direction: column; background: var(--bg); position: relative; overflow: hidden; }
         .header { padding: 10px 12px; background: var(--surface); border-bottom: 2px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; min-height: 90px; }
@@ -79,10 +76,9 @@
         .p-row { display: flex; align-items: center; background: var(--surface); border: 2px solid var(--border); border-radius: 10px; padding: 8px; height: 48px; position: relative; transition: 0.2s;}
         .p-name { flex: 1; font-weight: 900; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-left: 5px; }
         
-        /* ■■ 試合中のサーブ・レシーブ枠（青やオレンジを使わず無彩色で統一） ■■ */
         .role-badge { font-size: 0.8rem; font-weight: 900; padding: 2px 6px; border-radius: 6px; display: none; color: white; margin-right: 4px; min-width: 24px; text-align: center; }
-        .role-badge.show-s { display: inline-block; background: #1e293b; color: #fff; } /* サーバーは濃いネイビー */
-        .role-badge.show-r { display: inline-block; background: #94a3b8; color: #fff; } /* レシーバーはグレー */
+        .role-badge.show-s { display: inline-block; background: #1e293b; color: #fff; } 
+        .role-badge.show-r { display: inline-block; background: #94a3b8; color: #fff; } 
         .active-server { background: #e2e8f0 !important; border-color: #1e293b !important; }
         .active-receiver { background: #f8fafc !important; border-color: #94a3b8 !important; }
         
@@ -128,12 +124,76 @@
                 <button class="back-btn-text" onclick="step('mode')">← 最初に戻る</button>
             </div>
             
-            <div id="step-1" style="display:none;">
-                <h3 style="text-align:center; margin-bottom: 10px;">オーダー確認</h3>
+            <div id="step-1" style="display:none; width:100%;">
+                <h3 style="text-align:center; margin-bottom: 15px;">オーダー確認</h3>
                 <p style="text-align:center; font-size:0.75rem; color:var(--error); font-weight:bold; margin-bottom:10px; display:none;" id="order-error-hint">⚠️ 未入力の項目があります</p>
-                <div class="order-box"><div class="order-title">第1マッチ</div><div class="team-mini-label" style="color:var(--blue-active);"><span id="l-m1-t1">🔵 T1</span></div><div class="order-row"><input id="o1A" oninput="validateOrder()"><input id="o1B" oninput="validateOrder()"></div><div class="order-vs-divider">VS</div><div class="team-mini-label" style="color:var(--orange-active);"><span id="l-m1-t2">🟠 T2</span></div><div class="order-row"><input id="o1C" oninput="validateOrder()"><input id="o1D" oninput="validateOrder()"></div></div>
-                <div class="order-box"><div class="order-title">第2マッチ</div><div class="team-mini-label" style="color:var(--blue-active);"><span id="l-m2-t1">🔵 T1</span></div><div class="order-row"><input id="o2A" oninput="validateOrder()"><input id="o2B" oninput="validateOrder()"></div><div class="order-vs-divider">VS</div><div class="team-mini-label" style="color:var(--orange-active);"><span id="l-m2-t2">🟠 T2</span></div><div class="order-row"><input id="o2C" oninput="validateOrder()"><input id="o2D" oninput="validateOrder()"></div></div>
-                <div class="order-box"><div class="order-title">第3マッチ</div><div class="team-mini-label" style="color:var(--blue-active);"><span id="l-m3-t1">🔵 T1</span><label class="op-check-label"><input type="checkbox" id="o3opL" onchange="validateOrder()"> OP(不戦敗)</label></div><div class="order-row"><input id="o3A" oninput="validateOrder()"><input id="o3B" oninput="validateOrder()"></div><div class="order-vs-divider">VS</div><div class="team-mini-label" style="color:var(--orange-active);"><span id="l-m3-t2">🟠 T2</span><label class="op-check-label"><input type="checkbox" id="o3opR" onchange="validateOrder()"> OP(不戦敗)</label></div><div class="order-row"><input id="o3C" oninput="validateOrder()"><input id="o3D" oninput="validateOrder()"></div></div>
+                
+                <div class="order-box">
+                    <div class="order-title">第1マッチ</div>
+                    <div style="display: flex; gap: 15px;">
+                        <div style="flex: 1; background: #f8fafc; border: 2px solid var(--blue-active); border-radius: 8px; padding: 10px;">
+                            <div style="text-align: center; color: var(--blue-active); font-weight: 900; margin-bottom: 10px; font-size: 1rem;"><span id="l-m1-t1">🔵 T1</span></div>
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <input id="o1A" class="v-input" oninput="validateOrder()">
+                                <input id="o1B" class="v-input" oninput="validateOrder()">
+                            </div>
+                        </div>
+                        <div style="flex: 1; background: #fff7ed; border: 2px solid var(--orange-active); border-radius: 8px; padding: 10px;">
+                            <div style="text-align: center; color: var(--orange-active); font-weight: 900; margin-bottom: 10px; font-size: 1rem;"><span id="l-m1-t2">🟠 T2</span></div>
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <input id="o1C" class="v-input" oninput="validateOrder()">
+                                <input id="o1D" class="v-input" oninput="validateOrder()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="order-box">
+                    <div class="order-title">第2マッチ</div>
+                    <div style="display: flex; gap: 15px;">
+                        <div style="flex: 1; background: #f8fafc; border: 2px solid var(--blue-active); border-radius: 8px; padding: 10px;">
+                            <div style="text-align: center; color: var(--blue-active); font-weight: 900; margin-bottom: 10px; font-size: 1rem;"><span id="l-m2-t1">🔵 T1</span></div>
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <input id="o2A" class="v-input" oninput="validateOrder()">
+                                <input id="o2B" class="v-input" oninput="validateOrder()">
+                            </div>
+                        </div>
+                        <div style="flex: 1; background: #fff7ed; border: 2px solid var(--orange-active); border-radius: 8px; padding: 10px;">
+                            <div style="text-align: center; color: var(--orange-active); font-weight: 900; margin-bottom: 10px; font-size: 1rem;"><span id="l-m2-t2">🟠 T2</span></div>
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <input id="o2C" class="v-input" oninput="validateOrder()">
+                                <input id="o2D" class="v-input" oninput="validateOrder()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="order-box">
+                    <div class="order-title">第3マッチ</div>
+                    <div style="display: flex; gap: 15px;">
+                        <div style="flex: 1; background: #f8fafc; border: 2px solid var(--blue-active); border-radius: 8px; padding: 10px;">
+                            <div style="text-align: center; color: var(--blue-active); font-weight: 900; margin-bottom: 10px; font-size: 1rem; display: flex; flex-direction: column; align-items: center;">
+                                <span id="l-m3-t1" style="margin-bottom: 5px;">🔵 T1</span>
+                                <label class="op-check-label"><input type="checkbox" id="o3opL" onchange="validateOrder()"> OP(不戦敗)</label>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <input id="o3A" class="v-input" oninput="validateOrder()">
+                                <input id="o3B" class="v-input" oninput="validateOrder()">
+                            </div>
+                        </div>
+                        <div style="flex: 1; background: #fff7ed; border: 2px solid var(--orange-active); border-radius: 8px; padding: 10px;">
+                            <div style="text-align: center; color: var(--orange-active); font-weight: 900; margin-bottom: 10px; font-size: 1rem; display: flex; flex-direction: column; align-items: center;">
+                                <span id="l-m3-t2" style="margin-bottom: 5px;">🟠 T2</span>
+                                <label class="op-check-label"><input type="checkbox" id="o3opR" onchange="validateOrder()"> OP(不戦敗)</label>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <input id="o3C" class="v-input" oninput="validateOrder()">
+                                <input id="o3D" class="v-input" oninput="validateOrder()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <button class="confirm-btn" id="btn-start" onclick="submitOrderAndProceed()" disabled>決定して次へ ➔</button>
                 <button class="back-btn-text" onclick="step('setup')">← 戻る</button>
             </div>
@@ -165,7 +225,6 @@
                             <div id="prep-t1-role" style="font-size:0.85rem; font-weight:bold; color:var(--text-dim); margin-bottom:12px;">-</div>
                             <div id="prep-t1-opts" style="display: flex; flex-direction: column; gap: 10px;"></div>
                         </div>
-                        
                         <div style="flex: 1; border: 2px solid var(--orange-active); border-radius: 8px; padding: 12px; background: #fff7ed; text-align: center;">
                             <div id="prep-t2-name" style="font-weight:900; color:var(--orange-active); margin-bottom:10px; font-size:1.1rem;">🟠 T2</div>
                             <div id="prep-t2-role" style="font-size:0.85rem; font-weight:bold; color:var(--text-dim); margin-bottom:12px;">-</div>
@@ -335,7 +394,6 @@
             step(2); 
         }
         
-        // ■■ 縦並びUIに対応したサーバー選択ロジック ■■
         function setServeTeam(t) { 
             S.startTeam = t; 
             S.curServTeam = t; 
