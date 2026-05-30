@@ -333,40 +333,12 @@
                 document.getElementById('t1-name').value = res.t1Name || "";
                 document.getElementById('t2-no').value = res.t2No || "";
                 document.getElementById('t2-name').value = res.t2Name || "";
-                
-                // 選手データの流し込み
                 document.getElementById('o1A').value = res.t1[0] || ""; document.getElementById('o1B').value = res.t1[1] || "";
                 document.getElementById('o1C').value = res.t2[0] || ""; document.getElementById('o1D').value = res.t2[1] || "";
                 document.getElementById('o2A').value = res.t1[2] || ""; document.getElementById('o2B').value = res.t1[3] || "";
                 document.getElementById('o2C').value = res.t2[2] || ""; document.getElementById('o2D').value = res.t2[3] || "";
                 document.getElementById('o3A').value = res.t1[4] || ""; document.getElementById('o3B').value = res.t1[5] || "";
                 document.getElementById('o3C').value = res.t2[4] || ""; document.getElementById('o3D').value = res.t2[5] || "";
-                
-                // ■■ 自動OP判定：欠員データが来た場合は自動でOPチェック＆グレーアウト ■■
-                if (res.t1[4] === '(欠員)' || res.t1[4] === '（欠員）') {
-                    document.getElementById('o3opL').checked = true;
-                    document.getElementById('o3A').value = '(欠員)';
-                    document.getElementById('o3B').value = '(欠員)';
-                    document.getElementById('o3A').disabled = true; document.getElementById('o3A').style.background = '#e2e8f0';
-                    document.getElementById('o3B').disabled = true; document.getElementById('o3B').style.background = '#e2e8f0';
-                } else {
-                    document.getElementById('o3opL').checked = false;
-                    document.getElementById('o3A').disabled = false; document.getElementById('o3A').style.background = '#fff';
-                    document.getElementById('o3B').disabled = false; document.getElementById('o3B').style.background = '#fff';
-                }
-                
-                if (res.t2[4] === '(欠員)' || res.t2[4] === '（欠員）') {
-                    document.getElementById('o3opR').checked = true;
-                    document.getElementById('o3C').value = '(欠員)';
-                    document.getElementById('o3D').value = '(欠員)';
-                    document.getElementById('o3C').disabled = true; document.getElementById('o3C').style.background = '#e2e8f0';
-                    document.getElementById('o3D').disabled = true; document.getElementById('o3D').style.background = '#e2e8f0';
-                } else {
-                    document.getElementById('o3opR').checked = false;
-                    document.getElementById('o3C').disabled = false; document.getElementById('o3C').style.background = '#fff';
-                    document.getElementById('o3D').disabled = false; document.getElementById('o3D').style.background = '#fff';
-                }
-
                 updateCourtSelect('v-sel', 'c-sel', 'c-inp');
                 validateSetup(); validateOrder(); step('setup');
             } catch (e) { alert("オーダーが未提出、または通信エラーです。"); }
@@ -395,7 +367,7 @@
             validateOrder(); 
         }
 
-        function submitOrderAndProceed() { TS.matchOrders = []; TS.matchResults = [null, null, null]; TS.winsL = 0; TS.winsR = 0; const circles = ['⓪', '①', '②', '③', '④', '⑤', '⑥', '⑦']; let winChar = circles[TS.meta.winG] || '④'; for (let i = 1; i <= 3; i++) { let a = document.getElementById(`o${i}A`).value; let b = document.getElementById(`o${i}B`).value; let c = document.getElementById(`o${i}C`).value; let d = document.getElementById(`o${i}D`).value; if (i === 3) { let isL_OP = document.getElementById('o3opL').checked; let isR_OP = document.getElementById('o3opR').checked; if (isL_OP) { a = '(OP)'; b = '(OP)'; } if (isR_OP) { c = '(OP)'; d = '(OP)'; } if (isL_OP && !isR_OP) { TS.winsR++; TS.matchResults[2] = { A: a, B: b, C: c, D: d, gL: 0, gR: TS.meta.winG, displayScore: `R - ${winChar}`, winner: "R", uiScoreHtml: `R - ${winChar}<br><span style="font-size:0.8rem; color:var(--text-dim); font-weight:normal;">(0-${TS.meta.winG})</span>` }; } else if (isR_OP && !isL_OP) { TS.winsL++; TS.matchResults[2] = { A: a, B: b, C: c, D: d, gL: TS.meta.winG, gR: 0, displayScore: `${winChar} - R`, winner: "L", uiScoreHtml: `${winChar} - R<br><span style="font-size:0.8rem; color:var(--text-dim); font-weight:normal;">(${TS.meta.winG}-0)</span>` }; } else if (isL_OP && isR_OP) { TS.matchResults[2] = { A: a, B: b, C: c, D: d, gL: 0, gR: 0, displayScore: `R - R`, winner: "D", uiScoreHtml: `R - R` }; } } TS.matchOrders.push({ A: a, B: b, C: c, D: d }); } step('match-select'); }
+        function submitOrderAndProceed() { TS.matchOrders = []; TS.matchResults = [null, null, null]; TS.winsL = 0; TS.winsR = 0; const circles = ['⓪', '①', '②', '③', '④', '⑤', '⑥', '⑦']; let winChar = circles[TS.meta.winG] || '④'; for (let i = 1; i <= 3; i++) { let a = document.getElementById(`o${i}A`).value; let b = document.getElementById(`o${i}B`).value; let c = document.getElementById(`o${i}C`).value; let d = document.getElementById(`o${i}D`).value; if (i === 3) { let isL_OP = document.getElementById('o3opL').checked; let isR_OP = document.getElementById('o3opR').checked; if (isL_OP) { a = a ? a + '(OP)' : '(OP)'; b = b ? b + '(OP)' : '(OP)'; } if (isR_OP) { c = c ? c + '(OP)' : '(OP)'; d = d ? d + '(OP)' : '(OP)'; } if (isL_OP && !isR_OP) { TS.winsR++; TS.matchResults[2] = { A: a, B: b, C: c, D: d, gL: 0, gR: TS.meta.winG, displayScore: `R - ${winChar}`, winner: "R", uiScoreHtml: `R - ${winChar}<br><span style="font-size:0.8rem; color:var(--text-dim); font-weight:normal;">(0-${TS.meta.winG})</span>` }; } else if (isR_OP && !isL_OP) { TS.winsL++; TS.matchResults[2] = { A: a, B: b, C: c, D: d, gL: TS.meta.winG, gR: 0, displayScore: `${winChar} - R`, winner: "L", uiScoreHtml: `${winChar} - R<br><span style="font-size:0.8rem; color:var(--text-dim); font-weight:normal;">(${TS.meta.winG}-0)</span>` }; } else if (isL_OP && isR_OP) { TS.matchResults[2] = { A: a, B: b, C: c, D: d, gL: 0, gR: 0, displayScore: `R - R`, winner: "D", uiScoreHtml: `R - R` }; } } TS.matchOrders.push({ A: a, B: b, C: c, D: d }); } step('match-select'); }
         function selMLock(n) { TS.currentMatchNum = n; [1, 2, 3].forEach(i => document.getElementById(`ms${i}`).className = 'opt-btn' + (i === n ? ' sel-gold' : '')); }
         function startAssignedMatch() { prepMatch(TS.currentMatchNum); }
         
@@ -443,6 +415,7 @@
 
             renderVerticalSelections();
             
+            // ■■ 修正ポイント：サイドチェンジ時の左右反転UI反映 ■■
             const flexContainer = document.getElementById('pos-flex-container');
             if (flexContainer) {
                 flexContainer.style.flexDirection = S.swapped ? 'row-reverse' : 'row';
