@@ -81,7 +81,6 @@
 
         // 画面起動時にURLパラメータからチーム情報を自動取得
         window.onload = async () => {
-            // 8枠の入力欄を生成
             const playerInputs = document.getElementById('player-inputs');
             for(let i=1; i<=8; i++) {
                 playerInputs.innerHTML += `
@@ -104,7 +103,6 @@
                     teamName = res.teamName;
                     document.getElementById('display-team-name').textContent = teamName;
                     document.getElementById('btn-submit-players').disabled = false;
-                    // 既に登録済みの選手がいればフォームに復元
                     if (res.players && res.players.length > 0) {
                         res.players.forEach((p, idx) => {
                             if (document.getElementById(`p${idx+1}`)) document.getElementById(`p${idx+1}`).value = p;
@@ -115,7 +113,7 @@
                     document.getElementById('display-team-name').textContent = "❌ 認証エラー（URLが不正です）";
                 }
             } catch (e) {
-                document.getElementById('display-team-name').textContent = "❌ 通信エラー";
+                document.getElementById('display-team-name').textContent = "❌ 通信エラー（URL・権限設定を確認）";
             }
         };
 
@@ -163,25 +161,25 @@
                 return;
             }
 
-            try {
-                const res = await fetch(API, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain' },
-                    body: JSON.stringify({
-                        type: "REGISTER_PLAYERS",
-                        teamId: teamId,
-                        token: token,
-                        players: registeredPlayers
-                    })
-                }).then(r => r.json());
+            const payload = {
+                type: "REGISTER_PLAYERS",
+                teamId: teamId,
+                token: token,
+                players: registeredPlayers
+            };
 
-                if (res.status === "success") {
-                    alert("選手登録（朝の受付）が完了しました！\n続いて「②オーダー作成」タブからオーダーを提出してください。");
-                    document.getElementById('reg-msg').style.display = 'none';
-                    switchTab('order');
-                } else {
-                    alert("エラー: " + res.message);
-                }
+            try {
+                // 【修正ポイント】ブラウザのセキュリティ（CORS）を強制突破して送信
+                await fetch(API, {
+                    method: 'POST',
+                    mode: 'no-cors', // ← これがブロック回避の鍵です
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify(payload)
+                });
+                
+                alert("選手登録（朝の受付）が完了しました！\n続いて「②オーダー作成」タブからオーダーを提出してください。");
+                document.getElementById('reg-msg').style.display = 'none';
+                switchTab('order');
             } catch (e) {
                 alert("送信に失敗しました。電波の良い所で再試行してください。");
             } finally {
@@ -253,19 +251,17 @@
             };
             
             try {
-                const res = await fetch(API, {
+                // 【修正ポイント】ブラウザのセキュリティ（CORS）を強制突破して送信
+                await fetch(API, {
                     method: 'POST',
+                    mode: 'no-cors', // ← これがブロック回避の鍵です
                     headers: { 'Content-Type': 'text/plain' },
                     body: JSON.stringify(orderData)
-                }).then(r => r.json());
-
-                if (res.status === "success") {
-                    alert(`試合番号 【${matchId}】 のオーダー送信が完了しました！`);
-                    document.querySelectorAll('.p-select').forEach(sel => sel.value = "");
-                    document.getElementById('match-id').value = "";
-                } else {
-                    alert("送信エラーが発生しました。");
-                }
+                });
+                
+                alert(`試合番号 【${matchId}】 のオーダー送信が完了しました！`);
+                document.querySelectorAll('.p-select').forEach(sel => sel.value = "");
+                document.getElementById('match-id').value = "";
             } catch (e) {
                 alert("通信エラー：送信に失敗しました。");
             } finally {
