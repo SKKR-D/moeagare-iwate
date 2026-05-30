@@ -46,7 +46,6 @@
         .confirm-btn:disabled { background: #94a3b8; cursor: not-allowed; opacity: 0.6; box-shadow: none; }
         .back-btn-text { width: 100%; margin-top: 15px; padding: 10px; background: transparent; border: none; color: var(--text-dim); font-weight: bold; font-size: 0.9rem; cursor: pointer; text-decoration: underline; }
         
-        /* ■ オーダー確認の縦UI用クラス ■ */
         .order-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 15px 12px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);}
         .order-title { font-weight: 900; font-size: 1.1rem; margin-bottom: 15px; border-bottom: 2px solid var(--border); padding-bottom: 5px; text-align: center; color: var(--text); }
         .v-input { width: 100%; padding: 12px 8px; font-size: 0.95rem; border-radius: 8px; border: 2px solid var(--border); font-weight: bold; text-align: center; background: white; transition: 0.2s;}
@@ -401,16 +400,24 @@
             document.getElementById('bsL').className = 'opt-btn' + (t === 0 ? ' sel-blue' : ''); 
             document.getElementById('bsR').className = 'opt-btn' + (t === 1 ? ' sel-orange' : ''); 
             
-            document.getElementById('prep-t1-role').innerHTML = t === 0 ? '⚪ サーブ' : '↗ レシーブ（クロス）';
-            document.getElementById('prep-t2-role').innerHTML = t === 1 ? '⚪ サーブ' : '↗ レシーブ（クロス）';
-
-            S.sOrder = t === 0 ? ['A', 'B'] : ['C', 'D'];
-            S.rOrder = t === 0 ? ['C', 'D'] : ['A', 'B'];
-
-            renderVerticalSelections();
+            // ■■ 修正ポイント：関数を統合し、リセットロジックを復元 ■■
+            buildPosSelection();
             document.getElementById('pos-opts').style.display = "block"; 
         }
         
+        // 統合した準備用関数
+        function buildPosSelection() {
+            document.getElementById('prep-t1-role').innerHTML = S.curServTeam === 0 ? '⚪ サーブ' : '↗ レシーブ（クロス）';
+            document.getElementById('prep-t2-role').innerHTML = S.curServTeam === 1 ? '⚪ サーブ' : '↗ レシーブ（クロス）';
+
+            const sSide = S.curServTeam === 0 ? ['A', 'B'] : ['C', 'D'];
+            const rSide = S.curServTeam === 0 ? ['C', 'D'] : ['A', 'B'];
+            S.sOrder = [sSide[0], sSide[1]];
+            S.rOrder = [rSide[0], rSide[1]];
+
+            renderVerticalSelections();
+        }
+
         function renderVerticalSelections() {
             const mkVertical = (id, list, selectedPlayer, selClass, isServer) => { 
                 const el = document.getElementById(id); 
@@ -439,7 +446,43 @@
 
         function addPoint(w) { history.push(JSON.stringify(S)); S.hist.push(w); if (w === 'L') S.pL++; else S.pR++; S.fault = 0; S.totalP++; if (!checkEnd()) { if (S.isFinal && S.totalP > 0 && (S.totalP - 2) % 4 === 0) { alert("チェンジサイズ"); S.swapped = !S.swapped; } update(); } }
         function handleFault() { if (S.curServTeam === null) return; if (S.fault === 0) { S.fault = 1; document.getElementById('f-btn').textContent = "2nd SRV"; document.getElementById('f-btn').classList.add('warn'); } else { addPoint(S.curServTeam === 0 ? 'R' : 'L'); document.getElementById('f-btn').textContent = "FAULT"; document.getElementById('f-btn').classList.remove('warn'); } }
-        function checkEnd() { const b = S.isFinal ? 7 : 4; const win = S.pL >= b && S.pL - S.pR >= 2 ? 'L' : S.pR >= b && S.pR - S.pL >= 2 ? 'R' : null; if (win) { win === 'L' ? S.gL++ : S.gR++; update(); setTimeout(() => { if (S.gL === TS.meta.winG || S.gR === TS.meta.winG) { showMatchRes(); } else { S.pL = 0; S.pR = 0; S.totalP = 0; S.hist = []; S.curServTeam = 1 - S.curServTeam; if (S.gL + S.gR === TS.meta.maxG - 1) S.isFinal = true; const nG = S.gL + S.gR + 1; alert((S.gL + S.gR) % 2 !== 0 ? "チェンジサイズ" : "チェンジサービス"); if ((S.gL + S.gR) % 2 !== 0) S.swapped = !S.swapped; document.getElementById('game-info-simple').textContent = S.isFinal ? "【ファイナル】" : `【${nG}G目】`; document.getElementById('btn-game-start').textContent = S.isFinal ? "ファイナルゲームを開始" : `第${nG}ゲームを開始`; document.getElementById('serve-area-full').style.display = "none"; document.getElementById('btn-back-step1').style.display = "none"; renderVerticalSelections(); document.getElementById('pos-opts').style.display = "block"; step(2); document.getElementById('modal').classList.remove('hidden'); update(); } }, 100); return true; } return false; }
+        
+        function checkEnd() { 
+            const b = S.isFinal ? 7 : 4; 
+            const win = S.pL >= b && S.pL - S.pR >= 2 ? 'L' : S.pR >= b && S.pR - S.pL >= 2 ? 'R' : null; 
+            if (win) { 
+                win === 'L' ? S.gL++ : S.gR++; 
+                update(); 
+                setTimeout(() => { 
+                    if (S.gL === TS.meta.winG || S.gR === TS.meta.winG) { 
+                        showMatchRes(); 
+                    } else { 
+                        S.pL = 0; S.pR = 0; S.totalP = 0; S.hist = []; 
+                        S.curServTeam = 1 - S.curServTeam; 
+                        
+                        if (S.gL + S.gR === TS.meta.maxG - 1) S.isFinal = true; 
+                        const nG = S.gL + S.gR + 1; 
+                        alert((S.gL + S.gR) % 2 !== 0 ? "チェンジサイズ" : "チェンジサービス"); 
+                        if ((S.gL + S.gR) % 2 !== 0) S.swapped = !S.swapped; 
+                        
+                        document.getElementById('game-info-simple').textContent = S.isFinal ? "【ファイナル】" : `【${nG}G目】`; 
+                        document.getElementById('btn-game-start').textContent = S.isFinal ? "ファイナルゲームを開始" : `第${nG}ゲームを開始`; 
+                        document.getElementById('serve-area-full').style.display = "none"; 
+                        document.getElementById('btn-back-step1').style.display = "none"; 
+                        
+                        // ■■ 修正ポイント：次のゲーム開始時にもリセットロジックを呼ぶ ■■
+                        buildPosSelection(); 
+                        
+                        document.getElementById('pos-opts').style.display = "block"; 
+                        step(2); 
+                        document.getElementById('modal').classList.remove('hidden'); 
+                        update(); 
+                    } 
+                }, 100); 
+                return true; 
+            } 
+            return false; 
+        }
         
         function update() { 
             const getServ = () => { if (S.curServTeam === null) return null; if (!S.isFinal) return { s: S.sOrder[Math.floor(S.totalP / 2) % 2], r: S.rOrder[S.totalP % 2], t: S.curServTeam }; const blk = Math.floor(S.totalP / 2) % 4, pb = S.totalP % 2; if (blk === 0) return { s: S.sOrder[0], r: S.rOrder[pb], t: S.curServTeam }; if (blk === 1) return { s: S.rOrder[0], r: S.sOrder[pb], t: 1 - S.curServTeam }; if (blk === 2) return { s: S.sOrder[1], r: S.rOrder[pb], t: S.curServTeam }; return { s: S.rOrder[1], r: S.sOrder[pb], t: 1 - S.curServTeam }; }; 
