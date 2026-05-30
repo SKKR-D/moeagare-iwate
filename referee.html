@@ -218,7 +218,7 @@
                 </div>
                 
                 <div id="pos-opts" style="display:none; width: 100%;">
-                    <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+                    <div id="pos-flex-container" style="display: flex; gap: 15px; margin-bottom: 20px;">
                         <div style="flex: 1; border: 2px solid var(--blue-active); border-radius: 8px; padding: 12px; background: #f8fafc; text-align: center;">
                             <div id="prep-t1-name" style="font-weight:900; color:var(--blue-active); margin-bottom:10px; font-size:1.1rem;">🔵 T1</div>
                             <div id="prep-t1-role" style="font-size:0.85rem; font-weight:bold; color:var(--text-dim); margin-bottom:12px;">-</div>
@@ -400,12 +400,10 @@
             document.getElementById('bsL').className = 'opt-btn' + (t === 0 ? ' sel-blue' : ''); 
             document.getElementById('bsR').className = 'opt-btn' + (t === 1 ? ' sel-orange' : ''); 
             
-            // ■■ 修正ポイント：関数を統合し、リセットロジックを復元 ■■
             buildPosSelection();
             document.getElementById('pos-opts').style.display = "block"; 
         }
         
-        // 統合した準備用関数
         function buildPosSelection() {
             document.getElementById('prep-t1-role').innerHTML = S.curServTeam === 0 ? '⚪ サーブ' : '↗ レシーブ（クロス）';
             document.getElementById('prep-t2-role').innerHTML = S.curServTeam === 1 ? '⚪ サーブ' : '↗ レシーブ（クロス）';
@@ -416,6 +414,12 @@
             S.rOrder = [rSide[0], rSide[1]];
 
             renderVerticalSelections();
+            
+            // ■■ 修正ポイント：サイドチェンジ時の左右反転UI反映 ■■
+            const flexContainer = document.getElementById('pos-flex-container');
+            if (flexContainer) {
+                flexContainer.style.flexDirection = S.swapped ? 'row-reverse' : 'row';
+            }
         }
 
         function renderVerticalSelections() {
@@ -470,7 +474,6 @@
                         document.getElementById('serve-area-full').style.display = "none"; 
                         document.getElementById('btn-back-step1').style.display = "none"; 
                         
-                        // ■■ 修正ポイント：次のゲーム開始時にもリセットロジックを呼ぶ ■■
                         buildPosSelection(); 
                         
                         document.getElementById('pos-opts').style.display = "block"; 
