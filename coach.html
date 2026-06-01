@@ -30,7 +30,6 @@
         .tab.active { background: var(--blue-active); color: white; }
         .success-box { background: #dcfce7; border: 2px solid var(--green); color: #166534; padding: 20px; text-align: center; font-weight: 900; border-radius: 12px; }
         
-        /* 欠員チェックボックス用スタイル */
         .vacant-label { font-size: 0.8rem; font-weight: bold; color: var(--text-dim); cursor: pointer; display: flex; align-items: center; gap: 4px; flex-shrink: 0; background: #e2e8f0; padding: 6px 8px; border-radius: 6px; }
         .vacant-label input { transform: scale(1.2); }
     </style>
@@ -90,7 +89,6 @@
         window.onload = async () => {
             const playerInputs = document.getElementById('player-inputs');
             for(let i=1; i<=8; i++) {
-                // ① No.5〜No.8 に欠員チェックボックスを追加
                 let vacantHtml = '';
                 if(i >= 5) {
                     vacantHtml = `<label class="vacant-label"><input type="checkbox" id="vacant${i}" onchange="toggleVacancy(${i})"> 欠員</label>`;
@@ -136,7 +134,6 @@
             }
         };
 
-        // 欠員チェックボックスの処理（入力不可＆グレーアウト）
         function toggleVacancy(i) {
             const inp = document.getElementById(`p${i}`);
             const chk = document.getElementById(`vacant${i}`);
@@ -182,7 +179,7 @@
             
             for(let i=1; i<=8; i++) {
                 const chk = document.getElementById(`vacant${i}`);
-                if (chk && chk.checked) continue; // 欠員はスキップ
+                if (chk && chk.checked) continue; 
                 
                 const name = document.getElementById(`p${i}`).value.trim();
                 if(name) {
@@ -191,7 +188,6 @@
                 }
             }
             
-            // 最低人数のチェック（団体戦の成立要件）
             if(realPlayerCount < 4) { 
                 alert("最低4名の登録が必要です"); 
                 btn.disabled = false; 
@@ -210,43 +206,44 @@
             }
         }
 
+        // ==========================================
+        // 【重要修正】Androidでのプルダウンバグ対策
+        // 処理を50ミリ秒遅らせることでクラッシュを防ぎます
+        // ==========================================
         function updateDynamicSelects() {
-            const selects = Array.from(document.querySelectorAll('.p-select'));
-            const currentValues = selects.map(sel => sel.value); 
+            setTimeout(() => {
+                const selects = Array.from(document.querySelectorAll('.p-select'));
+                const currentValues = selects.map(sel => sel.value); 
 
-            // ② 実登録選手が5名以下なら、第3マッチを「欠員」で固定＆グレーアウト
-            const isShortHanded = registeredPlayers.length < 6;
+                const isShortHanded = registeredPlayers.length < 6;
 
-            selects.forEach((sel, index) => {
-                // o3a (インデックス4), o3b (インデックス5) への処理
-                if (isShortHanded && (sel.id === 'o3a' || sel.id === 'o3b')) {
-                    sel.innerHTML = '<option value="(欠員)">(欠員)</option>';
-                    sel.value = '(欠員)';
-                    sel.disabled = true;
-                    sel.style.backgroundColor = '#e2e8f0';
-                    return; // 通常の選手流し込みをスキップ
-                }
+                selects.forEach((sel, index) => {
+                    if (isShortHanded && (sel.id === 'o3a' || sel.id === 'o3b')) {
+                        sel.innerHTML = '<option value="(欠員)">(欠員)</option>';
+                        sel.value = '(欠員)';
+                        sel.disabled = true;
+                        sel.style.backgroundColor = '#e2e8f0';
+                        return; 
+                    }
 
-                // 通常のプルダウン生成
-                sel.disabled = false;
-                sel.style.backgroundColor = '#fff';
-                const myValue = currentValues[index];
-                sel.innerHTML = '<option value="">▼ 選択 ▼</option>';
-                
-                registeredPlayers.forEach(p => {
-                    // 自分以外のプルダウンで選択されている選手は除外（欠員という文字は除外チェックの対象外）
-                    const isUsedElsewhere = currentValues.some((val, i) => i !== index && val === p && val !== "(欠員)");
-                    if (!isUsedElsewhere) {
-                        sel.innerHTML += `<option value="${p}">${p}</option>`;
+                    sel.disabled = false;
+                    sel.style.backgroundColor = '#fff';
+                    const myValue = currentValues[index];
+                    sel.innerHTML = '<option value="">▼ 選択 ▼</option>';
+                    
+                    registeredPlayers.forEach(p => {
+                        const isUsedElsewhere = currentValues.some((val, i) => i !== index && val === p && val !== "(欠員)");
+                        if (!isUsedElsewhere) {
+                            sel.innerHTML += `<option value="${p}">${p}</option>`;
+                        }
+                    });
+                    
+                    if(registeredPlayers.includes(myValue) || myValue === "") {
+                        sel.value = myValue; 
                     }
                 });
-                
-                // 復元
-                if(registeredPlayers.includes(myValue) || myValue === "") {
-                    sel.value = myValue; 
-                }
-            });
-            checkDuplicates();
+                checkDuplicates();
+            }, 50); // ← この50ミリ秒の遅延がAndroidを救います
         }
 
         function checkDuplicates() {
