@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第1回クラブチーム・スポーツ少年団合同交流大会 参加申込確認｜岩手県中学生ソフトテニス連盟</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#1a6b35;--green-dark:#145a2a;--green-light:#e8f5ec;
+  --gold:#c8a020;--white:#fff;--gray:#f5f5f0;
+  --text:#222;--text-light:#666;--radius:10px;--red:#b33030;--blue:#0056b3;
+}
+html{font-size:15px}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--text);min-height:100vh}
+
+.header{background:linear-gradient(135deg,#0d3318,var(--green));color:var(--white);padding:16px 20px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.3)}
+.header-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.header-title{display:flex;align-items:center;gap:10px}
+.header-title .icon{font-size:1.6rem}
+.header-title h1{font-size:1rem;font-weight:700}
+.header-title h1 small{display:block;font-size:.7rem;font-weight:500;opacity:.8}
+.header-title h1 .tournament-name{display:block;font-size:.82rem;font-weight:900;color:var(--gold)}
+.reload-btn{background:rgba(255,255,255,.15);color:var(--white);border:none;padding:8px 14px;border-radius:6px;font-size:.8rem;cursor:pointer;font-family:inherit}
+
+.main{max-width:1100px;margin:0 auto;padding:20px}
+
+/* ── ログイン ── */
+.login-box{max-width:380px;margin:60px auto;background:var(--white);border-radius:var(--radius);padding:32px 28px;box-shadow:0 2px 12px rgba(0,0,0,.08);text-align:center}
+.login-box h2{font-size:1rem;color:var(--green);margin-bottom:20px}
+.login-box input{width:100%;padding:12px;border:2px solid #ddd;border-radius:8px;font-size:1rem;font-family:inherit;margin-bottom:14px;text-align:center;letter-spacing:2px}
+.login-box input:focus{border-color:var(--green);outline:none}
+.login-box .err{color:var(--red);font-size:.82rem;margin-bottom:12px;display:none}
+
+/* ── 集計バー ── */
+.summary{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.summary .chip{background:var(--white);border-radius:8px;padding:12px 18px;box-shadow:0 1px 6px rgba(0,0,0,.06);font-size:.82rem}
+.summary .chip b{display:block;font-size:1.3rem;color:var(--green);font-weight:900;margin-top:2px}
+
+/* ── フィルタ ── */
+.filter-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.filter-bar select{padding:8px 12px;border:2px solid #ddd;border-radius:8px;font-size:.85rem;font-family:inherit;background:var(--white)}
+.filter-bar select:focus{border-color:var(--green);outline:none}
+
+/* ── テーブル ── */
+.table-wrap{background:var(--white);border-radius:var(--radius);box-shadow:0 1px 6px rgba(0,0,0,.06);overflow-x:auto}
+table.list{width:100%;border-collapse:collapse;font-size:.82rem;min-width:920px}
+table.list th{background:var(--green);color:var(--white);padding:10px 8px;text-align:left;font-weight:700;font-size:.76rem;white-space:nowrap;position:sticky;top:0}
+table.list td{padding:9px 8px;border-bottom:1px solid #eee;vertical-align:middle}
+table.list tr:hover td{background:var(--green-light)}
+table.list tr.received td{background:#f0f7f1}
+.team-link{color:var(--green);font-weight:700;cursor:pointer;text-decoration:underline;background:none;border:none;font-family:inherit;font-size:.84rem;padding:0;text-align:left}
+.team-link:hover{color:var(--green-dark)}
+.badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:.7rem;font-weight:700}
+.badge.champion{background:#fde8e8;color:#b33030}
+.badge.soft{background:#e8f0fe;color:#0056b3}
+.phone{font-variant-numeric:tabular-nums;white-space:nowrap}
+.chk-cell{text-align:center}
+.chk-cell input[type=checkbox]{width:20px;height:20px;cursor:pointer;accent-color:var(--green)}
+.sent-tag{display:block;font-size:.66rem;color:var(--green);margin-top:2px}
+.sent-tag.no{color:var(--text-light)}
+
+.status-msg{margin-top:14px;padding:12px;border-radius:8px;font-size:.85rem;text-align:center;display:none}
+.status-msg.success{display:block;background:#e8f5e9;color:#2e7d32}
+.status-msg.error{display:block;background:#fdecea;color:#b33030}
+.loading{text-align:center;padding:40px;color:var(--text-light);font-size:.9rem}
+
+.footer{text-align:center;padding:24px;font-size:.72rem;color:var(--text-light)}
+
+/* ── モーダル（処理中） ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300;justify-content:center;align-items:center}
+.overlay.active{display:flex}
+.overlay .box{background:var(--white);border-radius:12px;padding:24px 32px;font-size:.9rem;font-weight:700;color:var(--green)}
+
+@media(max-width:600px){
+  .summary .chip{flex:1;min-width:0}
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="header-title">
+      <div class="icon">🏆</div>
+      <h1>
+        <small>岩手県中学生ソフトテニス連盟</small>
+        <span class="tournament-name">第1回岩手県中学生クラブチーム・スポーツ少年団合同ソフトテニス交流大会</span>
+        参加申込 確認ページ
+      </h1>
+    </div>
+    <button class="reload-btn" onclick="loadList()" id="reloadBtn" style="display:none">↻ 再読込</button>
+  </div>
+</header>
+
+<!-- ===== ログイン画面 ===== -->
+<div class="main" id="loginScreen">
+  <div class="login-box">
+    <h2>🔒 確認ページ ログイン</h2>
+    <div class="err" id="loginErr">パスワードが違います。</div>
+    <input type="password" id="pwInput" placeholder="パスワード" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="reload-btn" style="background:var(--green);width:100%;padding:12px;font-size:.9rem" onclick="doLogin()">ログイン</button>
+  </div>
+</div>
+
+<!-- ===== 確認画面 ===== -->
+<main class="main" id="listScreen" style="display:none">
+
+  <div class="summary" id="summaryBar"></div>
+
+  <div class="filter-bar">
+    <select id="filterGender" onchange="renderTable()">
+      <option value="">男女：すべて</option>
+      <option value="男子">男子</option>
+      <option value="女子">女子</option>
+    </select>
+    <select id="filterSection" onchange="renderTable()">
+      <option value="">部門：すべて</option>
+      <option value="チャンピオンの部">チャンピオンの部</option>
+      <option value="ソフトテニスの部">ソフトテニスの部</option>
+    </select>
+    <select id="filterReceived" onchange="renderTable()">
+      <option value="">受付：すべて</option>
+      <option value="yes">受付済み</option>
+      <option value="no">未受付</option>
+    </select>
+  </div>
+
+  <div class="table-wrap">
+    <div class="loading" id="loadingMsg">読み込み中...</div>
+    <table class="list" id="listTable" style="display:none">
+      <thead>
+        <tr>
+          <th>チーム名</th>
+          <th>男女</th>
+          <th>出場区分</th>
+          <th>地区</th>
+          <th>部門</th>
+          <th>申込者氏名</th>
+          <th>携帯番号</th>
+          <th>参加料</th>
+          <th>人数</th>
+          <th style="text-align:center">受付</th>
+        </tr>
+      </thead>
+      <tbody id="listBody"></tbody>
+    </table>
+  </div>
+
+  <div class="status-msg" id="statusMsg"></div>
+</main>
+
+<div class="overlay" id="overlay"><div class="box" id="overlayMsg">処理中...</div></div>
+
+<footer class="footer">&copy; 岩手県中学生ソフトテニス連盟</footer>
+
+<script>
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbwMaX6mOexotFkV6n5Y79QXO9IhDgBRvT4PHuCr9c9j435683_N7G8yKkQPcIi-wXtu/exec';
+var PASSWORD = 'icgr2030';
+var TOURNAMENT = '第1回岩手県中学生クラブチーム・スポーツ少年団合同ソフトテニス交流大会';
+var allRows = [];
+
+/* ========== ログイン ========== */
+function doLogin() {
+  var pw = document.getElementById('pwInput').value;
+  if (pw === PASSWORD) {
+    try { sessionStorage.setItem('club_confirm_auth', '1'); } catch(e) {}
+    showList();
+  } else {
+    document.getElementById('loginErr').style.display = 'block';
+  }
+}
+
+function showList() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('listScreen').style.display = '';
+  document.getElementById('reloadBtn').style.display = '';
+  loadList();
+}
+
+/* ========== 一覧取得 ========== */
+function loadList() {
+  document.getElementById('loadingMsg').style.display = '';
+  document.getElementById('listTable').style.display = 'none';
+  document.getElementById('loadingMsg').textContent = '読み込み中...';
+
+  var url = GAS_URL + '?action=getClubList&tournament=' + encodeURIComponent(TOURNAMENT);
+  fetch(url).then(function(res){ return res.json(); })
+  .then(function(data){
+    allRows = data.rows || [];
+    renderSummary();
+    renderTable();
+  }).catch(function(err){
+    document.getElementById('loadingMsg').textContent = '読み込みに失敗しました：' + err.message;
+  });
+}
+
+/* ========== 集計バー ========== */
+function renderSummary() {
+  var total = allRows.length;
+  var received = 0, champ = 0, soft = 0, feeSum = 0, receivedFee = 0;
+  for (var i=0;i<allRows.length;i++){
+    var r = allRows[i];
+    if (r.received) { received++; receivedFee += Number(r.fee)||0; }
+    if (r.section === 'チャンピオンの部') champ++;
+    if (r.section === 'ソフトテニスの部') soft++;
+    feeSum += Number(r.fee)||0;
+  }
+  var html = '';
+  html += '<div class="chip">エントリー総数<b>' + total + '</b></div>';
+  html += '<div class="chip">チャンピオンの部<b>' + champ + '</b></div>';
+  html += '<div class="chip">ソフトテニスの部<b>' + soft + '</b></div>';
+  html += '<div class="chip">受付済み<b>' + received + ' / ' + total + '</b></div>';
+  html += '<div class="chip">参加料合計<b>' + feeSum.toLocaleString() + '円</b></div>';
+  html += '<div class="chip">受付済み入金<b>' + receivedFee.toLocaleString() + '円</b></div>';
+  document.getElementById('summaryBar').innerHTML = html;
+}
+
+/* ========== テーブル描画 ========== */
+function renderTable() {
+  var fg = document.getElementById('filterGender').value;
+  var fs = document.getElementById('filterSection').value;
+  var fr = document.getElementById('filterReceived').value;
+
+  document.getElementById('loadingMsg').style.display = 'none';
+  document.getElementById('listTable').style.display = '';
+
+  var body = document.getElementById('listBody');
+  var html = '';
+  var shown = 0;
+
+  for (var i=0;i<allRows.length;i++){
+    var r = allRows[i];
+    if (fg && r.gender !== fg) continue;
+    if (fs && r.section !== fs) continue;
+    if (fr === 'yes' && !r.received) continue;
+    if (fr === 'no' && r.received) continue;
+    shown++;
+
+    var secClass = (r.section === 'チャンピオンの部') ? 'champion' : 'soft';
+    var phone = String(r.phone || '');
+    if (phone && phone.charAt(0) !== '0') phone = '0' + phone;
+
+    html += '<tr class="' + (r.received ? 'received' : '') + '">';
+    html += '<td><button class="team-link" onclick="openPdf(' + r.sheetRow + ')">' + esc(r.teamName) + '</button></td>';
+    html += '<td>' + esc(r.gender) + '</td>';
+    html += '<td>' + esc(r.clubType) + '</td>';
+    html += '<td>' + esc(r.district) + '</td>';
+    html += '<td><span class="badge ' + secClass + '">' + esc(r.section) + '</span></td>';
+    html += '<td>' + esc(r.applicantName) + '</td>';
+    html += '<td class="phone">' + esc(phone) + '</td>';
+    html += '<td>' + (Number(r.fee)||0).toLocaleString() + '円</td>';
+    html += '<td style="text-align:center">' + r.playerCount + '名</td>';
+    html += '<td class="chk-cell">';
+    html += '<input type="checkbox" ' + (r.received ? 'checked' : '') + ' onchange="onCheck(' + r.sheetRow + ', this)">';
+    if (r.receiptSent) {
+      html += '<span class="sent-tag">領収書送信済</span>';
+    } else if (r.received) {
+      html += '<span class="sent-tag no">送信記録なし</span>';
+    }
+    html += '</td>';
+    html += '</tr>';
+  }
+
+  if (shown === 0) {
+    html = '<tr><td colspan="10" style="text-align:center;padding:30px;color:#999">該当する申込がありません</td></tr>';
+  }
+  body.innerHTML = html;
+}
+
+function esc(s){
+  s = (s==null) ? '' : String(s);
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ========== チーム名クリック → PDF別ウィンドウ ========== */
+function openPdf(sheetRow) {
+  var url = GAS_URL + '?action=getClubRosterPdf&row=' + sheetRow;
+  // GASがPDFのdataURLを返すため、いったん新規ウィンドウを開いてから流し込む
+  var win = window.open('', '_blank');
+  if (win) {
+    win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>名簿PDF</title></head><body style="margin:0;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;color:#666">PDFを生成しています...</body></html>');
+  }
+  fetch(url).then(function(res){ return res.json(); })
+  .then(function(data){
+    if (data.status === 'ok' && data.pdfBase64) {
+      var byteChars = atob(data.pdfBase64);
+      var byteNums = new Array(byteChars.length);
+      for (var i=0;i<byteChars.length;i++){ byteNums[i] = byteChars.charCodeAt(i); }
+      var blob = new Blob([new Uint8Array(byteNums)], { type: 'application/pdf' });
+      var blobUrl = URL.createObjectURL(blob);
+      if (win) {
+        win.location.href = blobUrl;
+      } else {
+        window.open(blobUrl, '_blank');
+      }
+    } else {
+      if (win) win.document.body.textContent = 'PDF生成に失敗しました：' + (data.message || '不明なエラー');
+      else alert('PDF生成に失敗しました');
+    }
+  }).catch(function(err){
+    if (win) win.document.body.textContent = 'PDF生成に失敗しました：' + err.message;
+    else alert('PDF生成に失敗しました：' + err.message);
+  });
+}
+
+/* ========== 受付チェック → 領収書送信 ========== */
+function onCheck(sheetRow, checkbox) {
+  var checked = checkbox.checked;
+  checkbox.disabled = true;
+
+  var overlay = document.getElementById('overlay');
+  var overlayMsg = document.getElementById('overlayMsg');
+  overlayMsg.textContent = checked ? '受付処理中（領収書を送信します）...' : '受付を解除しています...';
+  overlay.classList.add('active');
+
+  var url = GAS_URL + '?action=updateClubReceived'
+    + '&row=' + sheetRow
+    + '&received=' + (checked ? '1' : '0');
+
+  fetch(url).then(function(res){ return res.json(); })
+  .then(function(data){
+    overlay.classList.remove('active');
+    checkbox.disabled = false;
+    var msg = document.getElementById('statusMsg');
+
+    if (data.status === 'ok') {
+      // ローカルの状態を更新
+      for (var i=0;i<allRows.length;i++){
+        if (allRows[i].sheetRow === sheetRow) {
+          allRows[i].received = checked;
+          if (data.receiptSent) allRows[i].receiptSent = true;
+          break;
+        }
+      }
+      msg.className = 'status-msg success';
+      if (checked && data.receiptSent) {
+        msg.textContent = '受付しました。領収書を ' + (data.email||'申込者') + ' 宛に送信しました。';
+      } else if (checked && !data.receiptSent && data.alreadySent) {
+        msg.textContent = '受付しました。（領収書は送信済みのため再送していません）';
+      } else if (checked && !data.receiptSent) {
+        msg.textContent = '受付しました。（メールアドレス未登録のため領収書は送信されていません）';
+      } else {
+        msg.textContent = '受付を解除しました。';
+      }
+      renderSummary();
+      renderTable();
+    } else {
+      checkbox.checked = !checked;
+      msg.className = 'status-msg error';
+      msg.textContent = '処理に失敗しました：' + (data.message || '不明なエラー');
+    }
+  }).catch(function(err){
+    overlay.classList.remove('active');
+    checkbox.disabled = false;
+    checkbox.checked = !checked;
+    var msg = document.getElementById('statusMsg');
+    msg.className = 'status-msg error';
+    msg.textContent = '通信に失敗しました：' + err.message;
+  });
+}
+
+/* ========== INIT ========== */
+(function init(){
+  try {
+    if (sessionStorage.getItem('club_confirm_auth') === '1') { showList(); return; }
+  } catch(e) {}
+  document.getElementById('pwInput').focus();
+})();
+</script>
+</body>
+</html>
