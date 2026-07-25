@@ -367,11 +367,29 @@ function printDetail() {
 function exportListPdf() {
   var win = window.open('', '_blank');
   win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>団体登録一覧</title>');
-  win.document.write('<style>body{font-family:"Noto Sans JP",sans-serif;padding:16px;font-size:10px}h1{font-size:14px;text-align:center;margin-bottom:4px}p.sub{text-align:center;font-size:9px;color:#666;margin-bottom:12px}table{width:100%;border-collapse:collapse}th,td{padding:4px 6px;border:1px solid #ccc;text-align:left;white-space:nowrap}th{background:#1b3a5c;color:#fff;font-weight:bold;-webkit-print-color-adjust:exact;print-color-adjust:exact}.paid{color:green;font-weight:bold}.unpaid{color:red;font-weight:bold}.mono{font-family:monospace;font-size:9px}p.footer{text-align:center;font-size:8px;color:#888;margin-top:12px}</style>');
+  win.document.write('<style>body{font-family:"Noto Sans JP",sans-serif;padding:16px;font-size:10px}h1{font-size:14px;text-align:center;margin-bottom:4px}p.sub{text-align:center;font-size:9px;color:#666;margin-bottom:12px}table{width:100%;border-collapse:collapse}th,td{padding:4px 6px;border:1px solid #ccc;text-align:left;white-space:nowrap}th{background:#1b3a5c;color:#fff;font-weight:bold;-webkit-print-color-adjust:exact;print-color-adjust:exact}.paid{color:green;font-weight:bold}.unpaid{color:red;font-weight:bold}.mono{font-family:monospace;font-size:9px}p.footer{text-align:center;font-size:8px;color:#888;margin-top:12px}table.summary{margin-bottom:12px}table.summary th{background:#1b3a5c;color:#fff}table.summary td{text-align:center;font-weight:bold}</style>');
   win.document.write('</head><body>');
   win.document.write('<h1>岩手県中学生ソフトテニス連盟　令和8年度 団体登録一覧</h1>');
   var now = new Date();
-  win.document.write('<p class="sub">' + now.getFullYear() + '年' + (now.getMonth()+1) + '月' + now.getDate() + '日時点　登録' + allRegistrations.length + '団体</p>');
+
+  // サマリー集計
+  var sTotal = allRegistrations.length, sPaid = 0, sUnpaid = 0, sTotalFee = 0, sPaidFee = 0;
+  for (var s = 0; s < allRegistrations.length; s++) {
+    sTotalFee += (allRegistrations[s].fee || 0);
+    if (allRegistrations[s].paid) { sPaid++; sPaidFee += (allRegistrations[s].fee || 0); }
+    else { sUnpaid++; }
+  }
+
+  win.document.write('<p class="sub">' + now.getFullYear() + '年' + (now.getMonth()+1) + '月' + now.getDate() + '日時点</p>');
+  win.document.write('<table class="summary"><tr>' +
+    '<th>登録団体総数</th><th>入金済み件数</th><th>未入金件数</th><th>登録料合計</th><th>入金済み合計</th></tr><tr>' +
+    '<td>' + sTotal + '団体</td>' +
+    '<td>' + sPaid + '団体</td>' +
+    '<td class="unpaid">' + sUnpaid + '団体</td>' +
+    '<td>' + sTotalFee.toLocaleString() + '円</td>' +
+    '<td>' + sPaidFee.toLocaleString() + '円</td>' +
+    '</tr></table>');
+
   win.document.write('<table><tr><th>No.</th><th>振込照合名</th><th>団体名</th><th>種別</th><th>地区</th><th>代表者</th><th>選手数</th><th>登録料</th><th>入金</th><th>確認日</th></tr>');
 
   var i, r, pc;
@@ -380,7 +398,7 @@ function exportListPdf() {
     pc = 0;
     try { pc = JSON.parse(r.playersJson || '[]').length; } catch(e) {}
     var paidStr = r.paid ? '<span class="paid">済</span>' : '<span class="unpaid">未</span>';
-    win.document.write('<tr><td>' + r._regNo + '</td><td class="mono">' + esc(r._transferName) + '</td><td>' + esc(r.teamName) + '</td><td>' + esc(r.category) + '</td><td>' + esc(r.district) + '</td><td>' + esc(r.repName) + '</td><td>' + pc + '</td><td>' + (r.fee||0).toLocaleString() + '</td><td>' + paidStr + '</td><td style="font-size:8px">' + esc(r.paidDate || '') + '</td></tr>');
+    win.document.write('<tr><td>' + (i + 1) + '</td><td class="mono">' + esc(r._transferName) + '</td><td>' + esc(r.teamName) + '</td><td>' + esc(r.category) + '</td><td>' + esc(r.district) + '</td><td>' + esc(r.repName) + '</td><td>' + pc + '</td><td>' + (r.fee||0).toLocaleString() + '</td><td>' + paidStr + '</td><td style="font-size:8px">' + esc(r.paidDate || '') + '</td></tr>');
   }
   win.document.write('</table>');
   win.document.write('<p class="footer">岩手県中学生ソフトテニス連盟　団体登録管理</p>');
